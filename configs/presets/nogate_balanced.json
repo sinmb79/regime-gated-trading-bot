@@ -1,0 +1,222 @@
+﻿{
+    "mode":  "dry",
+    "pipeline":  {
+                     "universe":  [
+                                      "BTC/USDT",
+                                      "ETH/USDT",
+                                      "SOL/USDT",
+                                      "XRP/USDT",
+                                      "DOGE/USDT"
+                                  ],
+                     "scan_limit":  20,
+                     "candidate_count":  2,
+                     "symbols_to_scan":  20,
+                     "max_cycles":  1
+                 },
+    "risk_limits":  {
+                        "daily_max_loss_pct":  0.03,
+                        "max_total_exposure":  0.4,
+                        "max_symbol_exposure":  0.15,
+                        "max_open_positions":  3,
+                        "max_daily_trades":  16,
+                        "max_leverage":  4,
+                        "min_signal_confidence":  0.61,
+                        "max_slippage_bps":  28,
+                        "min_expectancy_pct":  0.06,
+                        "cooldown_minutes":  10,
+                        "max_consecutive_losses":  3,
+                        "max_reject_ratio":  0.85,
+                        "reject_rate_warn":  0.35,
+                        "reject_rate_critical":  0.60,
+                        "reject_reason_rate_warn":  0.30,
+                        "reject_reason_rate_critical":  0.50,
+                        "reject_reason_min_samples":  20,
+                        "reject_alert_profile":  "auto"
+                    },
+    "risk_guard":  {
+                       "clear_fail_limit":  3,
+                       "clear_lock_duration_seconds":  30,
+                       "confirm_token":  "UNHALT"
+                   },
+    "live_guard":  {
+                       "enabled":  true,
+                       "require_ack":  true,
+                       "confirm_token":  "LIVE_OK",
+                       "enforce_notifications":  true,
+                       "max_daily_loss_hard_limit_pct":  0.10,
+                       "max_total_exposure_hard_limit":  0.90,
+                       "max_leverage_hard_limit":  10.0
+                   },
+    "live_staging":  {
+                         "enabled":  true,
+                         "stage1_max_order_usdt":  50.0,
+                         "stage1_trade_count":  10,
+                         "stage2_max_order_usdt":  150.0,
+                         "stage2_trade_count":  20,
+                         "stage3_max_order_usdt":  400.0,
+                         "block_on_daily_loss_usdt":  150.0,
+                         "require_non_negative_pnl_for_promotion":  true
+                     },
+    "execution":  {
+                      "default_position_fraction":  0.06,
+                      "maker_fee_bps":  2.0,
+                      "taker_fee_bps":  4.0,
+                      "default_leverage":  2.0,
+                      "order_retries":  2,
+                      "retry_base_wait_ms":  300
+                  },
+    "exchange":  {
+                     "type":  "paper",
+                     "initial_cash_usdt":  10000,
+                     "base_currency":  "USDT",
+                     "api_key":  "",
+                     "api_secret":  "",
+                     "api_passphrase":  "",
+                     "api_key_env":  "",
+                     "api_secret_env":  "",
+                     "api_passphrase_env":  "",
+                     "testnet":  true,
+                     "allow_live":  false,
+                     "partial_fill_probability":  0.15,
+                     "partial_fill_min_ratio":  0.55,
+                     "partial_fill_max_ratio":  0.93
+                 },
+    "strategies":  {
+                       "grid":  {
+                                    "enabled":  true,
+                                    "weight":  0.7,
+                                    "bot_type":  "grid",
+                                    "bot_profile":  {
+                                                        "position_size_multiplier":  1.0,
+                                                        "position_size_max":  0.10
+                                                    },
+                                    "bot_profile_by_regime":  {
+                                                                  "range":  {
+                                                                                "position_size_multiplier":  1.15
+                                                                            },
+                                                                  "panic":  {
+                                                                                "position_size_multiplier":  0.70
+                                                                            }
+                                                              }
+                                },
+                       "trend":  {
+                                     "enabled":  true,
+                                     "weight":  0.55,
+                                     "bot_type":  "trend",
+                                     "bot_profile":  {
+                                                         "target_leverage":  2.2,
+                                                         "leverage_max":  4.0
+                                                     },
+                                     "bot_profile_by_regime":  {
+                                                                   "trend_up":  {
+                                                                                    "position_size_multiplier":  1.08,
+                                                                                    "expected_edge_bps_bonus":  2.0
+                                                                                },
+                                                                   "panic":  {
+                                                                                 "position_size_multiplier":  0.60
+                                                                             }
+                                                               }
+                                 },
+                       "defensive":  {
+                                         "enabled":  true,
+                                         "weight":  0.95,
+                                         "bot_type":  "defensive",
+                                         "bot_profile":  {
+                                                             "position_size_multiplier":  0.85,
+                                                             "target_leverage":  1.4
+                                                         }
+                                     },
+                       "funding_arb":  {
+                                           "enabled":  true,
+                                           "weight":  0.9,
+                                           "bot_type":  "funding_arb",
+                                           "bot_profile":  {
+                                                               "leverage_min":  2.0,
+                                                               "leverage_max":  5.0,
+                                                               "target_leverage":  2.5
+                                                           }
+                                       },
+                       "bollinger_reversion":  {
+                                                   "enabled":  true,
+                                                   "weight":  0.95,
+                                                   "bot_type":  "indicator",
+                                                   "z_entry_threshold":  1.35,
+                                                   "max_bb_width_ratio":  0.09
+                                               },
+                       "ema_crossover":  {
+                                             "enabled":  true,
+                                             "weight":  0.6,
+                                             "bot_type":  "trend",
+                                             "min_gap":  0.001
+                                         },
+                       "volume_breakout":  {
+                                               "enabled":  false,
+                                               "weight":  0.6,
+                                               "bot_type":  "trend",
+                                               "volume_ratio_min":  1.9,
+                                               "leverage":  2.0
+                                           }
+                   },
+    "llm":  {
+                "enabled":  false,
+                "provider":  "mock",
+                "api_key":  "",
+                "api_key_env":  "OPENAI_API_KEY",
+                "api_base_url":  "https://api.openai.com/v1",
+                "model":  "gpt-4o-mini",
+                "temperature":  0.2,
+                "timeout_seconds":  12,
+                "max_retries":  1,
+                "retry_delay_ms":  250,
+                "max_tokens":  256,
+                "score_scale":  10.0,
+                "score_candidates_limit":  30,
+                "request_mode":  "openai"
+            },
+    "journal":  {
+                    "path":  "data/trading_journal_balanced.sqlite"
+                },
+    "notifications":  {
+                          "enabled":  false,
+                          "send_on_levels":  [
+                                                 "critical",
+                                                 "warn"
+                                             ],
+                          "cooldown_seconds":  900,
+                          "max_per_hour":  0,
+                          "webhook_url":  "",
+                          "slack_webhook_url":  "",
+                          "telegram_bot_token":  "",
+                          "telegram_chat_id":  "",
+                          "include_reject_summary":  true
+                      },
+    "validation_gate":  {
+                            "enforce_for_live":  true,
+                            "enforce_for_auto_learning":  true,
+                            "report_path":  "data/validation/latest_validation_report.json",
+                            "history_path":  "data/validation/validation_history.jsonl",
+                            "history_limit_default":  30,
+                            "require_overall_passed":  true,
+                            "max_report_age_days":  14,
+                            "alert_enabled":  true,
+                            "alert_min_samples":  5,
+                            "alert_pass_rate_warn":  0.6,
+                            "alert_pass_rate_critical":  0.4,
+                            "alert_max_drawdown_warn":  0.25,
+                            "alert_max_drawdown_critical":  0.35,
+                            "allow_bypass":  true,
+                            "bypass":  true
+                        },
+    "auto_learning":  {
+                          "enabled":  false,
+                          "paper_only":  true,
+                          "apply_interval_cycles":  20,
+                          "window_days":  14,
+                          "min_trades_per_strategy":  8,
+                          "min_confidence":  0.62,
+                          "max_weight_step_pct":  0.2,
+                          "max_strategy_changes_per_apply":  3,
+                          "max_applies_per_day":  8,
+                          "allow_pause":  false
+                      }
+}

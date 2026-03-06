@@ -1,0 +1,7 @@
+ccxt
+pydantic>=2.8
+numpy
+pandas
+requests
+fastapi
+uvicorn[standard]

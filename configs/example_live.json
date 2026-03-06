@@ -1,0 +1,83 @@
+﻿{
+  "mode": "paper",
+  "pipeline": {
+    "universe": ["BTC/USDT", "ETH/USDT", "SOL/USDT"],
+    "scan_limit": 20,
+    "candidate_count": 2,
+    "symbols_to_scan": 20,
+    "max_cycles": 1
+  },
+  "risk_limits": {
+    "daily_max_loss_pct": 0.04,
+    "max_total_exposure": 0.45,
+    "max_symbol_exposure": 0.18,
+    "max_open_positions": 3,
+    "max_daily_trades": 20,
+    "max_leverage": 5.0,
+    "min_signal_confidence": 0.58,
+    "max_slippage_bps": 35.0,
+    "min_expectancy_pct": 0.05,
+    "cooldown_minutes": 10,
+    "max_consecutive_losses": 3,
+    "max_reject_ratio": 0.85,
+    "reject_rate_warn": 0.35,
+    "reject_rate_critical": 0.60,
+    "reject_reason_rate_warn": 0.30,
+    "reject_reason_rate_critical": 0.50,
+    "reject_reason_min_samples": 20,
+    "reject_alert_profile": "auto"
+  },
+  "risk_guard": {
+    "clear_fail_limit": 3,
+    "clear_lock_duration_seconds": 30,
+    "confirm_token": "UNHALT"
+  },
+  "execution": {
+    "default_position_fraction": 0.06,
+    "maker_fee_bps": 2.0,
+    "taker_fee_bps": 4.0,
+    "default_leverage": 2.0
+  },
+  "exchange": {
+    "type": "paper",
+    "initial_cash_usdt": 10000.0,
+    "base_currency": "USDT",
+    "api_key": "",
+    "api_secret": "",
+    "api_passphrase": "",
+    "api_key_env": "",
+    "api_secret_env": "",
+    "api_passphrase_env": "",
+    "testnet": true,
+    "allow_live": false
+  },
+  "strategies": {
+    "grid": {"enabled": true, "weight": 0.9},
+    "trend": {"enabled": true, "weight": 0.9},
+    "defensive": {"enabled": true, "weight": 0.7},
+    "funding_arb": {"enabled": true, "weight": 0.6}
+  },
+  "llm": {
+    "enabled": true,
+    "provider": "mock"
+  },
+  "journal": {
+    "path": "data/trading_journal.sqlite"
+  },
+  "notifications": {
+    "enabled": false,
+    "send_on_levels": [
+      "critical",
+      "warn"
+    ],
+    "cooldown_seconds": 900,
+    "max_per_hour": 0,
+    "webhook_url": "",
+    "slack_webhook_url": "",
+    "telegram_bot_token": "",
+    "telegram_chat_id": "",
+    "include_reject_summary": true
+  }
+}
+
+

@@ -1,0 +1,236 @@
+{
+  "timestamp": "2026-03-06T00:51:32.600881",
+  "config_path": "D:\\신명범(25.07.01.~)\\개인파일\\매매봇\\configs\\default.json",
+  "validation": {
+    "backtest": {
+      "mode": "backtest",
+      "journal_path": "D:\\신명범(25.07.01.~)\\개인파일\\매매봇\\data\\validation\\backtest_20260306_005132.sqlite",
+      "config_mode": "paper",
+      "cycles": 80,
+      "seed": 42,
+      "llm_used": false,
+      "metrics": {
+        "cycles": 80,
+        "selected_signals": 160,
+        "executed_signals": 12,
+        "rejected_signals": 148,
+        "filled_trades": 12,
+        "rejected_trades": 0,
+        "win_trades": 4,
+        "win_rate": 0.3333333333333333,
+        "reject_rate": 0.0,
+        "avg_slippage_bps": 0.0,
+        "avg_realized_pnl_per_trade": -2.407385542757454,
+        "realized_pnl_sum": -28.888626513089452,
+        "start_equity_usdt": 10000.0,
+        "end_equity_usdt": 9688.291945086996,
+        "pnl_total_usdt": -311.70805491300416,
+        "max_drawdown_pct": 0.11783357376346248,
+        "top_reject_reasons": {
+          "cooldown_time": 105,
+          "expectancy_check": 40,
+          "slippage_too_high": 18,
+          "symbol_exposure_limit": 5
+        }
+      },
+      "gate": {
+        "passed": false,
+        "checks": {
+          "min_trades": {
+            "required": 20,
+            "actual": 12,
+            "pass": false
+          },
+          "min_win_rate": {
+            "required": 0.45,
+            "actual": 0.3333333333333333,
+            "pass": false
+          },
+          "min_pnl_usdt": {
+            "required": 0.0,
+            "actual": -311.70805491300416,
+            "pass": false
+          },
+          "max_drawdown_pct": {
+            "required": 0.25,
+            "actual": 0.11783357376346248,
+            "pass": true
+          }
+        }
+      },
+      "recommendation": "revise_strategy_or_risk"
+    },
+    "walk_forward": {
+      "mode": "walk_forward",
+      "journal_path": "D:\\신명범(25.07.01.~)\\개인파일\\매매봇\\data\\validation\\walk_forward_20260306_005218.sqlite",
+      "windows": 2,
+      "train_cycles": 40,
+      "test_cycles": 20,
+      "seed": 143,
+      "llm_used": false,
+      "overall_metrics": {
+        "cycles": 40,
+        "selected_signals": 80,
+        "executed_signals": 1,
+        "rejected_signals": 79,
+        "filled_trades": 14,
+        "rejected_trades": 0,
+        "win_trades": 0,
+        "win_rate": 0.0,
+        "reject_rate": 0.0,
+        "avg_slippage_bps": 0.0,
+        "avg_realized_pnl_per_trade": -2.58712384034406,
+        "realized_pnl_sum": -36.219733764816844,
+        "start_equity_usdt": 9421.447319097482,
+        "end_equity_usdt": 9527.077241255714,
+        "pnl_total_usdt": 105.62992215823215,
+        "max_drawdown_pct": 0.0007836561946500679,
+        "top_reject_reasons": {
+          "consecutive_loss_limit": 57,
+          "expectancy_check": 21,
+          "cooldown_time": 14,
+          "slippage_too_high": 10
+        }
+      },
+      "overall_gate": {
+        "passed": false,
+        "checks": {
+          "min_trades": {
+            "required": 20,
+            "actual": 14,
+            "pass": false
+          },
+          "min_win_rate": {
+            "required": 0.45,
+            "actual": 0.0,
+            "pass": false
+          },
+          "min_pnl_usdt": {
+            "required": 0.0,
+            "actual": 105.62992215823215,
+            "pass": true
+          },
+          "max_drawdown_pct": {
+            "required": 0.25,
+            "actual": 0.0007836561946500679,
+            "pass": true
+          }
+        }
+      },
+      "windows_result": [
+        {
+          "window": 1,
+          "train_cycles": 40,
+          "test_cycles": 20,
+          "applied_tuning": [],
+          "metrics": {
+            "cycles": 20,
+            "selected_signals": 40,
+            "executed_signals": 1,
+            "rejected_signals": 39,
+            "filled_trades": 7,
+            "rejected_trades": 0,
+            "win_trades": 0,
+            "win_rate": 0.0,
+            "reject_rate": 0.0,
+            "avg_slippage_bps": 0.0,
+            "avg_realized_pnl_per_trade": -2.58712384034406,
+            "realized_pnl_sum": -18.109866882408422,
+            "start_equity_usdt": 9421.447319097482,
+            "end_equity_usdt": 9529.51394335073,
+            "pnl_total_usdt": 108.06662425324794,
+            "max_drawdown_pct": 0.0007836561946500679,
+            "top_reject_reasons": {
+              "consecutive_loss_limit": 27,
+              "cooldown_time": 14,
+              "expectancy_check": 11,
+              "slippage_too_high": 7
+            }
+          },
+          "gate": {
+            "passed": false,
+            "checks": {
+              "min_trades": {
+                "required": 20,
+                "actual": 7,
+                "pass": false
+              },
+              "min_win_rate": {
+                "required": 0.45,
+                "actual": 0.0,
+                "pass": false
+              },
+              "min_pnl_usdt": {
+                "required": 0.0,
+                "actual": 108.06662425324794,
+                "pass": true
+              },
+              "max_drawdown_pct": {
+                "required": 0.25,
+                "actual": 0.0007836561946500679,
+                "pass": true
+              }
+            }
+          }
+        },
+        {
+          "window": 2,
+          "train_cycles": 40,
+          "test_cycles": 20,
+          "applied_tuning": [],
+          "metrics": {
+            "cycles": 20,
+            "selected_signals": 40,
+            "executed_signals": 0,
+            "rejected_signals": 40,
+            "filled_trades": 7,
+            "rejected_trades": 0,
+            "win_trades": 0,
+            "win_rate": 0.0,
+            "reject_rate": 0.0,
+            "avg_slippage_bps": 0.0,
+            "avg_realized_pnl_per_trade": -2.58712384034406,
+            "realized_pnl_sum": -18.109866882408422,
+            "start_equity_usdt": 9527.787176911277,
+            "end_equity_usdt": 9527.077241255714,
+            "pnl_total_usdt": -0.709935655562731,
+            "max_drawdown_pct": 0.0005098131540202257,
+            "top_reject_reasons": {
+              "consecutive_loss_limit": 30,
+              "expectancy_check": 10,
+              "slippage_too_high": 3
+            }
+          },
+          "gate": {
+            "passed": false,
+            "checks": {
+              "min_trades": {
+                "required": 20,
+                "actual": 7,
+                "pass": false
+              },
+              "min_win_rate": {
+                "required": 0.45,
+                "actual": 0.0,
+                "pass": false
+              },
+              "min_pnl_usdt": {
+                "required": 0.0,
+                "actual": -0.709935655562731,
+                "pass": false
+              },
+              "max_drawdown_pct": {
+                "required": 0.25,
+                "actual": 0.0005098131540202257,
+                "pass": true
+              }
+            }
+          }
+        }
+      ],
+      "recommendation": "revise_strategy_or_risk"
+    },
+    "overall_passed": false,
+    "next_step": "tune_strategy_and_risk"
+  }
+}

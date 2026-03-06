@@ -1,0 +1,249 @@
+{
+  "timestamp": "2026-03-06T01:02:36.615174",
+  "config_path": "D:\\신명범(25.07.01.~)\\개인파일\\매매봇\\configs\\default.json",
+  "validation": {
+    "backtest": {
+      "mode": "backtest",
+      "journal_path": "D:\\신명범(25.07.01.~)\\개인파일\\매매봇\\data\\validation\\backtest_20260306_010236.sqlite",
+      "config_mode": "paper",
+      "cycles": 80,
+      "seed": 42,
+      "llm_used": false,
+      "metrics": {
+        "cycles": 80,
+        "selected_signals": 160,
+        "executed_signals": 10,
+        "rejected_signals": 150,
+        "filled_trades": 10,
+        "rejected_trades": 0,
+        "win_trades": 0,
+        "win_rate": 0.0,
+        "reject_rate": 0.0,
+        "avg_slippage_bps": 0.0,
+        "avg_realized_pnl_per_trade": 0.0,
+        "realized_pnl_sum": 0.0,
+        "start_equity_usdt": 10000.0,
+        "end_equity_usdt": 8398.806923308164,
+        "pnl_total_usdt": -1601.1930766918358,
+        "max_drawdown_pct": 0.1691631186686005,
+        "top_reject_reasons": {
+          "total_exposure_limit": 105,
+          "expectancy_check": 44,
+          "position_count_limit": 37,
+          "symbol_exposure_limit": 26
+        }
+      },
+      "gate": {
+        "passed": false,
+        "checks": {
+          "min_trades": {
+            "required": 20,
+            "actual": 10,
+            "pass": false
+          },
+          "min_win_rate": {
+            "required": 0.45,
+            "actual": 0.0,
+            "pass": false
+          },
+          "min_pnl_usdt": {
+            "required": 0.0,
+            "actual": -1601.1930766918358,
+            "pass": false
+          },
+          "max_drawdown_pct": {
+            "required": 0.25,
+            "actual": 0.1691631186686005,
+            "pass": true
+          }
+        }
+      },
+      "recommendation": "revise_strategy_or_risk"
+    },
+    "walk_forward": {
+      "mode": "walk_forward",
+      "journal_path": "D:\\신명범(25.07.01.~)\\개인파일\\매매봇\\data\\validation\\walk_forward_20260306_010326.sqlite",
+      "windows": 2,
+      "train_cycles": 40,
+      "test_cycles": 20,
+      "seed": 143,
+      "llm_used": false,
+      "overall_metrics": {
+        "cycles": 40,
+        "selected_signals": 80,
+        "executed_signals": 24,
+        "rejected_signals": 56,
+        "filled_trades": 24,
+        "rejected_trades": 0,
+        "win_trades": 0,
+        "win_rate": 0.0,
+        "reject_rate": 0.0,
+        "avg_slippage_bps": 0.0,
+        "avg_realized_pnl_per_trade": -0.045721437688607015,
+        "realized_pnl_sum": -1.0973145045265684,
+        "start_equity_usdt": 10000.0,
+        "end_equity_usdt": 8281.671796307875,
+        "pnl_total_usdt": -1718.3282036921246,
+        "max_drawdown_pct": 0.2507929601209226,
+        "top_reject_reasons": {
+          "total_exposure_limit": 34,
+          "symbol_exposure_limit": 23,
+          "position_count_limit": 19,
+          "expectancy_check": 13,
+          "slippage_too_high": 2
+        }
+      },
+      "overall_gate": {
+        "passed": false,
+        "checks": {
+          "min_trades": {
+            "required": 20,
+            "actual": 24,
+            "pass": true
+          },
+          "min_win_rate": {
+            "required": 0.45,
+            "actual": 0.0,
+            "pass": false
+          },
+          "min_pnl_usdt": {
+            "required": 0.0,
+            "actual": -1718.3282036921246,
+            "pass": false
+          },
+          "max_drawdown_pct": {
+            "required": 0.25,
+            "actual": 0.2507929601209226,
+            "pass": false
+          }
+        }
+      },
+      "windows_result": [
+        {
+          "window": 1,
+          "train_cycles": 40,
+          "test_cycles": 20,
+          "journal_path": "D:\\신명범(25.07.01.~)\\개인파일\\매매봇\\data\\validation\\walk_forward_w1_test_20260306_010407.sqlite",
+          "applied_tuning": [
+            {
+              "strategy": "funding_arb",
+              "action": "decrease",
+              "suggested_weight": 0.39,
+              "reason": "승률/평균손익 모두 약함: 비중 축소"
+            }
+          ],
+          "metrics": {
+            "cycles": 20,
+            "selected_signals": 40,
+            "executed_signals": 12,
+            "rejected_signals": 28,
+            "filled_trades": 12,
+            "rejected_trades": 0,
+            "win_trades": 0,
+            "win_rate": 0.0,
+            "reject_rate": 0.0,
+            "avg_slippage_bps": 0.0,
+            "avg_realized_pnl_per_trade": -0.06335506375243267,
+            "realized_pnl_sum": -0.7602607650291922,
+            "start_equity_usdt": 10000.0,
+            "end_equity_usdt": 7507.496854568719,
+            "pnl_total_usdt": -2492.503145431281,
+            "max_drawdown_pct": 0.2507929601209226,
+            "top_reject_reasons": {
+              "total_exposure_limit": 15,
+              "expectancy_check": 10,
+              "position_count_limit": 10,
+              "symbol_exposure_limit": 8,
+              "slippage_too_high": 1
+            }
+          },
+          "gate": {
+            "passed": false,
+            "checks": {
+              "min_trades": {
+                "required": 20,
+                "actual": 12,
+                "pass": false
+              },
+              "min_win_rate": {
+                "required": 0.45,
+                "actual": 0.0,
+                "pass": false
+              },
+              "min_pnl_usdt": {
+                "required": 0.0,
+                "actual": -2492.503145431281,
+                "pass": false
+              },
+              "max_drawdown_pct": {
+                "required": 0.25,
+                "actual": 0.2507929601209226,
+                "pass": false
+              }
+            }
+          }
+        },
+        {
+          "window": 2,
+          "train_cycles": 40,
+          "test_cycles": 20,
+          "journal_path": "D:\\신명범(25.07.01.~)\\개인파일\\매매봇\\data\\validation\\walk_forward_w2_test_20260306_010456.sqlite",
+          "applied_tuning": [],
+          "metrics": {
+            "cycles": 20,
+            "selected_signals": 40,
+            "executed_signals": 12,
+            "rejected_signals": 28,
+            "filled_trades": 12,
+            "rejected_trades": 0,
+            "win_trades": 0,
+            "win_rate": 0.0,
+            "reject_rate": 0.0,
+            "avg_slippage_bps": 0.0,
+            "avg_realized_pnl_per_trade": -0.028087811624781352,
+            "realized_pnl_sum": -0.3370537394973762,
+            "start_equity_usdt": 10000.0,
+            "end_equity_usdt": 8281.671796307875,
+            "pnl_total_usdt": -1718.3282036921246,
+            "max_drawdown_pct": 0.17527787799918224,
+            "top_reject_reasons": {
+              "total_exposure_limit": 19,
+              "symbol_exposure_limit": 15,
+              "position_count_limit": 9,
+              "expectancy_check": 3,
+              "slippage_too_high": 1
+            }
+          },
+          "gate": {
+            "passed": false,
+            "checks": {
+              "min_trades": {
+                "required": 20,
+                "actual": 12,
+                "pass": false
+              },
+              "min_win_rate": {
+                "required": 0.45,
+                "actual": 0.0,
+                "pass": false
+              },
+              "min_pnl_usdt": {
+                "required": 0.0,
+                "actual": -1718.3282036921246,
+                "pass": false
+              },
+              "max_drawdown_pct": {
+                "required": 0.25,
+                "actual": 0.17527787799918224,
+                "pass": true
+              }
+            }
+          }
+        }
+      ],
+      "recommendation": "revise_strategy_or_risk"
+    },
+    "overall_passed": false,
+    "next_step": "tune_strategy_and_risk"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "profiles": [
+    {
+      "name": "boss_primary",
+      "config_path": "default.json",
+      "interval_seconds": 5,
+      "enabled": true,
+      "live_confirm_token": ""
+    },
+    {
+      "name": "boss_secondary",
+      "config_path": "default.secondary.json",
+      "interval_seconds": 7,
+      "enabled": false,
+      "live_confirm_token": ""
+    }
+  ]
+}
