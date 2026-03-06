@@ -40,6 +40,7 @@ set "MULTI_COMMAND=loop"
 set "MULTI_INTERVAL=0"
 set "MULTI_LIVE_TOKEN="
 set "BACKUP_OUTPUT_DIR=backups"
+set "REHEARSAL_OUTPUT="
 set "INCLUDE_READINESS=0"
 set "INCLUDE_LOGS=1"
 set "RESTART_COOLDOWN=20"
@@ -75,6 +76,10 @@ if /I "%MODE%"=="backup" (
   if not "!ARG2!"=="" set "BACKUP_OUTPUT_DIR=!ARG2!"
   if not "!ARG3!"=="" set "INCLUDE_LOGS=!ARG3!"
 )
+if /I "%MODE%"=="rehearsal" (
+  if not "!ARG2!"=="" set "CONFIG=!ARG2!"
+  if not "!ARG3!"=="" set "REHEARSAL_OUTPUT=!ARG3!"
+)
 if /I "%MODE%"=="watchdog" (
   if not "!ARG2!"=="" set "CONFIG=!ARG2!"
   if not "!ARG3!"=="" set "LISTEN_HOST=!ARG3!"
@@ -83,7 +88,7 @@ if /I "%MODE%"=="watchdog" (
   if not "!ARG6!"=="" set "RESTART_COOLDOWN=!ARG6!"
 )
 
-if /I not "%MODE%"=="desktop" if /I not "%MODE%"=="web" if /I not "%MODE%"=="multi" if /I not "%MODE%"=="multi-ui" if /I not "%MODE%"=="healthcheck" if /I not "%MODE%"=="backup" if /I not "%MODE%"=="watchdog" (
+if /I not "%MODE%"=="desktop" if /I not "%MODE%"=="web" if /I not "%MODE%"=="multi" if /I not "%MODE%"=="multi-ui" if /I not "%MODE%"=="healthcheck" if /I not "%MODE%"=="backup" if /I not "%MODE%"=="rehearsal" if /I not "%MODE%"=="watchdog" (
   echo [ERROR] Unknown mode: %MODE%
   goto :usage
 )
@@ -117,6 +122,13 @@ if /I "%MODE%"=="multi-ui" (
   )
 )
 if /I "%MODE%"=="healthcheck" (
+  call :resolve_path "%CONFIG%" CONFIG_PATH
+  if not exist "!CONFIG_PATH!" (
+    echo [ERROR] Config not found: !CONFIG_PATH!
+    exit /b 1
+  )
+)
+if /I "%MODE%"=="rehearsal" (
   call :resolve_path "%CONFIG%" CONFIG_PATH
   if not exist "!CONFIG_PATH!" (
     echo [ERROR] Config not found: !CONFIG_PATH!
@@ -190,6 +202,17 @@ if /I "%MODE%"=="backup" (
   if /I "!INCLUDE_LOGS!"=="no" set "LOG_FLAG=--no-include-logs"
   echo Boss backup: output=!BACKUP_OUTPUT_DIR! logs=!INCLUDE_LOGS!
   "!PY_EXE!" -m trading_system.ops_cli backup --output-dir "!BACKUP_OUTPUT_DIR!" !LOG_FLAG!
+  exit /b !errorlevel!
+)
+if /I "%MODE%"=="rehearsal" (
+  echo Boss live rehearsal runbook: config=!CONFIG_PATH!
+  if "!REHEARSAL_OUTPUT!"=="" (
+    "!PY_EXE!" -m trading_system.main --config "!CONFIG_PATH!" --live-rehearsal
+  ) else if /I "!REHEARSAL_OUTPUT!"=="auto" (
+    "!PY_EXE!" -m trading_system.main --config "!CONFIG_PATH!" --live-rehearsal-report
+  ) else (
+    "!PY_EXE!" -m trading_system.main --config "!CONFIG_PATH!" --live-rehearsal-report "!REHEARSAL_OUTPUT!"
+  )
   exit /b !errorlevel!
 )
 if /I "%MODE%"=="watchdog" (
@@ -278,7 +301,7 @@ for %%I in ("%_raw%") do set "%~2=%%~fI"
 exit /b 0
 
 :usage
-echo Usage: run-trading-system.bat ^<desktop^|web^|multi^|multi-ui^|healthcheck^|backup^|watchdog^> [args...]
+echo Usage: run-trading-system.bat ^<desktop^|web^|multi^|multi-ui^|healthcheck^|backup^|rehearsal^|watchdog^> [args...]
 echo        run-trading-system.bat nogate ^<desktop^|web^|multi^|multi-ui^> [args...]
 echo   desktop [config]
 echo   web [config] [host] [port]
@@ -286,5 +309,6 @@ echo   multi [multi_config] [command] [interval] [live_token]
 echo   multi-ui [multi_config] [host] [port]
 echo   healthcheck [config] [host] [port] [include_readiness]
 echo   backup [output_dir] [include_logs]
+echo   rehearsal [config] [output_path^|auto]
 echo   watchdog [config] [host] [port] [interval] [restart_cooldown]
 exit /b 1

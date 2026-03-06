@@ -109,8 +109,32 @@ class TradingRuntime:
         upper = current + max_step
         return round(cls._clamp(target, lower, upper), 3)
 
+    @staticmethod
+    def _normalize_apply_mode(raw: Any) -> str:
+        mode = str(raw or "").strip().lower()
+        aliases = {
+            "manual": "manual_approval",
+            "approval": "manual_approval",
+            "approve": "manual_approval",
+            "manual_approval": "manual_approval",
+            "auto": "auto_apply",
+            "auto_apply": "auto_apply",
+            "automatic": "auto_apply",
+        }
+        return aliases.get(mode, "manual_approval")
+
     def _auto_learning_status(self, config: AppConfig) -> Dict[str, Any]:
         cfg = config.auto_learning
+        apply_mode = self._normalize_apply_mode(getattr(cfg, "apply_mode", "manual_approval"))
+        expiry_hours = max(0, int(getattr(cfg, "proposal_expiry_hours", 72) or 72))
+        if expiry_hours > 0:
+            try:
+                self.journal.expire_auto_learning_proposals(expiry_hours=expiry_hours)
+            except Exception:
+                pass
+        proposal_stats = self.journal.auto_learning_proposal_stats()
+        pending_preview = self.journal.recent_auto_learning_proposals(limit=20, status="pending")
+
         gate = self._validation_gate(config)
         now = time.time()
         while self._auto_learning_apply_times and now - self._auto_learning_apply_times[0] > 86400:
@@ -127,6 +151,7 @@ class TradingRuntime:
         return {
             "enabled": bool(cfg.enabled),
             "paper_only": bool(cfg.paper_only),
+            "apply_mode": apply_mode,
             "window_days": int(cfg.window_days),
             "min_trades_per_strategy": int(cfg.min_trades_per_strategy),
             "min_confidence": float(cfg.min_confidence),
@@ -134,6 +159,8 @@ class TradingRuntime:
             "max_strategy_changes_per_apply": int(cfg.max_strategy_changes_per_apply),
             "max_applies_per_day": max_daily,
             "allow_pause": bool(cfg.allow_pause),
+            "max_pending_proposals": int(getattr(cfg, "max_pending_proposals", 100) or 100),
+            "proposal_expiry_hours": expiry_hours,
             "apply_interval_cycles": interval,
             "remaining_cycles_to_next_apply": remaining_cycles,
             "last_applied_cycle": self._auto_learning_last_applied_cycle,
@@ -141,13 +168,17 @@ class TradingRuntime:
             "applied_today": len(self._auto_learning_apply_times),
             "daily_quota_remaining": max(-1, max_daily - len(self._auto_learning_apply_times)) if max_daily > 0 else -1,
             "last_result": self._auto_learning_last_result,
+            "proposal_stats": proposal_stats,
+            "pending_preview": pending_preview[:10],
             "validation_gate": gate,
         }
 
     def _auto_learning_try_apply(self, config: AppConfig) -> Dict[str, Any]:
         cfg = config.auto_learning
+        apply_mode = self._normalize_apply_mode(getattr(cfg, "apply_mode", "manual_approval"))
         result: Dict[str, Any] = {
             "enabled": bool(cfg.enabled),
+            "apply_mode": apply_mode,
             "status": "disabled",
             "cycle": self._cycle_count,
             "applied_count": 0,
@@ -174,6 +205,13 @@ class TradingRuntime:
             result["status"] = "blocked_risk_halt"
             result["reason"] = "risk halt is active"
             return result
+
+        expiry_hours = max(0, int(getattr(cfg, "proposal_expiry_hours", 72) or 72))
+        if expiry_hours > 0:
+            try:
+                self.journal.expire_auto_learning_proposals(expiry_hours=expiry_hours)
+            except Exception:
+                pass
 
         interval = max(1, int(cfg.apply_interval_cycles or 1))
         if self._auto_learning_last_applied_cycle > 0:
@@ -222,8 +260,20 @@ class TradingRuntime:
         max_changes = max(1, int(cfg.max_strategy_changes_per_apply or 1))
         allow_pause = bool(cfg.allow_pause)
         max_step_pct = max(0.0, float(cfg.max_weight_step_pct or 0.0))
-        applied: list[dict[str, Any]] = []
+        max_pending = max(1, int(getattr(cfg, "max_pending_proposals", 100) or 100))
+        pending = self.journal.recent_auto_learning_proposals(limit=max_pending * 5, status="pending")
+        pending_by_strategy = {
+            str(item.get("strategy", "")).strip()
+            for item in pending
+            if str(item.get("strategy", "")).strip()
+        }
+        pending_count = len(pending)
+        candidate_changes: list[dict[str, Any]] = []
         skipped: list[dict[str, Any]] = []
+        strategy_cfg = {
+            key: (dict(value) if isinstance(value, dict) else {})
+            for key, value in config.strategies.items()
+        }
 
         for item in actionable:
             strategy = str(getattr(item, "strategy", "") or "").strip()
@@ -232,9 +282,14 @@ class TradingRuntime:
             reason = str(getattr(item, "reason", "") or "").strip()
             if not strategy:
                 continue
-            if len(applied) >= max_changes:
+            if len(candidate_changes) >= max_changes:
                 skipped.append(
                     {"strategy": strategy, "action": action, "reason": "max_strategy_changes_per_apply reached"}
+                )
+                continue
+            if strategy in pending_by_strategy:
+                skipped.append(
+                    {"strategy": strategy, "action": action, "reason": "pending proposal already exists"}
                 )
                 continue
 
@@ -253,9 +308,7 @@ class TradingRuntime:
                         {"strategy": strategy, "action": action, "reason": "already paused"}
                     )
                     continue
-                current["enabled"] = False
-                strategy_cfg[strategy] = current
-                applied.append(
+                candidate_changes.append(
                     {
                         "strategy": strategy,
                         "action": action,
@@ -276,10 +329,7 @@ class TradingRuntime:
                 )
                 continue
 
-            current["enabled"] = True
-            current["weight"] = bounded_weight
-            strategy_cfg[strategy] = current
-            applied.append(
+            candidate_changes.append(
                 {
                     "strategy": strategy,
                     "action": action,
@@ -292,9 +342,85 @@ class TradingRuntime:
             )
 
         result["skipped"] = skipped[:20]
-        if not applied:
+        if not candidate_changes:
             result["status"] = "no_change"
             result["reason"] = "all actionable tuning results were filtered or unchanged"
+            return result
+
+        if apply_mode == "manual_approval":
+            if pending_count >= max_pending:
+                result["status"] = "pending_queue_full"
+                result["reason"] = "pending proposal queue is full"
+                result["pending_count"] = pending_count
+                result["max_pending_proposals"] = max_pending
+                return result
+
+            room = max(0, max_pending - pending_count)
+            to_queue = candidate_changes[:room]
+            if not to_queue:
+                result["status"] = "pending_queue_full"
+                result["reason"] = "pending proposal queue has no available room"
+                result["pending_count"] = pending_count
+                result["max_pending_proposals"] = max_pending
+                return result
+
+            proposal_items = [
+                {
+                    "strategy": item.get("strategy"),
+                    "action": item.get("action"),
+                    "current_weight": float(item.get("weight_before", 0.0) or 0.0),
+                    "suggested_weight": float(item.get("weight_after", 0.0) or 0.0),
+                    "confidence": float(item.get("confidence", 0.0) or 0.0),
+                    "reason": str(item.get("reason", "") or ""),
+                }
+                for item in to_queue
+            ]
+            proposal_ids = self.journal.record_auto_learning_proposals(
+                source="auto",
+                mode=str(config.mode),
+                cycle=int(self._cycle_count),
+                proposals=proposal_items,
+                meta={
+                    "window_days": int(cfg.window_days),
+                    "min_trades_per_strategy": int(cfg.min_trades_per_strategy),
+                    "min_confidence": float(cfg.min_confidence),
+                    "max_weight_step_pct": float(cfg.max_weight_step_pct),
+                    "max_strategy_changes_per_apply": int(cfg.max_strategy_changes_per_apply),
+                    "apply_interval_cycles": int(cfg.apply_interval_cycles),
+                    "apply_mode": apply_mode,
+                },
+            )
+            result["status"] = "pending_approval"
+            result["proposal_count"] = len(proposal_ids)
+            result["proposal_ids"] = proposal_ids
+            result["pending_count"] = pending_count + len(proposal_ids)
+            result["queued"] = to_queue
+            return result
+
+        applied: list[dict[str, Any]] = []
+        for item in candidate_changes:
+            strategy = str(item.get("strategy", "") or "").strip()
+            action = str(item.get("action", "hold") or "hold").strip()
+            if not strategy:
+                continue
+            current = dict(strategy_cfg.get(strategy, {}))
+            if action == "pause":
+                current["enabled"] = False
+            elif action in {"increase", "decrease"}:
+                current["enabled"] = True
+                current["weight"] = float(item.get("weight_after", current.get("weight", 1.0)) or current.get("weight", 1.0))
+            strategy_cfg[strategy] = current
+            applied.append(
+                {
+                    **item,
+                    "enabled_after": bool(current.get("enabled", True)),
+                    "weight_after": round(float(current.get("weight", item.get("weight_after", 1.0)) or item.get("weight_after", 1.0)), 3),
+                }
+            )
+
+        if not applied:
+            result["status"] = "no_change"
+            result["reason"] = "no actionable tuning was converted to config patch"
             return result
 
         merged = self._merge(asdict(config), {"strategies": strategy_cfg})
@@ -328,6 +454,7 @@ class TradingRuntime:
                         "max_weight_step_pct": float(cfg.max_weight_step_pct),
                         "max_strategy_changes_per_apply": int(cfg.max_strategy_changes_per_apply),
                         "apply_interval_cycles": int(cfg.apply_interval_cycles),
+                        "apply_mode": apply_mode,
                     },
                 )
             except Exception:
@@ -1286,10 +1413,17 @@ class TradingRuntime:
                     window_days=window_days,
                 )
             ]
+            leaderboard = self._learning.leaderboard(window_days=window_days, limit=10)
+            proposals_pending = self.journal.recent_auto_learning_proposals(limit=100, status="pending")
+            proposals_recent = self.journal.recent_auto_learning_proposals(limit=30)
             return {
                 "window_days": window_days,
                 "summary": summary,
                 "tuning": tunings,
+                "leaderboard": leaderboard,
+                "proposal_stats": self.journal.auto_learning_proposal_stats(),
+                "pending_proposals": proposals_pending,
+                "recent_proposals": proposals_recent,
                 "auto_learning": self._auto_learning_status(config),
             }
 
@@ -1418,7 +1552,10 @@ class TradingRuntime:
                         enabled_after=bool(item.get("enabled_after", True)),
                         confidence=float(item.get("confidence", 0.0)),
                         reason=str(item.get("reason", "")),
-                        meta={"window_days": int(window_days)},
+                        meta={
+                            "window_days": int(window_days),
+                            "apply_mode": self._normalize_apply_mode(getattr(config.auto_learning, "apply_mode", "manual_approval")),
+                        },
                     )
                 except Exception:
                     pass
@@ -1430,6 +1567,218 @@ class TradingRuntime:
             self._auto_learning_last_result = result
             self._auto_learning_last_applied_cycle = self._cycle_count
             self._auto_learning_last_applied_at = datetime.utcnow().isoformat()
+            return result
+
+    def get_learning_leaderboard(self, window_days: int = 14, limit: int = 10) -> Dict[str, Any]:
+        with self._lock:
+            return self._learning.leaderboard(window_days=max(0, int(window_days)), limit=max(1, int(limit)))
+
+    def get_learning_proposals(
+        self,
+        limit: int = 100,
+        status: str | None = None,
+        source: str | None = None,
+    ) -> Dict[str, Any]:
+        with self._lock:
+            config = self._load_config()
+            expiry_hours = max(0, int(getattr(config.auto_learning, "proposal_expiry_hours", 72) or 72))
+            if expiry_hours > 0:
+                try:
+                    self.journal.expire_auto_learning_proposals(expiry_hours=expiry_hours)
+                except Exception:
+                    pass
+            items = self.journal.recent_auto_learning_proposals(
+                limit=max(1, min(2000, int(limit))),
+                status=str(status or "").strip() or None,
+                source=str(source or "").strip() or None,
+            )
+            return {
+                "items": items,
+                "stats": self.journal.auto_learning_proposal_stats(),
+                "auto_learning": self._auto_learning_status(config),
+            }
+
+    def review_learning_proposals(
+        self,
+        action: str,
+        proposal_ids: Optional[list[int]] = None,
+        all_pending: bool = False,
+        decision_note: str = "",
+    ) -> Dict[str, Any]:
+        action_norm = str(action or "").strip().lower()
+        if action_norm not in {"approve", "apply", "reject"}:
+            return {"status": "error", "reason": "action must be approve/apply/reject"}
+
+        with self._lock:
+            config = self._load_config()
+            pending = self.journal.recent_auto_learning_proposals(limit=2000, status="pending")
+            if proposal_ids:
+                requested = {int(x) for x in proposal_ids if str(x).strip()}
+                target = [item for item in pending if int(item.get("id", 0)) in requested]
+            elif all_pending:
+                target = pending
+            else:
+                target = pending[:1]
+
+            if not target:
+                return {
+                    "status": "no_target",
+                    "reason": "no matching pending proposals",
+                    "pending_count": len(pending),
+                }
+
+            if action_norm == "reject":
+                changed = self.journal.update_auto_learning_proposal_status(
+                    proposal_ids=[int(item.get("id", 0)) for item in target],
+                    status="rejected",
+                    decision_note=decision_note or "rejected_by_operator",
+                )
+                result = {
+                    "status": "rejected",
+                    "changed_count": int(changed),
+                    "rejected_ids": [int(item.get("id", 0)) for item in target],
+                }
+                self._auto_learning_last_result = result
+                return result
+
+            strategy_cfg = {
+                key: (dict(value) if isinstance(value, dict) else {})
+                for key, value in config.strategies.items()
+            }
+            allow_pause = bool(config.auto_learning.allow_pause)
+            max_step_pct = max(0.0, float(config.auto_learning.max_weight_step_pct or 0.0))
+            applied: list[Dict[str, Any]] = []
+            skipped: list[Dict[str, Any]] = []
+
+            for proposal in target:
+                pid = int(proposal.get("id", 0) or 0)
+                strategy = str(proposal.get("strategy", "") or "").strip()
+                action_value = str(proposal.get("action", "hold") or "hold").strip()
+                if not strategy:
+                    skipped.append({"id": pid, "reason": "empty strategy"})
+                    continue
+
+                current = dict(strategy_cfg.get(strategy, {}))
+                current_enabled = bool(current.get("enabled", True))
+                current_weight = float(current.get("weight", 1.0) or 1.0)
+
+                if action_value == "pause":
+                    if not allow_pause:
+                        skipped.append({"id": pid, "strategy": strategy, "reason": "pause disabled by config"})
+                        continue
+                    if not current_enabled:
+                        skipped.append({"id": pid, "strategy": strategy, "reason": "already paused"})
+                        continue
+                    current["enabled"] = False
+                    strategy_cfg[strategy] = current
+                    applied.append(
+                        {
+                            "id": pid,
+                            "strategy": strategy,
+                            "action": action_value,
+                            "weight_before": round(current_weight, 3),
+                            "weight_after": round(current_weight, 3),
+                            "enabled_after": False,
+                            "confidence": float(proposal.get("confidence", 0.0) or 0.0),
+                            "reason": str(proposal.get("reason", "") or ""),
+                        }
+                    )
+                    continue
+
+                suggested = float(proposal.get("suggested_weight", current_weight) or current_weight)
+                bounded = self._bounded_weight(current_weight, suggested, max_step_pct=max_step_pct)
+                if abs(bounded - current_weight) < 0.0005 and current_enabled:
+                    skipped.append({"id": pid, "strategy": strategy, "reason": "bounded target equals current"})
+                    continue
+
+                current["enabled"] = True
+                current["weight"] = bounded
+                strategy_cfg[strategy] = current
+                applied.append(
+                    {
+                        "id": pid,
+                        "strategy": strategy,
+                        "action": action_value,
+                        "weight_before": round(current_weight, 3),
+                        "weight_after": bounded,
+                        "enabled_after": True,
+                        "confidence": float(proposal.get("confidence", 0.0) or 0.0),
+                        "reason": str(proposal.get("reason", "") or ""),
+                    }
+                )
+
+            for item in skipped:
+                pid = int(item.get("id", 0) or 0)
+                if pid <= 0:
+                    continue
+                try:
+                    self.journal.update_auto_learning_proposal_status(
+                        proposal_ids=[pid],
+                        status="rejected",
+                        decision_note=str(item.get("reason", "rejected")),
+                    )
+                except Exception:
+                    pass
+
+            if not applied:
+                result = {
+                    "status": "no_change",
+                    "applied_count": 0,
+                    "applied": [],
+                    "skipped": skipped[:50],
+                }
+                self._auto_learning_last_result = result
+                return result
+
+            merged = self._merge(asdict(config), {"strategies": strategy_cfg})
+            self.config_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.config_path, "w", encoding="utf-8") as f:
+                json.dump(merged, f, ensure_ascii=False, indent=2)
+            self.config = AppConfig.from_file(str(self.config_path))
+
+            for item in applied:
+                event_id = None
+                try:
+                    event_id = self.journal.record_auto_learning_event(
+                        source="approval",
+                        mode=str(config.mode),
+                        cycle=int(self._cycle_count),
+                        strategy=str(item.get("strategy", "")),
+                        action=str(item.get("action", "hold")),
+                        weight_before=float(item.get("weight_before", 0.0)),
+                        weight_after=float(item.get("weight_after", 0.0)),
+                        enabled_after=bool(item.get("enabled_after", True)),
+                        confidence=float(item.get("confidence", 0.0)),
+                        reason=str(item.get("reason", "")),
+                        meta={
+                            "review_action": action_norm,
+                            "apply_mode": self._normalize_apply_mode(getattr(config.auto_learning, "apply_mode", "manual_approval")),
+                            "window_days": int(config.auto_learning.window_days),
+                        },
+                    )
+                except Exception:
+                    event_id = None
+                try:
+                    self.journal.update_auto_learning_proposal_status(
+                        proposal_ids=[int(item.get("id", 0) or 0)],
+                        status="applied",
+                        decision_note=decision_note or "approved_and_applied",
+                        applied_event_id=event_id,
+                    )
+                except Exception:
+                    pass
+
+            self._auto_learning_last_applied_cycle = self._cycle_count
+            self._auto_learning_last_applied_at = datetime.utcnow().isoformat()
+            self._auto_learning_apply_times.append(time.time())
+
+            result = {
+                "status": "applied",
+                "applied_count": len(applied),
+                "applied": applied,
+                "skipped": skipped[:50],
+            }
+            self._auto_learning_last_result = result
             return result
 
     def close(self) -> None:
@@ -1626,6 +1975,193 @@ class TradingRuntime:
             "report": report,
         }
 
+    def run_live_rehearsal(self) -> dict[str, Any]:
+        with self._lock:
+            config = self._load_config()
+            preflight = self._live_preflight(config)
+            validation_gate = self._validation_gate(config)
+
+        probe_payload: Dict[str, Any] = {}
+        try:
+            sample_symbols = [str(x).strip() for x in list(config.pipeline.universe or [])[:5] if str(x).strip()]
+            probe_payload = self.run_exchange_probe(symbols=sample_symbols or None)
+        except Exception as exc:
+            probe_payload = {"overall_passed": False, "error": str(exc), "symbols": [], "checks": []}
+
+        staging = config.live_staging
+        stage_plan = [
+            {
+                "stage": 1,
+                "label": "micro_size_safety",
+                "max_order_usdt": float(staging.stage1_max_order_usdt),
+                "trade_count_target": int(staging.stage1_trade_count),
+                "goals": [
+                    "주문/체결/저널 기록 경로 검증",
+                    "slippage/reject reason baseline 수집",
+                ],
+                "promotion_gate": [
+                    "validation_gate=PASS 유지",
+                    "critical reject reason 급증 없음",
+                    "daily_pnl이 block_on_daily_loss_usdt 이하로 하락하지 않음",
+                ],
+            },
+            {
+                "stage": 2,
+                "label": "controlled_scale_up",
+                "max_order_usdt": float(staging.stage2_max_order_usdt),
+                "trade_count_target": int(staging.stage2_trade_count),
+                "goals": [
+                    "부분체결/재시도/가드 동작 재검증",
+                    "전략별 피처 로그 품질 확인",
+                ],
+                "promotion_gate": [
+                    "stage1 통과 기록 존재",
+                    "reject hotspot 경보 없음(critical)",
+                    "실현손익/드로우다운이 운영 한도 이내",
+                ],
+            },
+            {
+                "stage": 3,
+                "label": "full_staging_cap",
+                "max_order_usdt": float(staging.stage3_max_order_usdt),
+                "trade_count_target": max(int(staging.stage2_trade_count), int(staging.stage1_trade_count)) + 20,
+                "goals": [
+                    "운영 모드 고정 전 최종 리허설",
+                    "실패 시나리오 복구시간(RTO) 측정",
+                ],
+                "promotion_gate": [
+                    "운영 체크리스트 전체 PASS",
+                    "실패 시나리오 대응표 리허설 완료",
+                    "승인자 서명(운영 승인형 모드일 때)",
+                ],
+            },
+        ]
+
+        failure_scenarios: list[dict[str, Any]] = [
+            {
+                "code": "validation_gate_failed",
+                "trigger": "validation_gate.overall_passed=false 또는 report stale",
+                "immediate_action": "live start 중단, mode=paper로 강등, 리포트 재생성",
+                "diagnostics": [
+                    "start-system.bat healthcheck <config> 127.0.0.1 8000 1",
+                    "py -m trading_system.main --config <config> --backtest-cycles 200 --walk-forward-windows 2 --validation-report data/validation/rehearsal_validation.json",
+                ],
+                "resume_criteria": "gate PASS + recent report age <= max_report_age_days",
+            },
+            {
+                "code": "exchange_param_mismatch",
+                "trigger": "exchange probe에서 precision/min_order/reduce_only/position_mode CHECK",
+                "immediate_action": "해당 심볼 거래 비활성 + 거래소 파라미터 수동 확인",
+                "diagnostics": [
+                    "py -m trading_system.main --config <config> --exchange-probe-report",
+                ],
+                "resume_criteria": "probe critical_failures=0 및 symbol verdict=PASS",
+            },
+            {
+                "code": "execution_guard_quarantine",
+                "trigger": "execution_guard symbol/global quarantine 활성화",
+                "immediate_action": "신규 주문 중단, reject reason 상위 원인 분리",
+                "diagnostics": [
+                    "UI: 거부사유 운영 대시보드 확인",
+                    "logs/watchdog.log 및 최근 executions 조사",
+                ],
+                "resume_criteria": "quarantine 해제 + 동일 사유 재발 없음(최소 30분)",
+            },
+            {
+                "code": "auth_or_permission_error",
+                "trigger": "reject_reason=auth_error 또는 API permission 에러",
+                "immediate_action": "API 키 즉시 교체/권한 재발급, 운영 중단",
+                "diagnostics": [
+                    "거래소 콘솔에서 key scope(조회/주문/선물) 재확인",
+                    "testnet/live endpoint 혼선 여부 확인",
+                ],
+                "resume_criteria": "probe PASS + llm/exchange test 재확인",
+            },
+            {
+                "code": "slippage_spike",
+                "trigger": "slippage_cause가 high_volatility/market_impact로 급증",
+                "immediate_action": "position_size 절반 축소 + max_slippage_bps 강화",
+                "diagnostics": [
+                    "실행 로그의 market_state/entry_rationale 확인",
+                    "spread/volatility 지표의 시점별 변화 점검",
+                ],
+                "resume_criteria": "최근 50건 평균 슬리피지 정상화",
+            },
+            {
+                "code": "daily_loss_limit_hit",
+                "trigger": "daily_loss_limit_reached 또는 live_staging block_on_daily_loss_usdt 도달",
+                "immediate_action": "당일 자동중단 유지, 전략 비중 하향 검토",
+                "diagnostics": [
+                    "risk events + executions PnL 분해",
+                    "학습 리더보드에서 손실 기여 전략/심볼 추적",
+                ],
+                "resume_criteria": "다음 세션 시작 전 승인자 재확인",
+            },
+        ]
+
+        readiness_summary = {
+            "preflight_passed": bool(preflight.get("passed", False)),
+            "validation_gate_passed": bool(validation_gate.get("passed", False)),
+            "exchange_probe_passed": bool(probe_payload.get("overall_passed", False)),
+            "exchange_probe_critical_failures": int(probe_payload.get("critical_failures", 0) or 0),
+        }
+
+        operator_checklist = [
+            "리허설은 stage1 -> stage2 -> stage3 순서로만 진행",
+            "각 stage 종료 시 PASS/FAIL 및 근거를 운영일지에 기록",
+            "FAIL 발생 시 즉시 다음 stage 진입 금지",
+            "승인형(auto_learning.apply_mode=manual_approval)일 때는 제안 승인 후 적용",
+        ]
+
+        return {
+            "timestamp": datetime.utcnow().isoformat(),
+            "config_path": str(self.config_path),
+            "mode": str(config.mode),
+            "readiness_summary": readiness_summary,
+            "preflight": preflight,
+            "validation_gate": validation_gate,
+            "exchange_probe": {
+                "overall_passed": bool(probe_payload.get("overall_passed", False)),
+                "critical_failures": int(probe_payload.get("critical_failures", 0) or 0),
+                "checks": probe_payload.get("checks", []),
+                "warnings": probe_payload.get("warnings", []),
+            },
+            "runbook": {
+                "objective": "실거래 진입 전 소액 staged rehearsal로 주문/리스크/복구 경로 검증",
+                "stage_plan": stage_plan,
+                "block_on_daily_loss_usdt": float(staging.block_on_daily_loss_usdt),
+                "require_non_negative_pnl_for_promotion": bool(staging.require_non_negative_pnl_for_promotion),
+                "recommended_commands": [
+                    "start-system.bat healthcheck <config> 127.0.0.1 8000 1",
+                    "py -m trading_system.main --config <config> --live-readiness-report",
+                    "py -m trading_system.main --config <config> --exchange-probe-report",
+                    "start-system.bat web <config> 127.0.0.1 8000",
+                ],
+                "operator_checklist": operator_checklist,
+            },
+            "failure_scenarios": failure_scenarios,
+        }
+
+    def save_live_rehearsal_report(self, output_path: str | None = None) -> dict[str, Any]:
+        report = self.run_live_rehearsal()
+        raw = str(output_path or "").strip()
+        if raw:
+            out = Path(raw)
+            if not out.is_absolute():
+                out = (self.config_path.parent / out).resolve()
+        else:
+            ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            out_dir = (self.config_path.parent / "data" / "validation" / "live_rehearsal").resolve()
+            out = out_dir / f"live_rehearsal_{ts}.json"
+
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        return {
+            "status": "saved",
+            "report_path": str(out),
+            "report": report,
+        }
+
     def run_exchange_probe(self, symbols: list[str] | None = None) -> dict[str, Any]:
         with self._lock:
             config = self._load_config()
@@ -1656,6 +2192,17 @@ class TradingRuntime:
                 return float(v)
             except Exception:
                 return float(default)
+
+        def _b(v: Any, default: bool = False) -> bool:
+            if isinstance(v, bool):
+                return v
+            if isinstance(v, (int, float)):
+                return bool(v)
+            if isinstance(v, str):
+                return v.strip().lower() in {"1", "true", "yes", "on", "ok"}
+            return bool(default)
+
+        live_target = str(config.mode).strip().lower() == "live" or bool(config.exchange.allow_live)
 
         target_symbols = [str(x).strip().upper() for x in (symbols or config.pipeline.universe or []) if str(x).strip()]
         if not target_symbols:
@@ -1701,6 +2248,7 @@ class TradingRuntime:
 
         if is_ccxt:
             markets_loaded = False
+            describe_payload: dict[str, Any] = {}
             try:
                 if hasattr(raw, "load_markets"):
                     raw.load_markets()
@@ -1709,15 +2257,44 @@ class TradingRuntime:
             except Exception as exc:
                 _add("load_markets", True, False, str(exc), "critical")
 
+            try:
+                if hasattr(raw, "describe"):
+                    desc = raw.describe()
+                    if isinstance(desc, dict):
+                        describe_payload = desc
+            except Exception:
+                describe_payload = {}
+
             has = getattr(raw, "has", {}) or {}
             create_order_ok = bool(has.get("createOrder"))
             fetch_positions_ok = bool(has.get("fetchPositions")) or bool(has.get("fetchPosition"))
             set_leverage_ok = bool(has.get("setLeverage"))
             set_position_mode_ok = bool(has.get("setPositionMode"))
+            has_reduce_only_flag = bool(has.get("createReduceOnlyOrder")) or bool(has.get("reduceOnly"))
+
+            def _feature_value(symbol: str | None, *path: str) -> Any:
+                try:
+                    if hasattr(raw, "featureValue"):
+                        return raw.featureValue(symbol, *path)
+                except Exception:
+                    return None
+                return None
+
+            reduce_only_feature = _feature_value(None, "createOrder", "reduceOnly")
+            if reduce_only_feature is None and target_symbols:
+                reduce_only_feature = _feature_value(target_symbols[0], "createOrder", "reduceOnly")
+            hedged_feature = _feature_value(None, "createOrder", "hedged")
+            position_mode_feature = _feature_value(None, "setPositionMode")
+
+            describe_text = json.dumps(describe_payload, ensure_ascii=False) if describe_payload else ""
+            reduce_only_supported = _b(reduce_only_feature) or has_reduce_only_flag or ("reduceonly" in describe_text.lower())
+            position_mode_supported = _b(position_mode_feature) or set_position_mode_ok or ("setpositionmode" in describe_text.lower())
+
             _add("cap_create_order", True, create_order_ok, f"has.createOrder={create_order_ok}", "info" if create_order_ok else "warn")
             _add("cap_fetch_positions", False, fetch_positions_ok, f"has.fetchPositions={fetch_positions_ok}", "info" if fetch_positions_ok else "warn")
             _add("cap_set_leverage", False, set_leverage_ok, f"has.setLeverage={set_leverage_ok}", "info" if set_leverage_ok else "warn")
-            _add("cap_set_position_mode", False, set_position_mode_ok, f"has.setPositionMode={set_position_mode_ok}", "info" if set_position_mode_ok else "warn")
+            _add("cap_set_position_mode", live_target, position_mode_supported, f"has.setPositionMode={set_position_mode_ok}", "info" if position_mode_supported else ("critical" if live_target else "warn"))
+            _add("cap_reduce_only", live_target, reduce_only_supported, f"feature.reduceOnly={reduce_only_feature}", "info" if reduce_only_supported else ("critical" if live_target else "warn"))
 
             if markets_loaded:
                 markets = getattr(raw, "markets", {}) or {}
@@ -1736,6 +2313,16 @@ class TradingRuntime:
                         "min_amount": None,
                         "min_notional": None,
                         "sample_amount_precision_ok": None,
+                        "sample_price_precision_ok": None,
+                        "last_price": None,
+                        "min_order_usdt_estimate": None,
+                        "min_order_verified": False,
+                        "precision_verified": False,
+                        "reduce_only_supported": bool(reduce_only_supported),
+                        "position_mode_supported": bool(position_mode_supported),
+                        "position_mode_feature": position_mode_feature,
+                        "hedged_feature": hedged_feature,
+                        "verdict": "CHECK",
                     }
                     market = markets.get(symbol)
                     if not isinstance(market, dict):
@@ -1771,6 +2358,30 @@ class TradingRuntime:
                         row["sample_amount_precision_ok"] = False
                         warnings.append(f"{symbol}: amount_to_precision failed")
 
+                    try:
+                        if hasattr(raw, "price_to_precision"):
+                            sample_price = max(_f(market.get("markPrice"), 0.0), 1.0)
+                            raw.price_to_precision(symbol, sample_price)
+                            row["sample_price_precision_ok"] = True
+                        else:
+                            row["sample_price_precision_ok"] = False
+                    except Exception:
+                        row["sample_price_precision_ok"] = False
+                        warnings.append(f"{symbol}: price_to_precision failed")
+
+                    try:
+                        row["last_price"] = float(temp_exchange.get_last_price(symbol))
+                    except Exception:
+                        row["last_price"] = None
+
+                    min_amount = _f(row["min_amount"], 0.0)
+                    min_notional = _f(row["min_notional"], 0.0)
+                    last_price = _f(row["last_price"], 0.0)
+                    min_order_estimate = max(min_notional, min_amount * last_price if last_price > 0 else 0.0)
+                    row["min_order_usdt_estimate"] = min_order_estimate if min_order_estimate > 0 else None
+                    row["min_order_verified"] = bool(min_order_estimate > 0)
+                    row["precision_verified"] = bool(row["sample_amount_precision_ok"]) and bool(row["sample_price_precision_ok"])
+
                     if not row["active"]:
                         warnings.append(f"{symbol}: inactive market")
                     if str(row["quote"] or "").upper() != "USDT":
@@ -1779,8 +2390,38 @@ class TradingRuntime:
                         warnings.append(f"{symbol}: amount precision missing")
                     if _f(row["min_notional"], 0.0) <= 0:
                         warnings.append(f"{symbol}: min_notional missing")
+                    if not row["min_order_verified"]:
+                        warnings.append(f"{symbol}: minimum order notional unresolved")
+
+                    if (
+                        row["active"]
+                        and row["precision_verified"]
+                        and row["min_order_verified"]
+                        and (row["reduce_only_supported"] or not live_target)
+                        and (row["position_mode_supported"] or not live_target)
+                    ):
+                        row["verdict"] = "PASS"
+                    else:
+                        row["verdict"] = "CHECK"
 
                     symbol_rows.append(row)
+
+            total_symbols = len(symbol_rows)
+            passed_symbols = sum(1 for row in symbol_rows if str(row.get("verdict")) == "PASS")
+            _add(
+                "symbol_parameter_verification",
+                True,
+                total_symbols > 0 and passed_symbols == total_symbols,
+                f"verified {passed_symbols}/{total_symbols} symbols",
+                "info" if total_symbols > 0 and passed_symbols == total_symbols else "warn",
+            )
+            exchange_info["parameter_support"] = {
+                "reduce_only_supported": bool(reduce_only_supported),
+                "position_mode_supported": bool(position_mode_supported),
+                "hedged_feature": hedged_feature,
+                "reduce_only_feature": reduce_only_feature,
+                "position_mode_feature": position_mode_feature,
+            }
 
         required_checks = [item for item in checks if bool(item.get("required"))]
         overall_passed = all(bool(item.get("passed")) for item in required_checks) if required_checks else True

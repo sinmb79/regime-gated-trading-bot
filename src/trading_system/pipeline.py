@@ -490,6 +490,77 @@ class TradingOrchestrator:
             ],
         }
 
+    @staticmethod
+    def _safe_float(value: Any, default: float = 0.0) -> float:
+        try:
+            return float(value)
+        except Exception:
+            return float(default)
+
+    def _enrich_signal_for_logging(
+        self,
+        signal: StrategySignal,
+        regime: MarketRegime,
+        total_score: float,
+        base_score: float,
+        llm_score_bonus: float,
+        llm_reason: str,
+        llm_confidence: float,
+    ) -> StrategySignal:
+        meta = dict(signal.meta or {})
+        spread_bps = self._safe_float(meta.get("spread_bps"), signal.slippage_estimate_bps)
+        volatility = self._safe_float(meta.get("volatility"), 0.0)
+        momentum = self._safe_float(meta.get("momentum"), 0.0)
+        funding_rate = self._safe_float(meta.get("funding_rate"), 0.0)
+        kalman_trend = self._safe_float(meta.get("kalman_trend_score"), 0.0)
+        kalman_shock = self._safe_float(meta.get("kalman_innovation_z"), 0.0)
+        kalman_uncertainty = self._safe_float(meta.get("kalman_uncertainty"), 0.0)
+
+        market_state = {
+            "regime": regime.regime.value,
+            "regime_confidence": round(float(regime.confidence), 4),
+            "regime_reason": str(regime.reason),
+            "spread_bps": round(spread_bps, 4),
+            "volatility": round(volatility, 6),
+            "momentum": round(momentum, 6),
+            "funding_rate": round(funding_rate, 6),
+            "kalman_trend_score": round(kalman_trend, 6),
+            "kalman_innovation_z": round(kalman_shock, 6),
+            "kalman_uncertainty": round(kalman_uncertainty, 6),
+        }
+
+        factors: list[str] = [
+            f"regime={regime.regime.value}({float(regime.confidence):.2f})",
+            f"edge={float(signal.expected_edge_bps):.2f}bps",
+            f"spread={spread_bps:.2f}bps",
+            f"volatility={volatility:.4f}",
+            f"kalman_shock={kalman_shock:.2f}",
+            f"score={total_score:.2f}(base={base_score:.2f}, llm={llm_score_bonus:.2f})",
+        ]
+        if llm_reason:
+            factors.append(f"llm={llm_reason[:120]}")
+
+        direction = signal.direction.value if isinstance(signal.direction, SignalDirection) else str(signal.direction)
+        rationale = {
+            "summary": (
+                f"{signal.strategy_id} {direction} 진입: "
+                f"레짐 {regime.regime.value} + 기대엣지 {float(signal.expected_edge_bps):.1f}bps + "
+                f"리스크 적합(신뢰도 {float(signal.confidence):.2f})"
+            ),
+            "factors": factors,
+            "score": {
+                "total": round(float(total_score), 4),
+                "base": round(float(base_score), 4),
+                "llm_bonus": round(float(llm_score_bonus), 4),
+                "llm_confidence": round(float(llm_confidence), 4),
+            },
+        }
+
+        meta["regime"] = regime.regime.value
+        meta["market_state"] = market_state
+        meta["entry_rationale"] = rationale
+        return replace(signal, meta=meta)
+
     def run_once(self) -> dict:
         self._cycle += 1
         created = datetime.utcnow().isoformat()
@@ -538,6 +609,16 @@ class TradingOrchestrator:
             if isinstance(score_meta, dict):
                 llm_reason = str(score_meta.get("reason", "")).strip()
                 llm_confidence = float(score_meta.get("confidence", 0.0))
+
+            signal = self._enrich_signal_for_logging(
+                signal=signal,
+                regime=regime,
+                total_score=total_score,
+                base_score=base_score,
+                llm_score_bonus=bonus,
+                llm_reason=llm_reason,
+                llm_confidence=llm_confidence,
+            )
 
             selected_plan.append(
                 {

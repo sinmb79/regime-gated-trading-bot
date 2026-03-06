@@ -411,6 +411,8 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         <button class="btn btn-danger" onclick="stopLoop()">중지</button>
         <button class="btn btn-sub" onclick="runLiveReadiness()">실거래 준비 점검</button>
         <button class="btn btn-sub" onclick="saveLiveReadinessReport()">점검 리포트 저장</button>
+        <button class="btn btn-sub" onclick="runLiveRehearsal()">실거래 리허설 계획</button>
+        <button class="btn btn-sub" onclick="saveLiveRehearsalReport()">리허설 리포트 저장</button>
         <button class="btn btn-sub" onclick="runExchangeProbe()">거래소 파라미터 점검</button>
         <button class="btn btn-sub" onclick="saveExchangeProbeReport()">거래소 점검 리포트 저장</button>
         <button class="btn btn-sub" onclick="testLlmConnection()">AI 연결 테스트</button>
@@ -421,6 +423,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       <div class="muted" style="margin-top:8px;">마지막 메시지: <span id="lastMessage">-</span></div>
       <div id="flowArea" style="margin-top:8px;"></div>
       <div id="liveReadinessArea" style="margin-top:8px;"></div>
+      <div id="liveRehearsalArea" style="margin-top:8px;"></div>
       <div id="exchangeProbeArea" style="margin-top:8px;"></div>
       <div class="grid" id="overview" style="margin-top:10px;"></div>
     </div>
@@ -779,7 +782,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       <table>
         <thead>
           <tr>
-            <th>시간</th><th>전략</th><th>종목</th><th>방향</th><th>상태</th><th>요청금액(USDT)</th><th>체결금액(USDT)</th><th>레버리지</th><th>예상가</th><th>체결가</th><th>슬리피지(bps)</th><th>시도</th><th>재시도사유</th><th>수수료(USDT)</th><th>GrossPnL</th><th>NetPnL</th>
+            <th>시간</th><th>전략</th><th>종목</th><th>방향</th><th>상태</th><th>요청금액(USDT)</th><th>체결금액(USDT)</th><th>레버리지</th><th>예상가</th><th>체결가</th><th>슬리피지(bps)</th><th>시도</th><th>재시도사유</th><th>수수료(USDT)</th><th>GrossPnL</th><th>NetPnL</th><th>레짐</th><th>진입근거</th><th>시장상태</th><th>슬리피지 원인</th>
           </tr>
         </thead>
         <tbody id="executionBody"></tbody>
@@ -794,6 +797,8 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         <button class="btn btn-sub" onclick="loadLearning()">분석 조회</button>
         <button class="btn btn-sub" onclick="applyLearning('selected')">선택 전략 적용</button>
         <button class="btn btn-good" onclick="applyLearning('all')">전체 제안 일괄 적용</button>
+        <button class="btn btn-sub" onclick="reviewLearningProposals('approve')">대기 제안 승인 적용</button>
+        <button class="btn btn-sub" onclick="reviewLearningProposals('reject')">대기 제안 거절</button>
       </div>
       <div id="learningMsg" class="muted" style="margin:8px 0;"></div>
       <table>
@@ -803,6 +808,24 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           </tr>
         </thead>
         <tbody id="learningBody"></tbody>
+      </table>
+      <div id="learningProposalMsg" class="muted" style="margin:10px 0 4px;"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>선택</th><th>ID</th><th>전략</th><th>제안</th><th>현재</th><th>제안값</th><th>신뢰도</th><th>사유</th><th>상태</th><th>시각</th>
+          </tr>
+        </thead>
+        <tbody id="learningProposalBody"></tbody>
+      </table>
+      <div class="grid" id="learningLeaderboardSummary" style="margin-top:8px;"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>카테고리</th><th>키</th><th>거래수</th><th>승률</th><th>총PnL</th><th>평균PnL</th>
+          </tr>
+        </thead>
+        <tbody id="learningLeaderboardBody"></tbody>
       </table>
     </div>
 
@@ -1783,6 +1806,10 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           <td>${Number(r.fee_usdt || 0).toFixed(4)}</td>
           <td>${Number(r.gross_realized_pnl || 0).toFixed(2)}</td>
           <td>${Number(r.realized_pnl || 0).toFixed(2)}</td>
+          <td>${r.regime_label || '-'}</td>
+          <td>${shortText(r.entry_rationale || '-', 120)}</td>
+          <td>${shortText(parseMarketStateSummary(r.market_state), 140)}</td>
+          <td>${r.slippage_cause || '-'}</td>
         </tr>
       `).join('');
       renderPnlChart(rows);
@@ -1864,11 +1891,56 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       }
     }
 
+    function shortText(raw, maxLen = 120) {
+      const text = String(raw || '');
+      if (text.length <= maxLen) return text;
+      return text.slice(0, maxLen - 3) + '...';
+    }
+
+    function parseMarketStateSummary(raw) {
+      if (!raw) return '-';
+      try {
+        const v = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (!v || typeof v !== 'object') return String(raw);
+        const regime = v.regime || '-';
+        const vol = Number(v.volatility || 0);
+        const spread = Number(v.spread_bps || 0);
+        const shock = Number(v.kalman_innovation_z || 0);
+        return `regime=${regime}, vol=${vol.toFixed(4)}, spread=${spread.toFixed(1)}, shock=${shock.toFixed(2)}`;
+      } catch (_e) {
+        return shortText(raw, 140);
+      }
+    }
+
+    function flattenLeaderboardRows(leaderboard) {
+      const rows = [];
+      const pushRows = (category, keyField, items) => {
+        (items || []).forEach((item) => {
+          rows.push({
+            category,
+            key: item[keyField] || '-',
+            trades: Number(item.trades || 0),
+            win_rate: Number(item.win_rate || 0),
+            total_pnl: Number(item.total_pnl || 0),
+            avg_pnl: Number(item.avg_pnl || 0),
+          });
+        });
+      };
+      pushRows('strategy', 'strategy', leaderboard.strategy || []);
+      pushRows('regime', 'regime', leaderboard.regime || []);
+      pushRows('symbol', 'symbol', leaderboard.symbol || []);
+      return rows;
+    }
+
     async function loadLearning() {
       const days = parseInt(document.getElementById('windowDays').value || '14', 10);
       const payload = await apiGet(`/api/learning?window_days=${days}`);
       const rows = payload.tuning || [];
       const auto = payload.auto_learning || {};
+      const pending = payload.pending_proposals || [];
+      const proposalStats = payload.proposal_stats || {};
+      const leaderboard = payload.leaderboard || {};
+
       document.getElementById('learningBody').innerHTML = rows.map((x) => `
         <tr>
           <td><input type="checkbox" class="tune-check" value="${x.strategy}" /></td>
@@ -1880,13 +1952,53 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           <td>${x.reason || '-'}</td>
         </tr>
       `).join('');
+
+      document.getElementById('learningProposalBody').innerHTML = pending.map((x) => `
+        <tr>
+          <td><input type="checkbox" class="proposal-check" value="${x.id}" /></td>
+          <td>${x.id}</td>
+          <td>${x.strategy || '-'}</td>
+          <td>${x.action || '-'}</td>
+          <td>${Number(x.current_weight || 0).toFixed(2)}</td>
+          <td>${Number(x.suggested_weight || 0).toFixed(2)}</td>
+          <td>${((x.confidence || 0) * 100).toFixed(1)}%</td>
+          <td>${shortText(x.reason || '-', 120)}</td>
+          <td>${x.status || '-'}</td>
+          <td>${String(x.ts || '-').slice(0, 19)}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="10" class="muted">대기 중인 승인 제안이 없습니다.</td></tr>';
+
+      const lbRows = flattenLeaderboardRows(leaderboard);
+      document.getElementById('learningLeaderboardBody').innerHTML = lbRows.map((x) => `
+        <tr>
+          <td>${x.category}</td>
+          <td>${x.key}</td>
+          <td>${x.trades}</td>
+          <td>${percentOrText(x.win_rate)}</td>
+          <td>${numberOrText(x.total_pnl, 2)}</td>
+          <td>${numberOrText(x.avg_pnl, 2)}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="6" class="muted">리더보드 샘플이 아직 부족합니다.</td></tr>';
+
+      document.getElementById('learningLeaderboardSummary').innerHTML = `
+        <div class="metric"><b>리더보드 샘플</b>${Number(leaderboard.sample_count || 0)}건</div>
+        <div class="metric"><b>전략 Top</b>${(leaderboard.strategy || []).length}개</div>
+        <div class="metric"><b>레짐 Top</b>${(leaderboard.regime || []).length}개</div>
+        <div class="metric"><b>심볼 Top</b>${(leaderboard.symbol || []).length}개</div>
+      `;
+
+      const pendingCount = Number(proposalStats.pending || pending.length || 0);
+      const applyMode = String(auto.apply_mode || 'manual_approval');
+      document.getElementById('learningProposalMsg').textContent =
+        `대기 제안 ${pendingCount}개 | 모드=${applyMode} | 만료=${Number(auto.proposal_expiry_hours || 0)}h`;
+
       const changeCount = rows.filter((r) => r.action !== 'hold').length;
       let learningMsg = `변경 제안: ${changeCount}개`;
       if (!rows.length) learningMsg = '적용 가능한 제안이 없습니다.';
       if (auto.enabled) {
         const autoStatus = ((auto.last_result || {}).status) || 'idle';
         const remain = Number(auto.remaining_cycles_to_next_apply || 0);
-        learningMsg += ` | 자동학습: ${autoStatus} (다음까지 ${remain} cycle)`;
+        learningMsg += ` | 자동학습: ${autoStatus} (다음까지 ${remain} cycle, 모드=${applyMode})`;
       } else {
         learningMsg += ' | 자동학습: 비활성';
       }
@@ -1907,6 +2019,23 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
 
       const result = await apiPost('/api/learning/apply', body);
       document.getElementById('learningMsg').textContent = `튜닝 적용: ${result.applied_count}개`;
+      await loadLearning();
+      await loadConfig();
+    }
+
+    async function reviewLearningProposals(action) {
+      const selectedIds = [...document.querySelectorAll('.proposal-check:checked')]
+        .map((x) => parseInt(x.value, 10))
+        .filter((x) => Number.isFinite(x));
+      const body = {
+        action: String(action || 'approve'),
+        proposal_ids: selectedIds,
+        all_pending: selectedIds.length === 0,
+      };
+      const result = await apiPost('/api/learning/proposals/review', body);
+      const verb = body.action === 'reject' ? '거절' : '승인적용';
+      const changed = Number(result.changed_count || result.applied_count || 0);
+      document.getElementById('learningMsg').textContent = `제안 ${verb}: ${changed}개 (${result.status || '-'})`;
       await loadLearning();
       await loadConfig();
     }
@@ -2144,6 +2273,62 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       }
     }
 
+    function renderLiveRehearsal(payload) {
+      const box = document.getElementById('liveRehearsalArea');
+      if (!box) return;
+      if (!payload || typeof payload !== 'object') {
+        box.innerHTML = '';
+        return;
+      }
+      const readiness = payload.readiness_summary || {};
+      const stages = (((payload.runbook || {}).stage_plan) || []).slice(0, 3);
+      const scenarios = (payload.failure_scenarios || []).slice(0, 4);
+      const stageLines = stages.map((s) =>
+        `<li>Stage ${s.stage}: cap=${Number(s.max_order_usdt || 0).toFixed(2)} USDT, target=${s.trade_count_target || 0} trades</li>`
+      ).join('');
+      const scenarioLines = scenarios.map((x) =>
+        `<li><b>${x.code}</b>: ${shortText(x.immediate_action || '-', 120)}</li>`
+      ).join('');
+      const pass = !!(readiness.preflight_passed && readiness.validation_gate_passed);
+      const css = pass ? 'reject-alert ok' : 'reject-alert warn';
+      box.innerHTML = `
+        <div class="${css}">
+          <b>실거래 리허설 계획: ${pass ? 'READY' : 'CHECK'}</b>
+          <span class="small" style="margin-left:8px;">preflight=${yesNo(!!readiness.preflight_passed)}, gate=${yesNo(!!readiness.validation_gate_passed)}, probe=${yesNo(!!readiness.exchange_probe_passed)}</span>
+          <div class="small" style="margin-top:6px;">Stage Plan</div>
+          <ul class="sketch-list compact">${stageLines || '<li>stage plan 없음</li>'}</ul>
+          <div class="small" style="margin-top:6px;">Failure Scenarios</div>
+          <ul class="sketch-list compact">${scenarioLines || '<li>시나리오 없음</li>'}</ul>
+        </div>
+      `;
+    }
+
+    async function runLiveRehearsal() {
+      try {
+        const payload = await apiGet('/api/live/rehearsal');
+        renderLiveRehearsal(payload);
+        const ready = (payload.readiness_summary || {});
+        document.getElementById('lastMessage').textContent =
+          `리허설 생성 완료(preflight=${yesNo(!!ready.preflight_passed)}, gate=${yesNo(!!ready.validation_gate_passed)}, probe=${yesNo(!!ready.exchange_probe_passed)})`;
+      } catch (e) {
+        document.getElementById('lastMessage').textContent = '실거래 리허설 생성 실패: ' + e.message;
+      }
+    }
+
+    async function saveLiveRehearsalReport() {
+      try {
+        const customPath = window.prompt('리허설 리포트 저장 경로(비우면 자동):', '');
+        const body = {};
+        if (customPath && customPath.trim()) body.output_path = customPath.trim();
+        const payload = await apiPost('/api/live/rehearsal/report', body);
+        const reportPath = (payload || {}).report_path || '-';
+        renderLiveRehearsal((payload || {}).report || {});
+        document.getElementById('lastMessage').textContent = `리허설 리포트 저장 완료: ${reportPath}`;
+      } catch (e) {
+        document.getElementById('lastMessage').textContent = '리허설 리포트 저장 실패: ' + e.message;
+      }
+    }
+
     function renderExchangeProbe(payload) {
       const box = document.getElementById('exchangeProbeArea');
       if (!box) return;
@@ -2160,11 +2345,19 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         return `<li>[${mark}] ${c.code}: ${c.detail || '-'}</li>`;
       }).join('');
       const warnLines = warnings.slice(0, 3).map((w) => `<li>${w}</li>`).join('');
+      const symbolRows = Array.isArray(payload.symbols) ? payload.symbols.slice(0, 4) : [];
+      const symbolLines = symbolRows.map((row) => {
+        const verdict = row.verdict || 'CHECK';
+        const minOrder = row.min_order_usdt_estimate == null ? '-' : Number(row.min_order_usdt_estimate).toFixed(4);
+        const precision = row.precision_verified ? 'ok' : 'check';
+        return `<li>${row.symbol || '-'}: ${verdict}, minOrder=${minOrder}, precision=${precision}, reduceOnly=${yesNo(!!row.reduce_only_supported)}, posMode=${yesNo(!!row.position_mode_supported)}</li>`;
+      }).join('');
       box.innerHTML = `
         <div class="${css}">
           <b>거래소 파라미터 점검: ${payload.overall_passed ? 'PASS' : 'CHECK'}</b>
           <span class="small" style="margin-left:8px;">필수 실패 ${failedRequired.length} / critical ${payload.critical_failures || 0}</span>
           <ul class="sketch-list compact" style="margin-top:6px;">${lines || '<li>점검 항목 없음</li>'}</ul>
+          ${symbolLines ? `<div class="small" style="margin-top:6px;">심볼 실증</div><ul class="sketch-list compact">${symbolLines}</ul>` : ''}
           ${warnLines ? `<div class="small" style="margin-top:6px;">주요 경고</div><ul class="sketch-list compact">${warnLines}</ul>` : ''}
         </div>
       `;
@@ -2403,6 +2596,23 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc))
 
+    @app.get("/api/live/rehearsal")
+    def live_rehearsal() -> dict[str, Any]:
+        try:
+            return runtime.run_live_rehearsal()
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc))
+
+    @app.post("/api/live/rehearsal/report")
+    def save_live_rehearsal_report(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+        try:
+            output_path = None
+            if isinstance(payload, dict):
+                output_path = payload.get("output_path")
+            return runtime.save_live_rehearsal_report(output_path=output_path)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc))
+
     @app.get("/api/exchange/probe")
     def exchange_probe(symbols: str = "") -> dict[str, Any]:
         try:
@@ -2471,12 +2681,42 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     def get_learning(window_days: int = 14) -> dict[str, Any]:
         return runtime.get_learning(window_days=window_days)
 
+    @app.get("/api/learning/leaderboard")
+    def get_learning_leaderboard(window_days: int = 14, limit: int = 10) -> dict[str, Any]:
+        try:
+            return runtime.get_learning_leaderboard(window_days=window_days, limit=limit)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc))
+
     @app.post("/api/learning/apply")
     def apply_learning(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             window_days = payload.get("window_days", 14) if isinstance(payload, dict) else 14
             strategy_filter = payload.get("strategy_filter") if isinstance(payload, dict) else None
             return runtime.apply_learning(window_days=window_days, strategy_filter=strategy_filter)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc))
+
+    @app.get("/api/learning/proposals")
+    def get_learning_proposals(limit: int = 100, status: str | None = None, source: str | None = None) -> dict[str, Any]:
+        try:
+            return runtime.get_learning_proposals(limit=limit, status=status, source=source)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc))
+
+    @app.post("/api/learning/proposals/review")
+    def review_learning_proposals(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+        try:
+            action = str(payload.get("action", "approve") if isinstance(payload, dict) else "approve")
+            proposal_ids = payload.get("proposal_ids") if isinstance(payload, dict) else None
+            all_pending = bool(payload.get("all_pending", False)) if isinstance(payload, dict) else False
+            decision_note = str(payload.get("decision_note", "") if isinstance(payload, dict) else "")
+            return runtime.review_learning_proposals(
+                action=action,
+                proposal_ids=proposal_ids if isinstance(proposal_ids, list) else None,
+                all_pending=all_pending,
+                decision_note=decision_note,
+            )
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc))
 

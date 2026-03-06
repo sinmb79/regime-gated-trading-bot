@@ -54,6 +54,16 @@ if /I "%MODE%"=="healthcheck" (
   exit /b !errorlevel!
 )
 
+if /I "%MODE%"=="rehearsal" (
+  if "!CONFIG!"=="" set "CONFIG=%DEFAULT_CONFIG%"
+  if "!HOST!"=="" (
+    call "%~dp0scripts\run-trading-system.bat" rehearsal "!CONFIG!"
+  ) else (
+    call "%~dp0scripts\run-trading-system.bat" rehearsal "!CONFIG!" "!HOST!"
+  )
+  exit /b !errorlevel!
+)
+
 if /I "%MODE%"=="backup" (
   if "!CONFIG!"=="" set "CONFIG=backups"
   call "%~dp0scripts\run-trading-system.bat" backup "!CONFIG!"
@@ -77,7 +87,7 @@ if "%MODE%"=="" (
 
 if /I "%MODE%"=="/h" (
   echo Usage:
-  echo   start-system.bat [desktop^|web^|multi^|multi-ui^|healthcheck^|backup^|watchdog] [config] [host] [port] [interval]
+  echo   start-system.bat [desktop^|web^|multi^|multi-ui^|healthcheck^|backup^|rehearsal^|watchdog] [config] [host] [port] [interval]
   echo   start-system.bat nogate [desktop^|web^|multi^|multi-ui] ...
   echo   start-system.bat                 => desktop dashboard
   echo   start-system.bat web             => web dashboard
@@ -87,6 +97,7 @@ if /I "%MODE%"=="/h" (
   echo   start-system.bat multi-ui [multi_config] [host] [port]
   echo   start-system.bat healthcheck [config] [host] [port]
   echo   start-system.bat backup [output_dir]
+  echo   start-system.bat rehearsal [config] [output_path^|auto]
   echo   start-system.bat watchdog [config] [host] [port] [interval]
   echo   start-system.bat nogate web [config] [host] [port]   ^(validation gate bypass)
   exit /b 0
@@ -100,6 +111,6 @@ if exist "%MODE%" (
 )
 
 echo Unknown mode: %MODE%
-echo Use desktop, web, multi, multi-ui, healthcheck, backup, watchdog. If passing only a config path, use:
+echo Use desktop, web, multi, multi-ui, healthcheck, backup, rehearsal, watchdog. If passing only a config path, use:
 	echo start-system.bat "configs/default.json"
 exit /b 1

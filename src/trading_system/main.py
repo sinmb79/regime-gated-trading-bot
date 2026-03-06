@@ -41,6 +41,14 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="Save live readiness report (empty path => auto output path)",
     )
+    parser.add_argument("--live-rehearsal", action="store_true", help="Build live rehearsal runbook only")
+    parser.add_argument(
+        "--live-rehearsal-report",
+        nargs="?",
+        const="auto",
+        default="",
+        help="Save live rehearsal runbook report (empty path => auto output path)",
+    )
     parser.add_argument("--multi-config", default="", help="Path to multi profile config JSON")
     parser.add_argument(
         "--multi-command",
@@ -606,6 +614,22 @@ def main() -> None:
                 print(json.dumps(payload, ensure_ascii=False, indent=2))
             else:
                 print(json.dumps(runtime.run_live_readiness(), ensure_ascii=False, indent=2))
+        finally:
+            runtime.close()
+        return
+
+    if args.live_rehearsal or str(args.live_rehearsal_report or "").strip():
+        from .runtime import TradingRuntime
+
+        runtime = TradingRuntime(str(config_path))
+        try:
+            report_arg = str(args.live_rehearsal_report or "").strip()
+            if report_arg:
+                output_path = "" if report_arg == "auto" else report_arg
+                payload = runtime.save_live_rehearsal_report(output_path=output_path)
+                print(json.dumps(payload, ensure_ascii=False, indent=2))
+            else:
+                print(json.dumps(runtime.run_live_rehearsal(), ensure_ascii=False, indent=2))
         finally:
             runtime.close()
         return

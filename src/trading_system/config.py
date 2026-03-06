@@ -156,6 +156,7 @@ class LiveStagingConfig:
 class AutoLearningConfig:
     enabled: bool = False
     paper_only: bool = True
+    apply_mode: str = "manual_approval"
     apply_interval_cycles: int = 20
     window_days: int = 14
     min_trades_per_strategy: int = 8
@@ -164,6 +165,8 @@ class AutoLearningConfig:
     max_strategy_changes_per_apply: int = 3
     max_applies_per_day: int = 8
     allow_pause: bool = False
+    max_pending_proposals: int = 100
+    proposal_expiry_hours: int = 72
 
 
 @dataclass(frozen=True)

@@ -5,7 +5,7 @@ import json
 import sqlite3
 import threading
 from dataclasses import asdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -44,10 +44,20 @@ class TradeJournal:
             "attempt_count": "INTEGER NOT NULL DEFAULT 1",
             "is_partial": "INTEGER NOT NULL DEFAULT 0",
             "reject_reason": "TEXT",
+            "regime_label": "TEXT",
+            "entry_rationale": "TEXT",
+            "market_state": "TEXT",
+            "slippage_cause": "TEXT",
+            "signal_meta": "TEXT",
         }
         for col, ddl in required.items():
             if col not in existing:
-                cur.execute(f"ALTER TABLE executions ADD COLUMN {col} {ddl}")
+                try:
+                    cur.execute(f"ALTER TABLE executions ADD COLUMN {col} {ddl}")
+                except sqlite3.OperationalError as exc:
+                    if "duplicate column name" in str(exc).lower():
+                        continue
+                    raise
 
     def _ensure_schema(self) -> None:
         with self._lock:
@@ -90,6 +100,11 @@ class TradeJournal:
                     realized_pnl REAL,
                     reject_reason TEXT,
                     note TEXT,
+                    regime_label TEXT,
+                    entry_rationale TEXT,
+                    market_state TEXT,
+                    slippage_cause TEXT,
+                    signal_meta TEXT,
                     FOREIGN KEY(signal_id) REFERENCES signals(id)
             )
                 """
@@ -138,6 +153,27 @@ class TradeJournal:
                 )
                 """
             )
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS auto_learning_proposals(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ts TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    mode TEXT NOT NULL,
+                    cycle INTEGER NOT NULL,
+                    strategy TEXT NOT NULL,
+                    action TEXT NOT NULL,
+                    current_weight REAL,
+                    suggested_weight REAL,
+                    confidence REAL,
+                    reason TEXT,
+                    status TEXT NOT NULL,
+                    decision_note TEXT,
+                    applied_event_id INTEGER,
+                    meta TEXT
+                )
+                """
+            )
             self.conn.commit()
 
     def _make_signal_id(self, signal: StrategySignal) -> str:
@@ -149,6 +185,108 @@ class TradeJournal:
         payload["direction"] = signal.direction.value
         payload["meta"] = signal.meta
         return json.dumps(payload, ensure_ascii=False, default=self._json_default)
+
+    def _signal_meta_text(self, signal: StrategySignal) -> str:
+        try:
+            return json.dumps(signal.meta or {}, ensure_ascii=False, default=self._json_default)
+        except Exception:
+            return "{}"
+
+    @staticmethod
+    def _regime_label_from_meta(meta: Dict[str, Any]) -> str:
+        if not isinstance(meta, dict):
+            return ""
+        for key in ["regime", "regime_label"]:
+            raw = str(meta.get(key) or "").strip()
+            if raw:
+                return raw
+        state = meta.get("market_state")
+        if isinstance(state, dict):
+            raw = str(state.get("regime") or "").strip()
+            if raw:
+                return raw
+        return ""
+
+    @staticmethod
+    def _entry_rationale_from_meta(signal: StrategySignal) -> str:
+        meta = signal.meta if isinstance(signal.meta, dict) else {}
+        rationale = meta.get("entry_rationale")
+        if isinstance(rationale, dict):
+            summary = str(rationale.get("summary") or "").strip()
+            if summary:
+                return summary
+            factors = rationale.get("factors")
+            if isinstance(factors, list):
+                out = " / ".join([str(x).strip() for x in factors if str(x).strip()])
+                if out:
+                    return out[:700]
+        if isinstance(rationale, str) and rationale.strip():
+            return rationale.strip()[:700]
+        return str(signal.comment or "").strip()[:700]
+
+    @staticmethod
+    def _market_state_from_meta(signal: StrategySignal, regime_label: str) -> str:
+        meta = signal.meta if isinstance(signal.meta, dict) else {}
+        state = meta.get("market_state")
+        if isinstance(state, dict):
+            payload = dict(state)
+            if regime_label and not payload.get("regime"):
+                payload["regime"] = regime_label
+            try:
+                return json.dumps(payload, ensure_ascii=False)
+            except Exception:
+                pass
+
+        payload: Dict[str, Any] = {}
+        for key in [
+            "regime",
+            "momentum",
+            "volatility",
+            "spread_bps",
+            "funding_rate",
+            "kalman_trend_score",
+            "kalman_innovation_z",
+            "kalman_uncertainty",
+        ]:
+            if key in meta:
+                payload[key] = meta.get(key)
+        if regime_label and "regime" not in payload:
+            payload["regime"] = regime_label
+        try:
+            return json.dumps(payload, ensure_ascii=False)
+        except Exception:
+            return "{}"
+
+    @staticmethod
+    def _slippage_cause(signal: StrategySignal, event: TradeEvent) -> str:
+        status_value = event.status.value if isinstance(event.status, OrderStatus) else str(event.status or "")
+        status_value = status_value.lower()
+        if status_value in {"rejected", "cancelled"}:
+            reason = str(event.reject_reason or "").strip()
+            return f"rejected:{reason or 'unknown'}"
+
+        meta = signal.meta if isinstance(signal.meta, dict) else {}
+        spread_est = abs(float(meta.get("spread_bps", signal.slippage_estimate_bps) or signal.slippage_estimate_bps or 0.0))
+        volatility = abs(float(meta.get("volatility", 0.0) or 0.0))
+        kalman_shock = abs(float(meta.get("kalman_innovation_z", 0.0) or 0.0))
+        slip = abs(float(event.slippage_bps or 0.0))
+        attempts = max(1, int(event.attempt_count or 1))
+
+        if bool(event.is_partial):
+            return "partial_fill_liquidity"
+        if attempts > 1 and slip >= max(6.0, spread_est * 0.4):
+            return "retry_requote_latency"
+        if slip <= max(3.0, spread_est * 0.35):
+            return "within_expected_spread"
+        if kalman_shock >= 3.0:
+            return "kalman_shock"
+        if volatility >= 0.035:
+            return "high_volatility"
+        if spread_est >= 20.0:
+            return "wide_spread"
+        if slip >= 40.0:
+            return "market_impact"
+        return "normal_variation"
 
     def log_signal(self, signal: StrategySignal) -> str:
         signal_id = self._make_signal_id(signal)
@@ -178,8 +316,13 @@ class TradeJournal:
             status_value = event.status.value if isinstance(event.status, OrderStatus) else str(event.status)
             requested_size = event.requested_size_usdt if event.requested_size_usdt is not None else event.size_usdt or 0.0
             requested_size = float(requested_size if requested_size is not None else 0.0)
+            regime_label = self._regime_label_from_meta(signal.meta if isinstance(signal.meta, dict) else {})
+            entry_rationale = self._entry_rationale_from_meta(signal)
+            market_state = self._market_state_from_meta(signal, regime_label=regime_label)
+            slippage_cause = self._slippage_cause(signal, event)
+            signal_meta = self._signal_meta_text(signal)
             cur.execute(
-                "INSERT OR REPLACE INTO executions(id, signal_id, ts, symbol, side, order_status, requested_size_usdt, size_usdt, leverage, expected_fill_price, actual_fill_price, slippage_bps, fee_bps, fee_usdt, gross_realized_pnl, attempt_count, is_partial, filled_price, realized_pnl, reject_reason, note) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO executions(id, signal_id, ts, symbol, side, order_status, requested_size_usdt, size_usdt, leverage, expected_fill_price, actual_fill_price, slippage_bps, fee_bps, fee_usdt, gross_realized_pnl, attempt_count, is_partial, filled_price, realized_pnl, reject_reason, note, regime_label, entry_rationale, market_state, slippage_cause, signal_meta) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     event.order_id or f"{sid}-none",
                     sid,
@@ -202,6 +345,11 @@ class TradeJournal:
                     event.realized_pnl if event.realized_pnl is not None else 0.0,
                     event.reject_reason or "",
                     signal.comment,
+                    regime_label,
+                    entry_rationale,
+                    market_state,
+                    slippage_cause,
+                    signal_meta,
                 ),
             )
             self.conn.commit()
@@ -370,6 +518,294 @@ class TradeJournal:
             )
         return out
 
+    def record_auto_learning_proposals(
+        self,
+        source: str,
+        mode: str,
+        cycle: int,
+        proposals: List[Dict[str, Any]],
+        meta: Dict[str, Any] | None = None,
+    ) -> List[int]:
+        ts = datetime.utcnow().isoformat()
+        base_meta = dict(meta or {})
+        inserted: List[int] = []
+        with self._lock:
+            cur = self.conn.cursor()
+            for item in proposals:
+                strategy = str(item.get("strategy", "") or "").strip()
+                action = str(item.get("action", "hold") or "hold").strip()
+                if not strategy:
+                    continue
+                payload = dict(base_meta)
+                if isinstance(item.get("meta"), dict):
+                    payload = {**payload, **item.get("meta")}
+                payload_text = json.dumps(payload, ensure_ascii=False)
+                cur.execute(
+                    """
+                    INSERT INTO auto_learning_proposals(
+                        ts, source, mode, cycle, strategy, action,
+                        current_weight, suggested_weight, confidence, reason,
+                        status, decision_note, applied_event_id, meta
+                    )
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        ts,
+                        str(source or "unknown"),
+                        str(mode or "unknown"),
+                        int(cycle or 0),
+                        strategy,
+                        action,
+                        float(item.get("current_weight", 0.0) or 0.0),
+                        float(item.get("suggested_weight", 0.0) or 0.0),
+                        float(item.get("confidence", 0.0) or 0.0),
+                        str(item.get("reason", "") or ""),
+                        "pending",
+                        "",
+                        None,
+                        payload_text,
+                    ),
+                )
+                inserted.append(int(cur.lastrowid))
+            self.conn.commit()
+        return inserted
+
+    def recent_auto_learning_proposals(
+        self,
+        limit: int = 100,
+        status: str | None = None,
+        source: str | None = None,
+    ) -> List[dict]:
+        limit = max(1, min(2000, int(limit)))
+        filters: List[str] = []
+        params: List[Any] = []
+        if status:
+            filters.append("status = ?")
+            params.append(str(status))
+        if source:
+            filters.append("source = ?")
+            params.append(str(source))
+
+        where = ""
+        if filters:
+            where = " WHERE " + " AND ".join(filters)
+
+        with self._lock:
+            cur = self.conn.cursor()
+            cur.execute(
+                f"""
+                SELECT id, ts, source, mode, cycle, strategy, action,
+                       current_weight, suggested_weight, confidence, reason,
+                       status, decision_note, applied_event_id, meta
+                FROM auto_learning_proposals
+                {where}
+                ORDER BY id DESC
+                LIMIT ?
+                """,
+                (*params, limit),
+            )
+            rows = cur.fetchall()
+
+        out: List[dict] = []
+        for row in rows:
+            meta_raw = row[14] or "{}"
+            try:
+                meta_value = json.loads(meta_raw)
+            except Exception:
+                meta_value = {}
+            out.append(
+                {
+                    "id": int(row[0]),
+                    "ts": row[1],
+                    "source": row[2],
+                    "mode": row[3],
+                    "cycle": int(row[4] or 0),
+                    "strategy": row[5],
+                    "action": row[6],
+                    "current_weight": row[7],
+                    "suggested_weight": row[8],
+                    "confidence": row[9],
+                    "reason": row[10],
+                    "status": row[11],
+                    "decision_note": row[12],
+                    "applied_event_id": row[13],
+                    "meta": meta_value,
+                }
+            )
+        return out
+
+    def auto_learning_proposal_stats(self) -> Dict[str, Any]:
+        with self._lock:
+            cur = self.conn.cursor()
+            cur.execute(
+                """
+                SELECT status, COUNT(*)
+                FROM auto_learning_proposals
+                GROUP BY status
+                """
+            )
+            rows = cur.fetchall()
+        by_status: Dict[str, int] = {}
+        for status, count in rows:
+            by_status[str(status or "unknown")] = int(count or 0)
+        return {
+            "total": int(sum(by_status.values())),
+            "by_status": by_status,
+            "pending": int(by_status.get("pending", 0)),
+        }
+
+    def update_auto_learning_proposal_status(
+        self,
+        proposal_ids: List[int],
+        status: str,
+        decision_note: str | None = None,
+        applied_event_id: int | None = None,
+    ) -> int:
+        ids = [int(x) for x in proposal_ids if isinstance(x, (int, float, str)) and str(x).strip()]
+        if not ids:
+            return 0
+        placeholders = ",".join(["?"] * len(ids))
+        with self._lock:
+            cur = self.conn.cursor()
+            cur.execute(
+                f"""
+                UPDATE auto_learning_proposals
+                SET status = ?, decision_note = ?, applied_event_id = ?
+                WHERE id IN ({placeholders})
+                """,
+                (
+                    str(status),
+                    str(decision_note or ""),
+                    applied_event_id,
+                    *ids,
+                ),
+            )
+            changed = int(cur.rowcount or 0)
+            self.conn.commit()
+        return changed
+
+    def expire_auto_learning_proposals(self, expiry_hours: int) -> int:
+        if int(expiry_hours or 0) <= 0:
+            return 0
+        cutoff = (datetime.utcnow() - timedelta(hours=int(expiry_hours))).isoformat()
+        with self._lock:
+            cur = self.conn.cursor()
+            cur.execute(
+                """
+                UPDATE auto_learning_proposals
+                SET status = 'expired', decision_note = 'expired_by_ttl'
+                WHERE status = 'pending' AND ts <= ?
+                """,
+                (cutoff,),
+            )
+            changed = int(cur.rowcount or 0)
+            self.conn.commit()
+        return changed
+
+    def performance_leaderboard(self, limit: int = 10, window_days: int = 14) -> Dict[str, Any]:
+        per_group_limit = max(1, min(100, int(limit)))
+        query_limit = max(300, per_group_limit * 60)
+        success_statuses = ",".join([f"'{x}'" for x in self._success_statuses()])
+        cutoff_ts: str | None = None
+        if int(window_days) > 0:
+            cutoff_ts = (datetime.utcnow() - timedelta(days=int(window_days))).isoformat()
+
+        with self._lock:
+            cur = self.conn.cursor()
+            if cutoff_ts:
+                cur.execute(
+                    f"""
+                    SELECT e.ts, s.strategy, e.symbol, e.realized_pnl, e.regime_label, s.payload
+                    FROM executions e
+                    JOIN signals s ON e.signal_id = s.id
+                    WHERE e.order_status IN ({success_statuses}) AND e.ts >= ?
+                    ORDER BY e.ts DESC
+                    LIMIT ?
+                    """,
+                    (cutoff_ts, query_limit),
+                )
+            else:
+                cur.execute(
+                    f"""
+                    SELECT e.ts, s.strategy, e.symbol, e.realized_pnl, e.regime_label, s.payload
+                    FROM executions e
+                    JOIN signals s ON e.signal_id = s.id
+                    WHERE e.order_status IN ({success_statuses})
+                    ORDER BY e.ts DESC
+                    LIMIT ?
+                    """,
+                    (query_limit,),
+                )
+            rows = cur.fetchall()
+
+        def _extract_regime(explicit: Any, payload_raw: Any) -> str:
+            raw = str(explicit or "").strip()
+            if raw:
+                return raw
+            try:
+                payload = json.loads(str(payload_raw or "{}"))
+            except Exception:
+                payload = {}
+            meta = payload.get("meta") if isinstance(payload, dict) else {}
+            if isinstance(meta, dict):
+                for key in ["regime", "regime_label"]:
+                    value = str(meta.get(key) or "").strip()
+                    if value:
+                        return value
+                state = meta.get("market_state")
+                if isinstance(state, dict):
+                    value = str(state.get("regime") or "").strip()
+                    if value:
+                        return value
+            return "unknown"
+
+        def _update_bucket(store: Dict[str, Dict[str, float]], key: str, pnl: float) -> None:
+            node = store.setdefault(key, {"trades": 0.0, "wins": 0.0, "total_pnl": 0.0})
+            node["trades"] += 1.0
+            if pnl > 0:
+                node["wins"] += 1.0
+            node["total_pnl"] += float(pnl)
+
+        by_strategy: Dict[str, Dict[str, float]] = {}
+        by_regime: Dict[str, Dict[str, float]] = {}
+        by_symbol: Dict[str, Dict[str, float]] = {}
+
+        for _, strategy, symbol, realized_pnl, regime_label, payload_raw in rows:
+            pnl = float(realized_pnl or 0.0)
+            strategy_key = str(strategy or "unknown")
+            symbol_key = str(symbol or "unknown")
+            regime_key = _extract_regime(regime_label, payload_raw)
+            _update_bucket(by_strategy, strategy_key, pnl)
+            _update_bucket(by_symbol, symbol_key, pnl)
+            _update_bucket(by_regime, regime_key, pnl)
+
+        def _finalize(source: Dict[str, Dict[str, float]], key_name: str) -> List[Dict[str, Any]]:
+            out: List[Dict[str, Any]] = []
+            for key, item in source.items():
+                trades = int(item.get("trades", 0.0) or 0)
+                wins = int(item.get("wins", 0.0) or 0)
+                total_pnl = float(item.get("total_pnl", 0.0) or 0.0)
+                out.append(
+                    {
+                        key_name: key,
+                        "trades": trades,
+                        "wins": wins,
+                        "win_rate": (wins / trades) if trades > 0 else 0.0,
+                        "total_pnl": total_pnl,
+                        "avg_pnl": (total_pnl / trades) if trades > 0 else 0.0,
+                    }
+                )
+            out.sort(key=lambda x: (float(x.get("total_pnl", 0.0)), float(x.get("win_rate", 0.0))), reverse=True)
+            return out[:per_group_limit]
+
+        return {
+            "window_days": int(window_days),
+            "sample_count": len(rows),
+            "strategy": _finalize(by_strategy, "strategy"),
+            "regime": _finalize(by_regime, "regime"),
+            "symbol": _finalize(by_symbol, "symbol"),
+        }
+
     def recent_executions(self, strategy: Optional[str] = None, limit: int = 100) -> List[tuple]:
         with self._lock:
             if strategy:
@@ -508,7 +944,8 @@ class TradeJournal:
                        e.expected_fill_price, e.actual_fill_price, e.slippage_bps,
                        e.fee_bps, e.fee_usdt, e.gross_realized_pnl,
                        e.filled_price, e.attempt_count, e.is_partial, e.realized_pnl,
-                       e.reject_reason, e.note
+                       e.reject_reason, e.note,
+                       e.regime_label, e.entry_rationale, e.market_state, e.slippage_cause, e.signal_meta
                 FROM executions e
                 LEFT JOIN signals s ON e.signal_id = s.id
                 {where_clause}
@@ -541,11 +978,16 @@ class TradeJournal:
                 "realized_pnl": realized_pnl,
                 "reject_reason": row_reject_reason,
                 "note": note,
+                "regime_label": regime_label,
+                "entry_rationale": entry_rationale,
+                "market_state": market_state,
+                "slippage_cause": slippage_cause,
+                "signal_meta": signal_meta,
             }
             for ts, strategy, symbol, side, event_status, requested_size_usdt, size_usdt, leverage,
             expected_fill_price, actual_fill_price, slippage_bps, fee_bps, fee_usdt, gross_realized_pnl,
             filled_price, attempt_count, row_is_partial,
-            realized_pnl, row_reject_reason, note in rows
+            realized_pnl, row_reject_reason, note, regime_label, entry_rationale, market_state, slippage_cause, signal_meta in rows
         ]
 
     def reject_reason_statistics(self, limit: int = 200) -> Dict[str, Any]:

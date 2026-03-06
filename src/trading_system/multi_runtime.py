@@ -360,6 +360,7 @@ class MultiRuntimeManager:
         auto_learning_keys = [
             "enabled",
             "paper_only",
+            "apply_mode",
             "apply_interval_cycles",
             "window_days",
             "min_trades_per_strategy",
@@ -368,6 +369,8 @@ class MultiRuntimeManager:
             "max_strategy_changes_per_apply",
             "max_applies_per_day",
             "allow_pause",
+            "max_pending_proposals",
+            "proposal_expiry_hours",
         ]
         auto_learning: Dict[str, Any] = {}
         for key in auto_learning_keys:

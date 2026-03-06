@@ -40,6 +40,7 @@ py -m trading_system.main --config configs/default.json --mode dry
 - `start-system.bat multi [multi_config] [command] [interval] [live_token]`: 멀티 운용
 - `start-system.bat multi-ui [multi_config] [host] [port]`: 멀티 통합 대시보드
 - `start-system.bat nogate [desktop|web|multi|multi-ui] ...`: 검증 게이트 임시 우회 실행
+- `start-system.bat rehearsal [config] [output_path|auto]`: 실거래 staged runbook/실패 대응표 생성
 - `start-nogate-preset.bat [safe|balanced|aggressive] [desktop|web]`: 검증 우회 + 프리셋 실행
 
 ```powershell
@@ -136,6 +137,18 @@ Kalman 기반 신호 반영:
 - 레짐 분류는 모멘텀+Kalman 추세를 결합하고, Kalman 충격(`innovation_z`)이 큰 경우 panic/range 쪽으로 보수적으로 전환합니다.
 - `trend/grid/defensive/funding_arb/bollinger_reversion/ema_crossover/volume_breakout` 전략에 Kalman 보조 게이트/가중치가 반영됩니다.
 
+전략 피처 로그 확장:
+- 실행 로그(`/api/executions`)에 `regime_label`, `entry_rationale`, `market_state`, `slippage_cause`가 포함됩니다.
+- 슬리피지 원인을 `within_expected_spread`, `high_volatility`, `kalman_shock`, `partial_fill_liquidity` 등으로 분류합니다.
+
+학습 리더보드 + 승인형/자동형 분리:
+- 학습 응답(`/api/learning`)에 전략/레짐/종목 리더보드가 포함됩니다.
+- `auto_learning.apply_mode`:
+  - `manual_approval`: 자동 제안은 pending 큐에 저장 후 승인 시 적용
+  - `auto_apply`: 주기/한도 기준으로 자동 적용
+- 제안 큐 조회: `GET /api/learning/proposals`
+- 제안 승인/거절: `POST /api/learning/proposals/review`
+
 ### 1-2) 설치형 원클릭 배포 (딸깍 배포)
 
 로컬 설치:
@@ -191,6 +204,15 @@ Kalman 기반 신호 반영:
 
 기본 출력:
 - `backups\trading_system_backup_YYYYMMDD_HHMMSS.zip`
+
+리허설(runbook) 생성:
+
+```powershell
+.\start-system.bat rehearsal configs/default.json auto
+```
+
+기본 출력:
+- `data\validation\live_rehearsal\live_rehearsal_YYYYMMDD_HHMMSS.json`
 
 Watchdog(자동 재기동):
 

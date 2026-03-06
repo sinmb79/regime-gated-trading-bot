@@ -202,6 +202,7 @@
   "auto_learning": {
     "enabled": false,
     "paper_only": true,
+    "apply_mode": "manual_approval",
     "apply_interval_cycles": 20,
     "window_days": 14,
     "min_trades_per_strategy": 8,
@@ -209,7 +210,9 @@
     "max_weight_step_pct": 0.2,
     "max_strategy_changes_per_apply": 3,
     "max_applies_per_day": 8,
-    "allow_pause": false
+    "allow_pause": false,
+    "max_pending_proposals": 100,
+    "proposal_expiry_hours": 72
   }
 }
 

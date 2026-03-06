@@ -10,6 +10,7 @@
 - [ ] `py -m trading_system.main --config configs/default.json --llm-test` 실행(PASS/CHECK 확인)
 - [ ] `py -m trading_system.main --config configs/default.json --live-readiness-report` 실행(리포트 저장 확인)
 - [ ] `py -m trading_system.main --config configs/default.json --exchange-probe-report` 실행(거래소 파라미터 점검 리포트 확인)
+- [ ] `py -m trading_system.main --config configs/default.json --live-rehearsal-report` 실행(소액 staged runbook/실패 대응표 저장 확인)
 
 ## 1회 사이클 가동 검증
 - [ ] config 로드 성공

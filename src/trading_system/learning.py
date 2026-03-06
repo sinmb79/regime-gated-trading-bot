@@ -32,6 +32,9 @@ class LearningEngine:
     def __init__(self, journal: TradeJournal):
         self.journal = journal
 
+    def leaderboard(self, window_days: int = 14, limit: int = 10) -> Dict[str, object]:
+        return self.journal.performance_leaderboard(limit=limit, window_days=window_days)
+
     def summarize(self, window_days: int = 14) -> List[StrategyMetric]:
         cutoff_ts = None
         if window_days > 0:

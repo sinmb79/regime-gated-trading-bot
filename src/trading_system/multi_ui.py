@@ -468,6 +468,10 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
               <option value="true" selected>paper only on</option>
               <option value="false">paper only off</option>
             </select>
+            <select id="learningApplyModeInput" title="learning apply mode">
+              <option value="manual_approval" selected>manual approval</option>
+              <option value="auto_apply">auto apply</option>
+            </select>
             <select id="learningAllowPauseInput" title="allow pause">
               <option value="false" selected>allow pause off</option>
               <option value="true">allow pause on</option>
@@ -481,6 +485,8 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
             <input id="learningMaxWeightStepInput" type="number" step="0.01" min="0" max="1" value="0.20" title="max weight step pct" />
             <input id="learningMaxChangesInput" type="number" min="1" value="3" title="max strategy changes per apply" />
             <input id="learningMaxAppliesInput" type="number" min="1" value="8" title="max applies per day" />
+            <input id="learningMaxPendingInput" type="number" min="1" value="100" title="max pending proposals" />
+            <input id="learningProposalExpiryInput" type="number" min="1" value="72" title="proposal expiry hours" />
             <input id="validationHistoryLimitInput" type="number" min="1" value="30" title="validation history limit" />
           </div>
         </div>
@@ -1093,6 +1099,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       return {
         enabled: toBool('learningEnabledInput', false),
         paper_only: toBool('learningPaperOnlyInput', true),
+        apply_mode: String(document.getElementById('learningApplyModeInput').value || 'manual_approval'),
         allow_pause: toBool('learningAllowPauseInput', false),
         apply_interval_cycles: toInt('learningApplyIntervalInput', 20),
         window_days: toInt('learningWindowDaysInput', 14),
@@ -1101,6 +1108,8 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         max_weight_step_pct: toFloat('learningMaxWeightStepInput', 0.20),
         max_strategy_changes_per_apply: toInt('learningMaxChangesInput', 3),
         max_applies_per_day: toInt('learningMaxAppliesInput', 8),
+        max_pending_proposals: toInt('learningMaxPendingInput', 100),
+        proposal_expiry_hours: toInt('learningProposalExpiryInput', 72),
       };
     }
 
