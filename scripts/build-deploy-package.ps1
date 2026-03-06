@@ -16,45 +16,76 @@ $OutputDir = [System.IO.Path]::GetFullPath($OutputDir)
 $stagingDir = Join-Path $OutputDir $PackageName
 $zipPath = Join-Path $OutputDir ("{0}.zip" -f $PackageName)
 
-function Invoke-Robocopy {
+function Get-TrackedFiles {
+    $gitArgs = @(
+        "-c", "safe.directory=$rootPath",
+        "-C", $rootPath,
+        "ls-files"
+    )
+    $lines = & git @gitArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "git ls-files failed (exit code=$LASTEXITCODE)"
+    }
+    return @($lines | Where-Object { $_ -and $_.Trim() })
+}
+
+function Test-IncludedTrackedPath {
     param(
-        [Parameter(Mandatory = $true)][string]$Source,
-        [Parameter(Mandatory = $true)][string]$Destination
+        [Parameter(Mandatory = $true)][string]$RelativePath
     )
-    $excludeDirs = @(
-        ".git",
-        ".venv",
-        "dist",
-        "logs",
-        "data",
-        "__pycache__"
-    )
-    $excludeFiles = @(
-        "*.pyc",
-        "*.pyo"
-    )
-    $args = @(
-        $Source,
-        $Destination,
-        "/E",
-        "/R:1",
-        "/W:1",
-        "/NFL",
-        "/NDL",
-        "/NJH",
-        "/NJS",
-        "/NP"
-    )
-    foreach ($dirName in $excludeDirs) {
-        $args += @("/XD", (Join-Path $Source $dirName))
+
+    $path = ($RelativePath -replace "\\", "/").TrimStart("./")
+    if (-not $path) {
+        return $false
     }
-    foreach ($filePattern in $excludeFiles) {
-        $args += @("/XF", $filePattern)
+
+    $includePrefixes = @(
+        "configs/",
+        "docs/",
+        "scripts/",
+        "src/"
+    )
+    foreach ($prefix in $includePrefixes) {
+        if ($path.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $true
+        }
     }
-    & robocopy @args | Out-Null
-    $code = $LASTEXITCODE
-    if ($code -ge 8) {
-        throw "파일 복사 실패(robocopy exit code=$code)"
+
+    $includeExact = @(
+        ".gitignore",
+        "README.md",
+        "requirements.txt",
+        "install-system.bat",
+        "start-dashboard-oneclick.bat",
+        "start-multi-dashboard.bat",
+        "start-multi-system.bat",
+        "start-nogate-preset.bat",
+        "start-system.bat"
+    )
+    return $includeExact -contains $path
+}
+
+function Copy-TrackedFiles {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourceRoot,
+        [Parameter(Mandatory = $true)][string]$DestinationRoot
+    )
+
+    foreach ($relative in Get-TrackedFiles) {
+        if (-not (Test-IncludedTrackedPath -RelativePath $relative)) {
+            continue
+        }
+        $sourcePath = Join-Path $SourceRoot $relative
+        if (-not (Test-Path -LiteralPath $sourcePath)) {
+            continue
+        }
+
+        $destinationPath = Join-Path $DestinationRoot $relative
+        $destinationDir = Split-Path -Parent $destinationPath
+        if ($destinationDir) {
+            New-Item -Path $destinationDir -ItemType Directory -Force | Out-Null
+        }
+        Copy-Item -LiteralPath $sourcePath -Destination $destinationPath -Force
     }
 }
 
@@ -63,7 +94,7 @@ if ($CleanOutput -and (Test-Path -Path $stagingDir)) {
 }
 
 New-Item -Path $stagingDir -ItemType Directory -Force | Out-Null
-Invoke-Robocopy -Source $rootPath -Destination $stagingDir
+Copy-TrackedFiles -SourceRoot $rootPath -DestinationRoot $stagingDir
 
 $installBat = @'
 @echo off
@@ -77,7 +108,7 @@ if errorlevel 1 (
   exit /b 1
 )
 echo 설치 완료.
-echo 바탕화면 바로가기에서 실행 가능합니다.
+echo 바탕화면 바로가기로 실행 가능합니다.
 pause
 exit /b 0
 '@
@@ -87,14 +118,14 @@ $readme = @'
 보스 AI 트레이딩 시스템 배포 패키지
 
 1) install.bat 실행
-2) 바탕화면 생성 아이콘으로 실행
+2) 바탕화면에 생성된 바로가기로 실행
    - 보스 AI 트레이딩 데스크톱
    - 보스 AI 트레이딩 웹
-   - 보스 AI 트레이딩 멀티운용
+   - 보스 AI 트레이딩 멀티 런타임
    - 보스 AI 트레이딩 멀티 대시보드
    - 보스 AI 트레이딩 Watchdog
 
-의존성/가상환경은 첫 실행 시 자동 복구됩니다.
+가상환경은 첫 실행 시 자동으로 복구됩니다.
 '@
 $readme | Set-Content -Path (Join-Path $stagingDir "README_INSTALL.txt") -Encoding UTF8
 

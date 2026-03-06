@@ -9,6 +9,7 @@ __pycache__/
 logs/
 .venv/
 backups/
+dist/
 data/tmp_smoke/
 data/validation/
 configs/data/validation/
