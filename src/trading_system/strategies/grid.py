@@ -44,6 +44,7 @@ class GridStrategy(TradingStrategy):
                 comment="grid_range_strategy",
                 meta={
                     "volatility": snapshot.volatility,
+                    "spread_bps": snapshot.spread_bps,
                     "regime": regime.regime.value,
                     "momentum": snapshot.momentum_7d,
                     "kalman_trend_score": kalman["trend_score"],

@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
+from .path_display import portable_path
 from .runtime import TradingRuntime
 
 
@@ -76,6 +77,10 @@ class MultiRuntimeManager:
             self.runtimes[profile.name] = runtime
             self.profile_by_name[profile.name] = profile
 
+    @staticmethod
+    def _display_path(path: str | Path) -> str:
+        return portable_path(path, base_dir=Path.cwd())
+
     def get_status(self) -> Dict[str, Any]:
         rows: Dict[str, Any] = {}
         for name, runtime in self.runtimes.items():
@@ -84,14 +89,14 @@ class MultiRuntimeManager:
                 status = runtime.get_status()
                 rows[name] = {
                     "enabled": True,
-                    "config_path": profile.config_path,
+                    "config_path": self._display_path(profile.config_path),
                     "interval_seconds": profile.interval_seconds,
                     "status": status,
                 }
             except Exception as exc:
                 rows[name] = {
                     "enabled": True,
-                    "config_path": profile.config_path,
+                    "config_path": self._display_path(profile.config_path),
                     "interval_seconds": profile.interval_seconds,
                     "error": str(exc),
                 }
@@ -100,14 +105,14 @@ class MultiRuntimeManager:
         for profile in disabled:
             rows[profile.name] = {
                 "enabled": False,
-                "config_path": profile.config_path,
+                "config_path": self._display_path(profile.config_path),
                 "interval_seconds": profile.interval_seconds,
                 "status": "disabled",
             }
 
         return {
             "timestamp": datetime.utcnow().isoformat(),
-            "multi_config_path": str(self.multi_config_path),
+            "multi_config_path": self._display_path(self.multi_config_path),
             "profile_count": len(self.profiles),
             "active_count": len(self.runtimes),
             "profiles": rows,
@@ -131,7 +136,7 @@ class MultiRuntimeManager:
             return {
                 "name": profile.name,
                 "enabled": False,
-                "config_path": profile.config_path,
+                "config_path": self._display_path(profile.config_path),
                 "interval_seconds": profile.interval_seconds,
                 "status": "disabled",
             }
@@ -139,7 +144,7 @@ class MultiRuntimeManager:
         return {
             "name": profile.name,
             "enabled": True,
-            "config_path": profile.config_path,
+            "config_path": self._display_path(profile.config_path),
             "interval_seconds": profile.interval_seconds,
             "status": runtime.get_status(),
         }

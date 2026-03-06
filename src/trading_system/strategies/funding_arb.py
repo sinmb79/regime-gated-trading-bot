@@ -55,6 +55,7 @@ class FundingArbStrategy(TradingStrategy):
                 meta={
                     "funding_rate": snapshot.funding_rate,
                     "volatility": snapshot.volatility,
+                    "spread_bps": snapshot.spread_bps,
                     "kalman_trend_score": k_trend,
                     "kalman_innovation_z": kalman["innovation_z"],
                     "kalman_uncertainty": kalman["uncertainty"],

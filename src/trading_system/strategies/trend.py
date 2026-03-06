@@ -51,6 +51,8 @@ class TrendStrategy(TradingStrategy):
                 comment="trend_following",
                 meta={
                     "momentum": snapshot.momentum_7d,
+                    "volatility": snapshot.volatility,
+                    "spread_bps": snapshot.spread_bps,
                     "regime": regime.regime.value,
                     "kalman_trend_score": k_trend,
                     "kalman_innovation_z": kalman["innovation_z"],

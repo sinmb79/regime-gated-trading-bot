@@ -17,6 +17,7 @@ from .exchange import build_exchange
 from .journal import TradeJournal
 from .llm import LLMAdvisor
 from .learning import LearningEngine
+from .path_display import portable_path
 from .pipeline import TradingOrchestrator
 from .preflight import evaluate_live_preflight
 from .validation_gate import evaluate_validation_gate
@@ -72,6 +73,10 @@ class TradingRuntime:
         if len(token) <= 2:
             return "*" * len(token)
         return token[:2] + "*" * (len(token) - 2)
+
+    @staticmethod
+    def _display_path(path: str | Path) -> str:
+        return portable_path(path, base_dir=Path.cwd())
 
     def _risk_clear_lock_remaining_ms(self) -> int:
         remain = (self._risk_clear_locked_until - time.time()) * 1000.0
@@ -913,7 +918,7 @@ class TradingRuntime:
         return build_validation_history_payload(
             rows=rows,
             limit=max_rows,
-            history_path=str(history_path),
+            history_path=self._display_path(history_path),
         )
 
     def _build_orchestrator(self, config: AppConfig) -> TradingOrchestrator:
@@ -1263,7 +1268,7 @@ class TradingRuntime:
                 "exchange": self.exchange.name,
                 "allow_live": config.exchange.allow_live,
                 "testnet": config.exchange.testnet,
-                "journal_path": config.journal.path,
+                "journal_path": self._display_path(config.journal.path),
                 "live_guard": {
                     "enabled": config.live_guard.enabled,
                     "require_ack": config.live_guard.require_ack,
@@ -1971,7 +1976,7 @@ class TradingRuntime:
         out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
         return {
             "status": "saved",
-            "report_path": str(out),
+            "report_path": self._display_path(out),
             "report": report,
         }
 
@@ -2115,7 +2120,7 @@ class TradingRuntime:
 
         return {
             "timestamp": datetime.utcnow().isoformat(),
-            "config_path": str(self.config_path),
+            "config_path": self._display_path(self.config_path),
             "mode": str(config.mode),
             "readiness_summary": readiness_summary,
             "preflight": preflight,
@@ -2158,7 +2163,7 @@ class TradingRuntime:
         out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
         return {
             "status": "saved",
-            "report_path": str(out),
+            "report_path": self._display_path(out),
             "report": report,
         }
 
@@ -2453,7 +2458,7 @@ class TradingRuntime:
         out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
         return {
             "status": "saved",
-            "report_path": str(out),
+            "report_path": self._display_path(out),
             "report": report,
         }
 

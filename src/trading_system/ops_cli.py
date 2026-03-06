@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -11,6 +11,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.request import Request, urlopen
+
+from .path_display import portable_path
 
 
 def _utc_now_iso() -> str:
@@ -164,7 +166,7 @@ def run_backup(args: argparse.Namespace) -> int:
 
     manifest: dict[str, Any] = {
         "timestamp": _utc_now_iso(),
-        "root": str(root),
+        "root": portable_path(root, base_dir=root),
         "entries": [],
     }
 
@@ -181,8 +183,8 @@ def run_backup(args: argparse.Namespace) -> int:
         copied = _copy_if_exists(source, destination)
         manifest["entries"].append(
             {
-                "source": str(source),
-                "destination": str(destination),
+                "source": portable_path(source, base_dir=root),
+                "destination": portable_path(destination, base_dir=staging_dir),
                 "copied": bool(copied),
             }
         )
@@ -198,7 +200,7 @@ def run_backup(args: argparse.Namespace) -> int:
     shutil.make_archive(archive_base, "zip", root_dir=str(bundle_dir))
     shutil.rmtree(staging_dir, ignore_errors=True)
 
-    print(f"백업 완료: {zip_path}")
+    print(f"백업 완료: {portable_path(zip_path, base_dir=root)}")
     return 0
 
 

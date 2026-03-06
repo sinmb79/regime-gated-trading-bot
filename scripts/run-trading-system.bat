@@ -230,6 +230,7 @@ set "REQ_FILE=!ROOT!\requirements.txt"
 set "PY_EXE="
 set "SYS_PY_EXE="
 set "SYS_PY_ARGS="
+set "VENV_BROKEN=0"
 
 if defined TRADING_SYSTEM_PYTHON (
   if exist "!TRADING_SYSTEM_PYTHON!" (
@@ -240,8 +241,13 @@ if defined TRADING_SYSTEM_PYTHON (
 )
 
 if exist "!VENV_PY!" (
-  set "PY_EXE=!VENV_PY!"
-  goto :deps
+  call :validate_python "!VENV_PY!"
+  if not errorlevel 1 (
+    set "PY_EXE=!VENV_PY!"
+    goto :deps
+  )
+  set "VENV_BROKEN=1"
+  echo [WARN] Existing virtual environment is unusable: !VENV_PY!
 )
 
 if not defined SYS_PY_EXE (
@@ -256,12 +262,26 @@ if not defined SYS_PY_EXE (
   if not errorlevel 1 set "SYS_PY_EXE=python"
 )
 if not defined SYS_PY_EXE (
-  echo [ERROR] Python launcher not found. Set TRADING_SYSTEM_PYTHON or install py/python.
+  where python3 >nul 2>nul
+  if not errorlevel 1 set "SYS_PY_EXE=python3"
+)
+if not defined SYS_PY_EXE (
+  if "!VENV_BROKEN!"=="1" (
+    echo [ERROR] Existing venv is broken and no system Python launcher was found.
+    echo [ERROR] Install Python 3.11+ or set TRADING_SYSTEM_PYTHON to a valid python.exe.
+  ) else (
+    echo [ERROR] Python launcher not found. Set TRADING_SYSTEM_PYTHON or install py/python.
+  )
   exit /b 1
 )
 
-echo [INFO] Creating virtual environment: !VENV_DIR!
-"!SYS_PY_EXE!" !SYS_PY_ARGS! -m venv "!VENV_DIR!"
+if "!VENV_BROKEN!"=="1" (
+  echo [INFO] Rebuilding virtual environment: !VENV_DIR!
+  "!SYS_PY_EXE!" !SYS_PY_ARGS! -m venv --clear "!VENV_DIR!"
+) else (
+  echo [INFO] Creating virtual environment: !VENV_DIR!
+  "!SYS_PY_EXE!" !SYS_PY_ARGS! -m venv "!VENV_DIR!"
+)
 if errorlevel 1 (
   echo [ERROR] Failed to create venv.
   exit /b 1
@@ -290,6 +310,12 @@ if errorlevel 1 (
   )
 )
 exit /b 0
+
+:validate_python
+set "_py=%~1"
+if "%_py%"=="" exit /b 1
+"%_py%" -c "import sys; sys.exit(0)" >nul 2>nul
+exit /b !errorlevel!
 
 :resolve_path
 set "_raw=%~1"

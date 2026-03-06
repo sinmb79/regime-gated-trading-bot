@@ -241,6 +241,115 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       font-size: 11px;
       color: var(--muted);
     }
+    .display-controls {
+      border-top: 1px solid rgba(107, 130, 175, 0.32);
+      padding-top: 8px;
+      margin-top: 2px;
+    }
+    .display-note {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    body.multi-theme-premium {
+      background: radial-gradient(circle at top, #1c325f, #0b1220);
+    }
+    body.multi-theme-premium .panel,
+    body.multi-theme-premium .topbar,
+    body.multi-theme-premium .section-label,
+    body.multi-theme-premium .section-body,
+    body.multi-theme-premium .metric,
+    body.multi-theme-premium .code,
+    body.multi-theme-premium input,
+    body.multi-theme-premium select,
+    body.multi-theme-premium textarea {
+      box-shadow: 0 14px 28px rgba(4, 10, 24, 0.22);
+    }
+    body.multi-theme-simple {
+      background: linear-gradient(180deg, #0f172a, #111827);
+    }
+    body.multi-theme-simple .topbar,
+    body.multi-theme-simple .panel,
+    body.multi-theme-simple .section-label,
+    body.multi-theme-simple .section-body,
+    body.multi-theme-simple .metric,
+    body.multi-theme-simple .code,
+    body.multi-theme-simple input,
+    body.multi-theme-simple select,
+    body.multi-theme-simple textarea {
+      background: #111827;
+      border-color: #334155;
+      box-shadow: none;
+    }
+    body.multi-theme-simple .tab {
+      background: #0f172a;
+      border-color: #475569;
+      color: #e5e7eb;
+    }
+    body.multi-theme-simple .tab.active {
+      background: #1f2937;
+      border-color: #cbd5e1;
+    }
+    body.multi-theme-light {
+      color: #0f172a;
+      background: linear-gradient(180deg, #f5f7fb, #dfe7f2);
+    }
+    body.multi-theme-light .topbar,
+    body.multi-theme-light .panel,
+    body.multi-theme-light .section-label,
+    body.multi-theme-light .section-body,
+    body.multi-theme-light .metric,
+    body.multi-theme-light .code,
+    body.multi-theme-light input,
+    body.multi-theme-light select,
+    body.multi-theme-light textarea {
+      background: rgba(255, 255, 255, 0.94);
+      color: #0f172a;
+      border-color: #cbd5e1;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    body.multi-theme-light .tab {
+      background: #eef2f8;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+    body.multi-theme-light .tab.active {
+      background: #dbe7f6;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+    body.multi-theme-light .muted,
+    body.multi-theme-light .field label,
+    body.multi-theme-light th {
+      color: #475569;
+    }
+    body.multi-theme-terminal {
+      background: radial-gradient(circle at top, rgba(34, 197, 94, 0.18), transparent 28%), linear-gradient(180deg, #04110d, #061a14 56%, #09251d);
+    }
+    body.multi-theme-terminal .topbar,
+    body.multi-theme-terminal .panel,
+    body.multi-theme-terminal .section-label,
+    body.multi-theme-terminal .section-body,
+    body.multi-theme-terminal .metric,
+    body.multi-theme-terminal .code,
+    body.multi-theme-terminal input,
+    body.multi-theme-terminal select,
+    body.multi-theme-terminal textarea {
+      background: #061611;
+      border-color: #1f6a57;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.08), 0 14px 32px rgba(0, 0, 0, 0.3);
+    }
+    body.multi-theme-terminal .tab {
+      background: #08201a;
+      border-color: #1f6a57;
+      color: #d8ffee;
+    }
+    body.multi-theme-terminal .tab.active {
+      background: #125f48;
+      border-color: #5eead4;
+    }
+    body.multi-theme-terminal .btn-sub {
+      background: #0f3a2f;
+    }
     @media (max-width: 1200px) {
       .workspace { grid-template-columns: 1fr; }
       .section-row { grid-template-columns: 1fr; }
@@ -255,39 +364,58 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
   <div class="wrap">
     <div class="topbar">
       <div class="tabs">
-        <div class="tab">시작</div>
-        <div class="tab">진행중</div>
-        <div class="tab">내계정</div>
-        <div class="tab">거래소 API</div>
-        <div class="tab">트레이딩 로그</div>
+        <div class="tab" id="tabStartLabel">시작</div>
+        <div class="tab" id="tabProgressLabel">진행중</div>
+        <div class="tab" id="tabAccountLabel">내계정</div>
+        <div class="tab" id="tabExchangeLabel">거래소 API</div>
+        <div class="tab" id="tabLogsLabel">트레이딩 로그</div>
       </div>
       <div class="toolbar">
-        <button class="btn" onclick="runOnceAll()">전체 1회 실행</button>
-        <button class="btn" onclick="startAll()">전체 시작</button>
-        <button class="btn btn-danger" onclick="stopAll()">전체 중지</button>
+        <button id="runOnceAllBtn" class="btn" onclick="runOnceAll()">전체 1회 실행</button>
+        <button id="startAllBtn" class="btn" onclick="startAll()">전체 시작</button>
+        <button id="stopAllBtn" class="btn btn-danger" onclick="stopAll()">전체 중지</button>
         <input id="intervalInput" type="number" min="1" value="5" title="interval seconds" />
         <input id="liveTokenInput" type="text" placeholder="live token (optional)" style="min-width:170px;" />
         <input id="riskTokenInput" type="text" placeholder="risk clear token" style="min-width:170px;" />
         <input id="sampleSymbolInput" type="text" placeholder="LLM symbol (BTCUSDT)" style="min-width:170px;" />
         <input id="probeSymbolsInput" type="text" placeholder="probe symbols, comma" style="min-width:190px;" />
-        <button class="btn btn-sub" onclick="refreshAll()">새로고침</button>
+        <button id="refreshAllBtn" class="btn btn-sub" onclick="refreshAll()">새로고침</button>
       </div>
-      <div class="muted">상태 메시지: <span id="lastMessage">-</span></div>
+      <div class="toolbar display-controls">
+        <span id="displaySettingsLabel" class="display-note">표시 설정</span>
+        <select id="multiThemePreset">
+          <option value="premium">더 고급스럽게</option>
+          <option value="simple">더 단순하게</option>
+          <option value="light">라이트 테마</option>
+          <option value="terminal">거래소 터미널</option>
+        </select>
+        <select id="multiLanguagePreset">
+          <option value="ko">한국어</option>
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+          <option value="ja">日本語</option>
+          <option value="fr">Français</option>
+        </select>
+        <button id="previewDisplayBtn" class="btn btn-sub" onclick="previewMultiDisplay()">미리보기</button>
+        <button id="saveDisplayBtn" class="btn btn-sub" onclick="saveMultiDisplay()">설정 저장</button>
+        <span id="displaySettingsHelp" class="display-note">브라우저에 저장됩니다.</span>
+      </div>
+      <div class="muted"><span id="lastMessageLabel">상태 메시지</span>: <span id="lastMessage">-</span></div>
     </div>
 
     <div class="workspace">
       <div class="main-col">
         <div class="section-row">
-          <div class="section-label">시장<br/>분석</div>
+          <div class="section-label" id="marketSectionLabel">시장<br/>분석</div>
           <div class="section-body">
             <div id="summary" class="grid"></div>
             <div id="accountTabPanel" class="hidden-view" style="margin-top:8px;">
               <div class="toolbar" style="margin-bottom:8px;">
                 <select id="accountProfileSelect" title="account profile"></select>
                 <input id="accountChartLimitInput" type="number" min="10" max="500" value="200" title="chart executions limit" />
-                <button class="btn btn-sub" onclick="refreshAccountPnlChart()">P&L chart refresh</button>
+                <button id="accountChartRefreshBtn" class="btn btn-sub" onclick="refreshAccountPnlChart()">P&L chart refresh</button>
               </div>
-              <div class="muted" style="margin-bottom:6px;">내계정/리스크 요약</div>
+              <div id="accountSummaryLabel" class="muted" style="margin-bottom:6px;">내계정/리스크 요약</div>
               <div style="overflow:auto;">
                 <table>
                   <thead>
@@ -316,15 +444,15 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         </div>
 
         <div class="section-row">
-          <div class="section-label">AI<br/>전략</div>
+          <div class="section-label" id="aiSectionLabel">AI<br/>전략</div>
           <div class="section-body">
             <div id="rejectMetricsResult" class="alert small">No metrics yet.</div>
             <div id="exchangeTabPanel" class="hidden-view" style="margin-top:10px;">
               <div class="toolbar">
                 <select id="exchangeProfileSelect" title="exchange profile"></select>
-                <button class="btn btn-sub" onclick="refreshExchangeTab()">API 상태 새로고침</button>
-                <button class="btn btn-sub" onclick="exchangeProbeFromTab()">거래소 점검</button>
-                <button class="btn btn-sub" onclick="readinessFromTab()">Readiness 점검</button>
+                <button id="exchangeRefreshBtn" class="btn btn-sub" onclick="refreshExchangeTab()">API 상태 새로고침</button>
+                <button id="exchangeProbeBtn" class="btn btn-sub" onclick="exchangeProbeFromTab()">거래소 점검</button>
+                <button id="exchangeReadinessBtn" class="btn btn-sub" onclick="readinessFromTab()">Readiness 점검</button>
               </div>
               <div id="exchangeSummary" class="grid" style="margin-top:8px;"></div>
               <div id="exchangeActionResult" class="alert small" style="margin-top:8px;">No exchange action yet.</div>
@@ -333,7 +461,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         </div>
 
         <div class="section-row">
-          <div class="section-label">매매<br/>봇</div>
+          <div class="section-label" id="botSectionLabel">매매<br/>봇</div>
           <div class="section-body">
             <table>
               <thead>
@@ -357,7 +485,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         </div>
 
         <div class="section-row">
-          <div class="section-label">실시간<br/>모니터링</div>
+          <div class="section-label" id="monitorSectionLabel">실시간<br/>모니터링</div>
           <div class="section-body">
             <div id="profileResult" class="alert small">No result yet.</div>
             <div id="logsTabPanel" class="hidden-view" style="margin-top:10px;">
@@ -376,7 +504,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
                   <option value="false">non-partial only</option>
                 </select>
                 <input id="logsRejectFilter" type="text" placeholder="reject reason filter (optional)" />
-                <button class="btn btn-sub" onclick="refreshLogsTab()">로그 조회</button>
+                <button id="logsQueryBtn" class="btn btn-sub" onclick="refreshLogsTab()">로그 조회</button>
               </div>
               <div id="logsSummary" class="grid" style="margin-top:8px;"></div>
               <div style="overflow:auto; margin-top:8px;">
@@ -408,8 +536,8 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
 
       <div class="side-col">
         <div class="panel">
-          <h3>보조 참고</h3>
-          <ul class="source-list">
+          <h3 id="sideReferenceTitle">보조 참고</h3>
+          <ul id="referenceList" class="source-list">
             <li>TradingView</li>
             <li>Google News</li>
             <li>VIX Index</li>
@@ -418,7 +546,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         </div>
 
         <div class="panel">
-          <h3>알림 임계치</h3>
+          <h3 id="sideAlertsTitle">알림 임계치</h3>
           <div class="toolbar">
             <input id="rejectWarnInput" type="number" step="0.01" min="0" max="1" value="0.35" title="reject rate warn" />
             <input id="rejectCriticalInput" type="number" step="0.01" min="0" max="1" value="0.60" title="reject rate critical" />
@@ -458,7 +586,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         </div>
 
         <div class="panel">
-          <h3>학습 설정</h3>
+          <h3 id="sideLearningTitle">학습 설정</h3>
           <div class="toolbar">
             <select id="learningEnabledInput" title="auto learning enabled">
               <option value="false" selected>auto learning off</option>
@@ -492,7 +620,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         </div>
 
         <div class="panel">
-          <h3>사용자 전략 편집</h3>
+          <h3 id="sideStrategyTitle">사용자 전략 편집</h3>
           <div class="toolbar">
             <input id="strategyIdInput" type="text" value="trend" title="strategy id" />
             <select id="strategyBotTypeInput" title="bot type">
@@ -568,6 +696,8 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
 
   <script>
     const POLL_MS = 3000;
+    const MULTI_THEME_KEY = 'boss_multi_theme_v1';
+    const MULTI_LANGUAGE_KEY = 'boss_multi_language_v1';
     const TAB_KEYS = ['start', 'progress', 'account', 'exchange', 'logs'];
     const VIEW_LAYOUT = {
       start: { mainIndexes: [0, 1, 2, 3], sideIndexes: [0, 1, 2, 3] },
@@ -578,6 +708,386 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
     };
     let currentView = 'start';
     let latestStatusPayload = null;
+    const MULTI_LANGUAGE_OPTIONS = {
+      ko: { key: 'ko', label: '한국어' },
+      en: { key: 'en', label: 'English' },
+      zh: { key: 'zh', label: '中文' },
+      ja: { key: 'ja', label: '日本語' },
+      fr: { key: 'fr', label: 'Français' },
+    };
+    const MULTI_THEME_PRESETS = {
+      premium: { key: 'premium', className: 'multi-theme-premium' },
+      simple: { key: 'simple', className: 'multi-theme-simple' },
+      light: { key: 'light', className: 'multi-theme-light' },
+      terminal: { key: 'terminal', className: 'multi-theme-terminal' },
+    };
+    const MULTI_THEME_CLASSES = Object.values(MULTI_THEME_PRESETS).map((item) => item.className);
+    const MULTI_I18N = {
+      en: {
+        'title.page': 'Boss Multi Trading Dashboard',
+        'display.settings': 'Display settings',
+        'display.help': 'Saved in this browser.',
+        'theme.premium': 'Premium',
+        'theme.simple': 'Simple',
+        'theme.light': 'Light',
+        'theme.terminal': 'Exchange Terminal',
+        'tab.start': 'Start',
+        'tab.progress': 'Running',
+        'tab.account': 'Accounts',
+        'tab.exchange': 'Exchange API',
+        'tab.logs': 'Trading Logs',
+        'button.runOnceAll': 'Run Once All',
+        'button.startAll': 'Start All',
+        'button.stopAll': 'Stop All',
+        'button.refresh': 'Refresh',
+        'button.preview': 'Preview',
+        'button.save': 'Save',
+        'button.accountChartRefresh': 'P&L chart refresh',
+        'button.exchangeRefresh': 'Refresh API status',
+        'button.exchangeProbe': 'Exchange probe',
+        'button.exchangeReadiness': 'Readiness check',
+        'button.logsQuery': 'Load logs',
+        'label.lastMessage': 'Status message',
+        'label.accountSummary': 'Account / risk summary',
+        'section.market': 'Market<br/>Overview',
+        'section.ai': 'AI<br/>Strategy',
+        'section.bot': 'Trading<br/>Bots',
+        'section.monitor': 'Live<br/>Monitoring',
+        'side.reference': 'Reference Sources',
+        'side.alerts': 'Alert Thresholds',
+        'side.learning': 'Learning Settings',
+        'side.strategy': 'Strategy Editor',
+        'reference.userMemo': 'User memo',
+        'placeholder.liveToken': 'live token (optional)',
+        'placeholder.riskToken': 'risk clear token',
+        'placeholder.sampleSymbol': 'LLM symbol (BTCUSDT)',
+        'placeholder.probeSymbols': 'probe symbols, comma',
+        'placeholder.logsReject': 'reject reason filter (optional)',
+        'message.viewChanged': 'View changed: {view}',
+        'message.displayPreview': 'Display preview applied: {value}',
+        'message.displaySaved': 'Display settings saved.',
+        'message.logsProfileEmpty': 'Logs profile is empty.',
+        'message.exchangeProfileEmpty': 'Exchange profile is empty.',
+        'message.statusReadFailed': 'Status read failed: {error}',
+        'message.noProfileSelected': 'No profile selected.',
+        'message.accountChartLoaded': '{profile} account chart loaded',
+        'message.accountChartFailed': '{profile} account chart failed: {error}',
+        'message.enterRiskToken': 'Enter risk clear token.',
+        'message.enterStrategyId': 'Enter strategy id.',
+        'table.noAccountData': 'No account data.',
+        'table.noProfiles': 'No profiles.',
+        'table.noChartData': 'No chart data.',
+        'table.noResultYet': 'No result yet.',
+        'table.noLogsLoaded': 'No logs loaded.',
+        'table.noLogsInFilter': 'No execution logs in selected filter.',
+        'table.loadLogsFailed': 'Failed to load logs.',
+        'common.yes': 'YES',
+        'common.no': 'NO',
+        'common.pass': 'PASS',
+        'common.fail': 'FAIL',
+        'common.check': 'CHECK',
+        'common.ok': 'OK',
+        'common.stop': 'STOP',
+        'common.run': 'RUN',
+      },
+      ko: {
+        'title.page': '다중 계정 트레이딩 대시보드',
+        'display.settings': '표시 설정',
+        'display.help': '브라우저에 저장됩니다.',
+        'theme.premium': '더 고급스럽게',
+        'theme.simple': '더 단순하게',
+        'theme.light': '라이트 테마',
+        'theme.terminal': '거래소 터미널',
+        'tab.start': '시작',
+        'tab.progress': '진행중',
+        'tab.account': '내계정',
+        'tab.exchange': '거래소 API',
+        'tab.logs': '트레이딩 로그',
+        'button.runOnceAll': '전체 1회 실행',
+        'button.startAll': '전체 시작',
+        'button.stopAll': '전체 중지',
+        'button.refresh': '새로고침',
+        'button.preview': '미리보기',
+        'button.save': '설정 저장',
+        'button.accountChartRefresh': 'P&L 차트 새로고침',
+        'button.exchangeRefresh': 'API 상태 새로고침',
+        'button.exchangeProbe': '거래소 점검',
+        'button.exchangeReadiness': '준비 상태 점검',
+        'button.logsQuery': '로그 조회',
+        'label.lastMessage': '상태 메시지',
+        'label.accountSummary': '내계정/리스크 요약',
+        'section.market': '시장<br/>분석',
+        'section.ai': 'AI<br/>전략',
+        'section.bot': '매매<br/>봇',
+        'section.monitor': '실시간<br/>모니터링',
+        'side.reference': '보조 참고',
+        'side.alerts': '알림 임계치',
+        'side.learning': '학습 설정',
+        'side.strategy': '사용자 전략 편집',
+        'reference.userMemo': '사용자 메모',
+        'placeholder.liveToken': '라이브 시작 토큰(선택)',
+        'placeholder.riskToken': '리스크 해제 토큰',
+        'placeholder.sampleSymbol': 'LLM 심볼 (BTCUSDT)',
+        'placeholder.probeSymbols': '점검 심볼, 쉼표 구분',
+        'placeholder.logsReject': '거부사유 필터(선택)',
+        'message.viewChanged': '보기 전환: {view}',
+        'message.displayPreview': '표시 미리보기 적용: {value}',
+        'message.displaySaved': '표시 설정을 저장했습니다.',
+        'message.logsProfileEmpty': '로그 프로필이 비어 있습니다.',
+        'message.exchangeProfileEmpty': '거래소 프로필이 비어 있습니다.',
+        'message.statusReadFailed': '상태 조회 실패: {error}',
+        'message.noProfileSelected': '선택된 프로필이 없습니다.',
+        'message.accountChartLoaded': '{profile} 계정 차트를 불러왔습니다.',
+        'message.accountChartFailed': '{profile} 계정 차트 조회 실패: {error}',
+        'message.enterRiskToken': '리스크 해제 토큰을 입력하세요.',
+        'message.enterStrategyId': '전략 ID를 입력하세요.',
+        'table.noAccountData': '계정 데이터가 없습니다.',
+        'table.noProfiles': '프로필이 없습니다.',
+        'table.noChartData': '차트 데이터가 없습니다.',
+        'table.noResultYet': '아직 결과가 없습니다.',
+        'table.noLogsLoaded': '불러온 로그가 없습니다.',
+        'table.noLogsInFilter': '선택한 조건의 실행 로그가 없습니다.',
+        'table.loadLogsFailed': '로그를 불러오지 못했습니다.',
+        'common.yes': '예',
+        'common.no': '아니오',
+        'common.pass': 'PASS',
+        'common.fail': 'FAIL',
+        'common.check': 'CHECK',
+        'common.ok': '정상',
+        'common.stop': '정지',
+        'common.run': '동작',
+      },
+      zh: {
+        'title.page': '多账户交易仪表板',
+        'display.settings': '显示设置',
+        'display.help': '保存在当前浏览器。',
+        'tab.start': '开始',
+        'tab.progress': '运行中',
+        'tab.account': '账户',
+        'tab.exchange': '交易所 API',
+        'tab.logs': '交易日志',
+        'button.preview': '预览',
+        'button.save': '保存',
+      },
+      ja: {
+        'title.page': 'マルチ口座トレーディングダッシュボード',
+        'display.settings': '表示設定',
+        'display.help': 'このブラウザに保存されます。',
+        'tab.start': '開始',
+        'tab.progress': '実行中',
+        'tab.account': '口座',
+        'tab.exchange': '取引所 API',
+        'tab.logs': '取引ログ',
+        'button.preview': 'プレビュー',
+        'button.save': '保存',
+      },
+      fr: {
+        'title.page': 'Tableau de bord multi-comptes',
+        'display.settings': 'Affichage',
+        'display.help': 'Enregistré dans ce navigateur.',
+        'tab.start': 'Démarrer',
+        'tab.progress': 'En cours',
+        'tab.account': 'Comptes',
+        'tab.exchange': 'API Exchange',
+        'tab.logs': 'Logs Trading',
+        'button.preview': 'Aperçu',
+        'button.save': 'Enregistrer',
+      },
+    };
+
+    function normalizeMultiLanguage(value) {
+      const raw = String(value || 'ko').trim().toLowerCase().replace('_', '-');
+      const base = raw.split('-')[0];
+      return MULTI_LANGUAGE_OPTIONS[base] ? base : 'ko';
+    }
+
+    function normalizeMultiTheme(value) {
+      const raw = String(value || 'premium').trim().toLowerCase();
+      return MULTI_THEME_PRESETS[raw] ? raw : 'premium';
+    }
+
+    function multiFormat(template, vars) {
+      return String(template || '').replace(/\{(\w+)\}/g, (_m, key) => {
+        const value = vars && Object.prototype.hasOwnProperty.call(vars, key) ? vars[key] : `{${key}}`;
+        return value == null ? '' : String(value);
+      });
+    }
+
+    function mt(key, vars, fallback) {
+      const lang = normalizeMultiLanguage(window.__multiLanguage || 'ko');
+      const pack = MULTI_I18N[lang] || MULTI_I18N.en;
+      const base = MULTI_I18N.en || {};
+      return multiFormat(pack[key] || base[key] || fallback || key, vars);
+    }
+
+    function mtr(koText, enText) {
+      return normalizeMultiLanguage(window.__multiLanguage || 'ko') === 'ko' ? koText : enText;
+    }
+
+    function readMultiDisplayState() {
+      let theme = 'premium';
+      let language = 'ko';
+      try {
+        theme = normalizeMultiTheme(localStorage.getItem(MULTI_THEME_KEY) || 'premium');
+        language = normalizeMultiLanguage(localStorage.getItem(MULTI_LANGUAGE_KEY) || 'ko');
+      } catch (_e) {}
+      return { theme, language };
+    }
+
+    function syncMultiDisplayControls(theme, language) {
+      const themeNode = document.getElementById('multiThemePreset');
+      const langNode = document.getElementById('multiLanguagePreset');
+      if (themeNode) themeNode.value = normalizeMultiTheme(theme);
+      if (langNode) langNode.value = normalizeMultiLanguage(language);
+    }
+
+    function applyMultiTheme(theme, persist) {
+      const key = normalizeMultiTheme(theme);
+      const preset = MULTI_THEME_PRESETS[key] || MULTI_THEME_PRESETS.premium;
+      document.body.classList.remove(...MULTI_THEME_CLASSES);
+      document.body.classList.add(preset.className);
+      if (persist !== false) {
+        localStorage.setItem(MULTI_THEME_KEY, key);
+      }
+      syncMultiDisplayControls(key, window.__multiLanguage || 'ko');
+    }
+
+    function localizeMultiStaticText() {
+      document.documentElement.lang = normalizeMultiLanguage(window.__multiLanguage || 'ko');
+      document.title = mt('title.page');
+      const setText = (id, key) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = mt(key);
+      };
+      const setHtml = (id, key) => {
+        const node = document.getElementById(id);
+        if (node) node.innerHTML = mt(key);
+      };
+      setText('tabStartLabel', 'tab.start');
+      setText('tabProgressLabel', 'tab.progress');
+      setText('tabAccountLabel', 'tab.account');
+      setText('tabExchangeLabel', 'tab.exchange');
+      setText('tabLogsLabel', 'tab.logs');
+      setText('runOnceAllBtn', 'button.runOnceAll');
+      setText('startAllBtn', 'button.startAll');
+      setText('stopAllBtn', 'button.stopAll');
+      setText('refreshAllBtn', 'button.refresh');
+      setText('previewDisplayBtn', 'button.preview');
+      setText('saveDisplayBtn', 'button.save');
+      setText('displaySettingsLabel', 'display.settings');
+      setText('displaySettingsHelp', 'display.help');
+      setText('lastMessageLabel', 'label.lastMessage');
+      setHtml('marketSectionLabel', 'section.market');
+      setHtml('aiSectionLabel', 'section.ai');
+      setHtml('botSectionLabel', 'section.bot');
+      setHtml('monitorSectionLabel', 'section.monitor');
+      setText('accountChartRefreshBtn', 'button.accountChartRefresh');
+      setText('accountSummaryLabel', 'label.accountSummary');
+      setText('exchangeRefreshBtn', 'button.exchangeRefresh');
+      setText('exchangeProbeBtn', 'button.exchangeProbe');
+      setText('exchangeReadinessBtn', 'button.exchangeReadiness');
+      setText('logsQueryBtn', 'button.logsQuery');
+      setText('sideReferenceTitle', 'side.reference');
+      setText('sideAlertsTitle', 'side.alerts');
+      setText('sideLearningTitle', 'side.learning');
+      setText('sideStrategyTitle', 'side.strategy');
+
+      const refList = document.getElementById('referenceList');
+      if (refList && refList.children && refList.children[3]) {
+        refList.children[3].textContent = mt('reference.userMemo');
+      }
+
+      const themeNode = document.getElementById('multiThemePreset');
+      if (themeNode) {
+        [...themeNode.options].forEach((option) => {
+          option.textContent = mt(`theme.${option.value}`, null, option.textContent);
+        });
+      }
+      const liveNode = document.getElementById('liveTokenInput');
+      const riskNode = document.getElementById('riskTokenInput');
+      const sampleNode = document.getElementById('sampleSymbolInput');
+      const probeNode = document.getElementById('probeSymbolsInput');
+      const logsRejectNode = document.getElementById('logsRejectFilter');
+      if (liveNode) liveNode.placeholder = mt('placeholder.liveToken');
+      if (riskNode) riskNode.placeholder = mt('placeholder.riskToken');
+      if (sampleNode) sampleNode.placeholder = mt('placeholder.sampleSymbol');
+      if (probeNode) probeNode.placeholder = mt('placeholder.probeSymbols');
+      if (logsRejectNode) logsRejectNode.placeholder = mt('placeholder.logsReject');
+
+      const logsStatus = document.getElementById('logsStatusFilter');
+      if (logsStatus && logsStatus.options.length >= 4) {
+        logsStatus.options[0].text = mtr('상태: 전체', 'status: all');
+      }
+      const logsPartial = document.getElementById('logsPartialFilter');
+      if (logsPartial && logsPartial.options.length >= 3) {
+        logsPartial.options[0].text = mtr('부분체결: 전체', 'partial: all');
+        logsPartial.options[1].text = mtr('부분체결만', 'partial only');
+        logsPartial.options[2].text = mtr('완전체결만', 'non-partial only');
+      }
+
+      const profileResult = document.getElementById('profileResult');
+      if (profileResult && profileResult.textContent.trim() === 'No result yet.') {
+        profileResult.textContent = mt('table.noResultYet');
+      }
+      const chartNode = document.getElementById('accountPnlChart');
+      if (chartNode && chartNode.textContent.trim() === 'No chart data.') {
+        chartNode.textContent = mt('table.noChartData');
+      }
+      const accountRiskBody = document.getElementById('accountRiskBody');
+      if (accountRiskBody && accountRiskBody.textContent.trim() === 'No account data.') {
+        accountRiskBody.innerHTML = `<tr><td colspan="10" class="muted">${mt('table.noAccountData')}</td></tr>`;
+      }
+      const logsBody = document.getElementById('logsBody');
+      if (logsBody && logsBody.textContent.trim() === 'No logs loaded.') {
+        logsBody.innerHTML = `<tr><td colspan="11" class="muted">${mt('table.noLogsLoaded')}</td></tr>`;
+      }
+    }
+
+    function applyMultiLanguage(language, persist) {
+      const lang = normalizeMultiLanguage(language);
+      window.__multiLanguage = lang;
+      if (persist !== false) {
+        localStorage.setItem(MULTI_LANGUAGE_KEY, lang);
+      }
+      localizeMultiStaticText();
+      syncMultiDisplayControls(window.__multiTheme || 'premium', lang);
+    }
+
+    function previewMultiDisplay() {
+      const theme = normalizeMultiTheme((document.getElementById('multiThemePreset') || {}).value || 'premium');
+      const language = normalizeMultiLanguage((document.getElementById('multiLanguagePreset') || {}).value || 'ko');
+      window.__multiTheme = theme;
+      applyMultiTheme(theme, false);
+      applyMultiLanguage(language, false);
+      if (latestStatusPayload) {
+        renderStatus(latestStatusPayload);
+        refreshAccountTab(latestStatusPayload);
+        refreshExchangeTab(latestStatusPayload);
+      }
+      document.getElementById('lastMessage').textContent = mt('message.displayPreview', { value: `${mt(`theme.${theme}`)} / ${(MULTI_LANGUAGE_OPTIONS[language] || MULTI_LANGUAGE_OPTIONS.ko).label}` }, 'Display preview applied.');
+    }
+
+    function saveMultiDisplay() {
+      const theme = normalizeMultiTheme((document.getElementById('multiThemePreset') || {}).value || 'premium');
+      const language = normalizeMultiLanguage((document.getElementById('multiLanguagePreset') || {}).value || 'ko');
+      window.__multiTheme = theme;
+      applyMultiTheme(theme, true);
+      applyMultiLanguage(language, true);
+      if (latestStatusPayload) {
+        renderStatus(latestStatusPayload);
+        refreshAccountTab(latestStatusPayload);
+        refreshExchangeTab(latestStatusPayload);
+      }
+      document.getElementById('lastMessage').textContent = mt('message.displaySaved');
+    }
+
+    function loadMultiDisplay() {
+      const state = readMultiDisplayState();
+      window.__multiTheme = state.theme;
+      window.__multiLanguage = state.language;
+      applyMultiTheme(state.theme, false);
+      applyMultiLanguage(state.language, false);
+    }
 
     function getMainSectionNodes() {
       return Array.from(document.querySelectorAll('.main-col .section-row'));
@@ -631,7 +1141,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       }
 
       const msg = document.getElementById('lastMessage');
-      if (msg) msg.textContent = `view changed: ${key}`;
+      if (msg) msg.textContent = mt('message.viewChanged', { view: mt(`tab.${key}`, null, key) }, `View changed: ${key}`);
     }
 
     function initTabs() {
@@ -659,7 +1169,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       return response.json();
     }
 
-    function yesNo(v) { return v ? '<span class="ok">YES</span>' : '<span class="bad">NO</span>'; }
+    function yesNo(v) { return v ? `<span class="ok">${mt('common.yes')}</span>` : `<span class="bad">${mt('common.no')}</span>`; }
     function num(v, d=2) { return (typeof v === 'number' && Number.isFinite(v)) ? v.toFixed(d) : '-'; }
     function toFloat(id, fallback) {
       const n = parseFloat(String(document.getElementById(id).value || ''));
@@ -698,7 +1208,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const names = Array.isArray(profileNames) ? profileNames : [];
       const current = String(select.value || '').trim();
       if (!names.length) {
-        select.innerHTML = '<option value="">no profile</option>';
+        select.innerHTML = `<option value="">${mtr('프로필 없음', 'no profile')}</option>`;
         return;
       }
       select.innerHTML = names.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
@@ -715,7 +1225,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const names = Array.isArray(profileNames) ? profileNames : [];
       const current = String(select.value || '').trim();
       if (!names.length) {
-        select.innerHTML = '<option value="">no profile</option>';
+        select.innerHTML = `<option value="">${mtr('프로필 없음', 'no profile')}</option>`;
         return;
       }
       select.innerHTML = names.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
@@ -732,7 +1242,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const names = Array.isArray(profileNames) ? profileNames : [];
       const current = String(select.value || '').trim();
       if (!names.length) {
-        select.innerHTML = '<option value="">no profile</option>';
+        select.innerHTML = `<option value="">${mtr('프로필 없음', 'no profile')}</option>`;
         return;
       }
       select.innerHTML = names.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
@@ -748,13 +1258,13 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const body = document.getElementById('accountRiskBody');
       if (!body) return;
       if (!payload || typeof payload !== 'object') {
-        body.innerHTML = '<tr><td colspan="10" class="muted">No account data.</td></tr>';
+        body.innerHTML = `<tr><td colspan="10" class="muted">${mt('table.noAccountData')}</td></tr>`;
         return;
       }
       const profiles = (payload.profiles && typeof payload.profiles === 'object') ? payload.profiles : {};
       const names = Object.keys(profiles).sort();
       if (!names.length) {
-        body.innerHTML = '<tr><td colspan="10" class="muted">No profiles.</td></tr>';
+        body.innerHTML = `<tr><td colspan="10" class="muted">${mt('table.noProfiles')}</td></tr>`;
         return;
       }
       body.innerHTML = names.map((name) => {
@@ -764,12 +1274,12 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         const risk = (st.risk_guard && typeof st.risk_guard === 'object') ? st.risk_guard : {};
         const guard = (st.execution_guard && typeof st.execution_guard === 'object') ? st.execution_guard : {};
         const g = (guard.global && typeof guard.global === 'object') ? guard.global : {};
-        const riskText = risk.halted ? `HALT(${escapeHtml(risk.reason || '-')})` : 'OK';
-        const guardText = g.blocked ? `BLOCK(${escapeHtml(g.reason || '-')})` : 'OK';
+        const riskText = risk.halted ? `HALT(${escapeHtml(risk.reason || '-')})` : mt('common.ok');
+        const guardText = g.blocked ? `BLOCK(${escapeHtml(g.reason || '-')})` : mt('common.ok');
         return `
           <tr>
             <td>${escapeHtml(name)}</td>
-            <td>${st.running ? 'RUN' : 'STOP'}</td>
+            <td>${st.running ? mt('common.run') : mt('common.stop')}</td>
             <td>${escapeHtml(st.mode || '-')}</td>
             <td>${Number(bal.USDT || 0).toFixed(2)}</td>
             <td>${Number(bal.equity_usdt || 0).toFixed(2)}</td>
@@ -802,7 +1312,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const width = 920;
       const height = 220;
       if (!series.length) {
-        return '<div class="muted">No realized pnl data for chart.</div>';
+        return `<div class="muted">${mtr('차트용 실현 손익 데이터가 없습니다.', 'No realized pnl data for chart.')}</div>`;
       }
       let min = Number.POSITIVE_INFINITY;
       let max = Number.NEGATIVE_INFINITY;
@@ -813,7 +1323,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         sum += p.pnl;
       }
       if (!Number.isFinite(min) || !Number.isFinite(max)) {
-        return '<div class="muted">Invalid chart data.</div>';
+        return `<div class="muted">${mtr('유효하지 않은 차트 데이터입니다.', 'Invalid chart data.')}</div>`;
       }
       const range = Math.max(1e-9, max - min);
       const points = series.map((p, idx) => {
@@ -848,7 +1358,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const summaryNode = document.getElementById('accountPnlSummary');
       const chartNode = document.getElementById('accountPnlChart');
       if (!profile) {
-        if (chartNode) chartNode.innerHTML = 'No profile selected.';
+        if (chartNode) chartNode.innerHTML = mt('message.noProfileSelected');
         return;
       }
       try {
@@ -873,10 +1383,10 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         if (chartNode) {
           chartNode.innerHTML = renderPnlSvg(series);
         }
-        document.getElementById('lastMessage').textContent = `${profile} account chart loaded`;
+        document.getElementById('lastMessage').textContent = mt('message.accountChartLoaded', { profile });
       } catch (e) {
-        if (chartNode) chartNode.innerHTML = '<span class="bad">Failed to load account chart.</span>';
-        document.getElementById('lastMessage').textContent = `${profile} account chart failed: ` + e.message;
+        if (chartNode) chartNode.innerHTML = `<span class="bad">${mtr('계정 차트를 불러오지 못했습니다.', 'Failed to load account chart.')}</span>`;
+        document.getElementById('lastMessage').textContent = mt('message.accountChartFailed', { profile, error: e.message }, `${profile} account chart failed: ${e.message}`);
       }
     }
 
@@ -888,7 +1398,7 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const profile = String((select || {}).value || '').trim();
 
       if (!payload || typeof payload !== 'object') {
-        summary.innerHTML = '<div class="metric"><b>exchange</b>no status</div>';
+        summary.innerHTML = `<div class="metric"><b>${mtr('거래소', 'Exchange')}</b>${mtr('상태 없음', 'no status')}</div>`;
         return;
       }
       const profiles = (payload.profiles && typeof payload.profiles === 'object') ? payload.profiles : {};
@@ -916,21 +1426,21 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const passphraseEnv = String(exchangeCfg.api_passphrase_env || '').trim() || '-';
 
       summary.innerHTML = `
-        <div class="metric"><b>profile</b>${escapeHtml(selected || '-')}</div>
-        <div class="metric"><b>exchange</b>${escapeHtml(exchangeName)}</div>
-        <div class="metric"><b>allow_live / testnet</b>${allowLive ? 'YES' : 'NO'} / ${testnet ? 'YES' : 'NO'}</div>
-        <div class="metric"><b>api key / secret / passphrase</b>${hasApiKey ? 'SET' : 'EMPTY'} / ${hasApiSecret ? 'SET' : 'EMPTY'} / ${hasApiPassphrase ? 'SET' : 'EMPTY'}</div>
-        <div class="metric"><b>api env refs</b>${escapeHtml(keyEnv)} | ${escapeHtml(secretEnv)} | ${escapeHtml(passphraseEnv)}</div>
-        <div class="metric"><b>preflight</b>${preflightPassed ? 'PASS' : 'CHECK'}</div>
-        <div class="metric"><b>validation gate</b>${gatePassed ? 'PASS' : 'CHECK'}</div>
-        <div class="metric"><b>last error</b>${escapeHtml(row.error || st.last_error || '-')}</div>
+        <div class="metric"><b>${mtr('프로필', 'Profile')}</b>${escapeHtml(selected || '-')}</div>
+        <div class="metric"><b>${mtr('거래소', 'Exchange')}</b>${escapeHtml(exchangeName)}</div>
+        <div class="metric"><b>${mtr('실거래 허용 / 테스트넷', 'Allow live / testnet')}</b>${allowLive ? mt('common.yes') : mt('common.no')} / ${testnet ? mt('common.yes') : mt('common.no')}</div>
+        <div class="metric"><b>${mtr('API key / secret / passphrase', 'API key / secret / passphrase')}</b>${hasApiKey ? 'SET' : 'EMPTY'} / ${hasApiSecret ? 'SET' : 'EMPTY'} / ${hasApiPassphrase ? 'SET' : 'EMPTY'}</div>
+        <div class="metric"><b>${mtr('API 환경변수 참조', 'API env refs')}</b>${escapeHtml(keyEnv)} | ${escapeHtml(secretEnv)} | ${escapeHtml(passphraseEnv)}</div>
+        <div class="metric"><b>preflight</b>${preflightPassed ? mt('common.pass') : mt('common.check')}</div>
+        <div class="metric"><b>${mtr('검증 게이트', 'Validation gate')}</b>${gatePassed ? mt('common.pass') : mt('common.check')}</div>
+        <div class="metric"><b>${mtr('최근 오류', 'Last error')}</b>${escapeHtml(row.error || st.last_error || '-')}</div>
       `;
     }
 
     async function exchangeProbeFromTab() {
       const profile = String((document.getElementById('exchangeProfileSelect') || {}).value || '').trim();
       if (!profile) {
-        document.getElementById('lastMessage').textContent = 'exchange profile is empty';
+        document.getElementById('lastMessage').textContent = mt('message.exchangeProfileEmpty');
         return;
       }
       const resultNode = document.getElementById('exchangeActionResult');
@@ -942,33 +1452,33 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
           const checks = Array.isArray(payload.checks) ? payload.checks : [];
           const top = checks.slice(0, 8).map((c) => `<li>${escapeHtml(c.code || '-')} : ${c.passed ? 'PASS' : 'FAIL'} (${escapeHtml(c.detail || c.message || '-')})</li>`).join('');
           resultNode.innerHTML = `
-            <b>${escapeHtml(profile)} exchange probe</b>
-            <div class="muted">overall: ${payload.overall_passed ? 'PASS' : 'CHECK'} / critical_failures: ${Number(payload.critical_failures || 0)}</div>
-            <ul class="source-list">${top || '<li>no checks</li>'}</ul>
+            <b>${escapeHtml(profile)} ${mtr('거래소 점검', 'exchange probe')}</b>
+            <div class="muted">overall: ${payload.overall_passed ? mt('common.pass') : mt('common.check')} / critical_failures: ${Number(payload.critical_failures || 0)}</div>
+            <ul class="source-list">${top || `<li>${mtr('점검 항목 없음', 'no checks')}</li>`}</ul>
             <div class="code">${escapeHtml(JSON.stringify(payload || {}, null, 2))}</div>
           `;
         }
-        document.getElementById('lastMessage').textContent = `${profile} exchange probe loaded`;
+        document.getElementById('lastMessage').textContent = `${profile} ${mtr('거래소 점검 결과를 불러왔습니다.', 'exchange probe loaded')}`;
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${profile} exchange probe failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${profile} ${mtr('거래소 점검 실패: ', 'exchange probe failed: ')}` + e.message;
       }
     }
 
     async function readinessFromTab() {
       const profile = String((document.getElementById('exchangeProfileSelect') || {}).value || '').trim();
       if (!profile) {
-        document.getElementById('lastMessage').textContent = 'exchange profile is empty';
+        document.getElementById('lastMessage').textContent = mt('message.exchangeProfileEmpty');
         return;
       }
       const resultNode = document.getElementById('exchangeActionResult');
       try {
         const payload = await apiGet('/api/profile/' + encodeURIComponent(profile) + '/live/readiness');
         if (resultNode) {
-          resultNode.innerHTML = `<b>${escapeHtml(profile)} readiness</b><div class="code">${escapeHtml(JSON.stringify(payload || {}, null, 2))}</div>`;
+          resultNode.innerHTML = `<b>${escapeHtml(profile)} ${mtr('준비 상태', 'readiness')}</b><div class="code">${escapeHtml(JSON.stringify(payload || {}, null, 2))}</div>`;
         }
-        document.getElementById('lastMessage').textContent = `${profile} readiness loaded`;
+        document.getElementById('lastMessage').textContent = `${profile} ${mtr('준비 상태를 불러왔습니다.', 'readiness loaded')}`;
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${profile} readiness failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${profile} ${mtr('준비 상태 조회 실패: ', 'readiness failed: ')}` + e.message;
       }
     }
 
@@ -983,14 +1493,14 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       syncAccountProfileSelector(names);
 
       document.getElementById('summary').innerHTML = `
-        <div class="metric"><b>Profile count</b>${profileCount}</div>
-        <div class="metric"><b>Active runtimes</b>${activeCount}</div>
-        <div class="metric"><b>Multi config</b>${payload.multi_config_path || '-'}</div>
-        <div class="metric"><b>Updated at</b>${payload.timestamp || '-'}</div>
+        <div class="metric"><b>${mtr('프로필 수', 'Profile count')}</b>${profileCount}</div>
+        <div class="metric"><b>${mtr('실행중 런타임', 'Active runtimes')}</b>${activeCount}</div>
+        <div class="metric"><b>${mtr('멀티 설정 경로', 'Multi config')}</b>${payload.multi_config_path || '-'}</div>
+        <div class="metric"><b>${mtr('업데이트 시각', 'Updated at')}</b>${payload.timestamp || '-'}</div>
       `;
 
       if (!names.length) {
-        document.getElementById('profileBody').innerHTML = '<tr><td colspan="9" class="muted">No profiles</td></tr>';
+        document.getElementById('profileBody').innerHTML = `<tr><td colspan="9" class="muted">${mt('table.noProfiles')}</td></tr>`;
         return;
       }
 
@@ -1005,13 +1515,13 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
         const usdt = (typeof bal === 'object') ? bal.USDT : null;
         const risk = (typeof st === 'object') ? (st.risk_guard || {}) : {};
         const halted = !!risk.halted;
-        const riskText = halted ? `<span class="bad">HALT</span> ${risk.reason || '-'}` : '<span class="ok">OK</span>';
+        const riskText = halted ? `<span class="bad">HALT</span> ${risk.reason || '-'}` : `<span class="ok">${mt('common.ok')}</span>`;
         const err = row.error || ((typeof st === 'object') ? (st.last_error || '-') : '-');
         return `
           <tr>
             <td>${name}</td>
             <td>${yesNo(enabled)}</td>
-            <td>${running ? '<span class="ok">RUN</span>' : '<span class="warn">STOP</span>'}</td>
+            <td>${running ? `<span class="ok">${mt('common.run')}</span>` : `<span class="warn">${mt('common.stop')}</span>`}</td>
             <td>${mode}</td>
             <td>${cycle}</td>
             <td>${riskText}</td>
@@ -1019,23 +1529,23 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
             <td>${err || '-'}</td>
             <td>
               <div class="toolbar">
-                <button class="btn btn-sub" onclick="runOnceProfile('${name}')">Run once</button>
-                <button class="btn btn-sub" onclick="startProfile('${name}')">Start</button>
-                <button class="btn btn-danger" onclick="stopProfile('${name}')">Stop</button>
-                <button class="btn btn-sub" onclick="readinessProfile('${name}')">Readiness</button>
-                <button class="btn btn-sub" onclick="saveReadinessProfile('${name}')">Readiness report</button>
-                <button class="btn btn-sub" onclick="llmTestProfile('${name}')">LLM test</button>
-                <button class="btn btn-sub" onclick="exchangeProbeProfile('${name}')">Exchange probe</button>
-                <button class="btn btn-sub" onclick="saveExchangeProbeProfile('${name}')">Probe report</button>
-                <button class="btn btn-sub" onclick="rejectMetricsProfile('${name}')">Reject metrics</button>
-                <button class="btn btn-sub" onclick="applyAlertConfigProfile('${name}')">Apply alert config</button>
-                <button class="btn btn-sub" onclick="validationAlertTestProfile('${name}')">Validation alert test</button>
-                <button class="btn btn-sub" onclick="learningStatusProfile('${name}')">Learning status</button>
-                <button class="btn btn-sub" onclick="validationHistoryProfile('${name}')">Validation history</button>
-                <button class="btn btn-sub" onclick="applyLearningConfigProfile('${name}')">Apply learning config</button>
-                <button class="btn btn-sub" onclick="loadStrategyBotProfile('${name}')">Strategy bot load</button>
-                <button class="btn btn-sub" onclick="applyStrategyBotProfile('${name}')">Strategy bot apply</button>
-                <button class="btn btn-danger" onclick="clearRiskProfile('${name}')">Clear risk halt</button>
+                <button class="btn btn-sub" onclick="runOnceProfile('${name}')">${mtr('1회 실행', 'Run once')}</button>
+                <button class="btn btn-sub" onclick="startProfile('${name}')">${mtr('시작', 'Start')}</button>
+                <button class="btn btn-danger" onclick="stopProfile('${name}')">${mtr('중지', 'Stop')}</button>
+                <button class="btn btn-sub" onclick="readinessProfile('${name}')">${mtr('준비 상태', 'Readiness')}</button>
+                <button class="btn btn-sub" onclick="saveReadinessProfile('${name}')">${mtr('준비 리포트', 'Readiness report')}</button>
+                <button class="btn btn-sub" onclick="llmTestProfile('${name}')">${mtr('LLM 테스트', 'LLM test')}</button>
+                <button class="btn btn-sub" onclick="exchangeProbeProfile('${name}')">${mtr('거래소 점검', 'Exchange probe')}</button>
+                <button class="btn btn-sub" onclick="saveExchangeProbeProfile('${name}')">${mtr('점검 리포트', 'Probe report')}</button>
+                <button class="btn btn-sub" onclick="rejectMetricsProfile('${name}')">${mtr('거부 메트릭', 'Reject metrics')}</button>
+                <button class="btn btn-sub" onclick="applyAlertConfigProfile('${name}')">${mtr('알림 설정 적용', 'Apply alert config')}</button>
+                <button class="btn btn-sub" onclick="validationAlertTestProfile('${name}')">${mtr('검증 알림 테스트', 'Validation alert test')}</button>
+                <button class="btn btn-sub" onclick="learningStatusProfile('${name}')">${mtr('학습 상태', 'Learning status')}</button>
+                <button class="btn btn-sub" onclick="validationHistoryProfile('${name}')">${mtr('검증 이력', 'Validation history')}</button>
+                <button class="btn btn-sub" onclick="applyLearningConfigProfile('${name}')">${mtr('학습 설정 적용', 'Apply learning config')}</button>
+                <button class="btn btn-sub" onclick="loadStrategyBotProfile('${name}')">${mtr('전략 Bot 불러오기', 'Strategy bot load')}</button>
+                <button class="btn btn-sub" onclick="applyStrategyBotProfile('${name}')">${mtr('전략 Bot 적용', 'Strategy bot apply')}</button>
+                <button class="btn btn-danger" onclick="clearRiskProfile('${name}')">${mtr('리스크 해제', 'Clear risk halt')}</button>
               </div>
             </td>
           </tr>
@@ -1195,14 +1705,14 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
           refreshLogsTab().catch(() => {});
         }
       } catch (e) {
-        document.getElementById('lastMessage').textContent = 'Status read failed: ' + e.message;
+        document.getElementById('lastMessage').textContent = mt('message.statusReadFailed', { error: e.message }, 'Status read failed: ' + e.message);
       }
     }
 
     async function refreshLogsTab() {
       const profile = String((document.getElementById('logsProfileSelect') || {}).value || '').trim();
       if (!profile) {
-        document.getElementById('lastMessage').textContent = 'logs profile is empty';
+        document.getElementById('lastMessage').textContent = mt('message.logsProfileEmpty');
         return;
       }
 
@@ -1233,18 +1743,18 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
 
         if (summaryNode) {
           summaryNode.innerHTML = `
-            <div class="metric"><b>profile</b>${escapeHtml(profile)}</div>
-            <div class="metric"><b>fetched rows</b>${list.length}</div>
-            <div class="metric"><b>rejected in rows</b>${rejected}</div>
-            <div class="metric"><b>partial in rows</b>${partial}</div>
-            <div class="metric"><b>reject rate (recent)</b>${((Number(metrics.reject_rate || 0) * 100).toFixed(2))}%</div>
-            <div class="metric"><b>recent rejected</b>${Number(metrics.rejected_executions || 0)} / ${Number(metrics.total_executions || 0)}</div>
+            <div class="metric"><b>${mtr('프로필', 'profile')}</b>${escapeHtml(profile)}</div>
+            <div class="metric"><b>${mtr('조회 행 수', 'fetched rows')}</b>${list.length}</div>
+            <div class="metric"><b>${mtr('거부 건수', 'rejected in rows')}</b>${rejected}</div>
+            <div class="metric"><b>${mtr('부분체결 건수', 'partial in rows')}</b>${partial}</div>
+            <div class="metric"><b>${mtr('최근 거부율', 'reject rate (recent)')}</b>${((Number(metrics.reject_rate || 0) * 100).toFixed(2))}%</div>
+            <div class="metric"><b>${mtr('최근 거부/전체', 'recent rejected')}</b>${Number(metrics.rejected_executions || 0)} / ${Number(metrics.total_executions || 0)}</div>
           `;
         }
 
         if (bodyNode) {
           if (!list.length) {
-            bodyNode.innerHTML = '<tr><td colspan="11" class="muted">No execution logs in selected filter.</td></tr>';
+            bodyNode.innerHTML = `<tr><td colspan="11" class="muted">${mt('table.noLogsInFilter')}</td></tr>`;
           } else {
             bodyNode.innerHTML = list.map((r) => `
               <tr>
@@ -1263,12 +1773,12 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
             `).join('');
           }
         }
-        document.getElementById('lastMessage').textContent = `${profile} logs loaded (${list.length})`;
+        document.getElementById('lastMessage').textContent = `${profile} ${mtr(`로그 ${list.length}건을 불러왔습니다.`, `logs loaded (${list.length})`)}`;
       } catch (e) {
         if (bodyNode) {
-          bodyNode.innerHTML = '<tr><td colspan="11" class="bad">Failed to load logs.</td></tr>';
+          bodyNode.innerHTML = `<tr><td colspan="11" class="bad">${mt('table.loadLogsFailed')}</td></tr>`;
         }
-        document.getElementById('lastMessage').textContent = `${profile} logs failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${profile} ${mtr('로그 조회 실패: ', 'logs failed: ')}` + e.message;
       }
     }
 
@@ -1277,30 +1787,30 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const liveToken = String(document.getElementById('liveTokenInput').value || '').trim();
       try {
         await apiPost('/api/start', { interval_seconds: interval, live_confirm_token: liveToken });
-        document.getElementById('lastMessage').textContent = 'Start all requested';
+        document.getElementById('lastMessage').textContent = mtr('전체 시작을 요청했습니다.', 'Start all requested');
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = 'Start all failed: ' + e.message;
+        document.getElementById('lastMessage').textContent = mtr('전체 시작 실패: ', 'Start all failed: ') + e.message;
       }
     }
 
     async function stopAll() {
       try {
         await apiPost('/api/stop', {});
-        document.getElementById('lastMessage').textContent = 'Stop all requested';
+        document.getElementById('lastMessage').textContent = mtr('전체 중지를 요청했습니다.', 'Stop all requested');
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = 'Stop all failed: ' + e.message;
+        document.getElementById('lastMessage').textContent = mtr('전체 중지 실패: ', 'Stop all failed: ') + e.message;
       }
     }
 
     async function runOnceAll() {
       try {
         await apiPost('/api/run-once', {});
-        document.getElementById('lastMessage').textContent = 'Run once all requested';
+        document.getElementById('lastMessage').textContent = mtr('전체 1회 실행을 요청했습니다.', 'Run once all requested');
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = 'Run once all failed: ' + e.message;
+        document.getElementById('lastMessage').textContent = mtr('전체 1회 실행 실패: ', 'Run once all failed: ') + e.message;
       }
     }
 
@@ -1309,33 +1819,33 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const liveToken = String(document.getElementById('liveTokenInput').value || '').trim();
       try {
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/start', { interval_seconds: interval, live_confirm_token: liveToken });
-        document.getElementById('lastMessage').textContent = `${name} start requested`;
-        showProfileResult(`${name} start`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('시작 요청 완료', 'start requested')}`;
+        showProfileResult(`${name} ${mtr('시작', 'start')}`, payload);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} start failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('시작 실패: ', 'start failed: ')}` + e.message;
       }
     }
 
     async function stopProfile(name) {
       try {
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/stop', {});
-        document.getElementById('lastMessage').textContent = `${name} stop requested`;
-        showProfileResult(`${name} stop`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('중지 요청 완료', 'stop requested')}`;
+        showProfileResult(`${name} ${mtr('중지', 'stop')}`, payload);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} stop failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('중지 실패: ', 'stop failed: ')}` + e.message;
       }
     }
 
     async function runOnceProfile(name) {
       try {
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/run-once', {});
-        document.getElementById('lastMessage').textContent = `${name} run once requested`;
-        showProfileResult(`${name} run once`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('1회 실행 요청 완료', 'run once requested')}`;
+        showProfileResult(`${name} ${mtr('1회 실행', 'run once')}`, payload);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} run once failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('1회 실행 실패: ', 'run once failed: ')}` + e.message;
       }
     }
 
@@ -1343,39 +1853,39 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       try {
         const payload = await apiGet('/api/profile/' + encodeURIComponent(name) + '/live/readiness');
         const passed = !!payload.overall_passed;
-        document.getElementById('lastMessage').textContent = `${name} readiness ${passed ? 'PASS' : 'CHECK'}`;
-        showProfileResult(`${name} readiness`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('준비 상태', 'readiness')} ${passed ? mt('common.pass') : mt('common.check')}`;
+        showProfileResult(`${name} ${mtr('준비 상태', 'readiness')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} readiness failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('준비 상태 실패: ', 'readiness failed: ')}` + e.message;
       }
     }
 
     async function saveReadinessProfile(name) {
       try {
-        const customPath = window.prompt(`${name} readiness report path (empty = auto):`, '');
+        const customPath = window.prompt(`${name} ${mtr('준비 리포트 저장 경로(비우면 자동):', 'readiness report path (empty = auto):')}`, '');
         const body = {};
         if (customPath && customPath.trim()) body.output_path = customPath.trim();
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/live/readiness/report', body);
-        document.getElementById('lastMessage').textContent = `${name} readiness report saved`;
-        showProfileResult(`${name} readiness report`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('준비 리포트를 저장했습니다.', 'readiness report saved')}`;
+        showProfileResult(`${name} ${mtr('준비 리포트', 'readiness report')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} readiness report failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('준비 리포트 저장 실패: ', 'readiness report failed: ')}` + e.message;
       }
     }
 
     async function clearRiskProfile(name) {
       const token = String(document.getElementById('riskTokenInput').value || '').trim();
       if (!token) {
-        document.getElementById('lastMessage').textContent = 'Enter risk clear token';
+        document.getElementById('lastMessage').textContent = mt('message.enterRiskToken');
         return;
       }
       try {
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/risk/clear', { confirm_token: token });
-        document.getElementById('lastMessage').textContent = `${name} risk clear requested`;
-        showProfileResult(`${name} risk clear`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('리스크 해제 요청 완료', 'risk clear requested')}`;
+        showProfileResult(`${name} ${mtr('리스크 해제', 'risk clear')}`, payload);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} risk clear failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('리스크 해제 실패: ', 'risk clear failed: ')}` + e.message;
       }
     }
 
@@ -1386,10 +1896,10 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
           sample_symbol: sampleSymbol,
         });
         const passed = !!payload.passed;
-        document.getElementById('lastMessage').textContent = `${name} LLM test ${passed ? 'PASS' : 'CHECK'}`;
-        showProfileResult(`${name} LLM test`, payload);
+        document.getElementById('lastMessage').textContent = `${name} LLM ${mtr('테스트', 'test')} ${passed ? mt('common.pass') : mt('common.check')}`;
+        showProfileResult(`${name} LLM ${mtr('테스트', 'test')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} LLM test failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} LLM ${mtr('테스트 실패: ', 'test failed: ')}` + e.message;
       }
     }
 
@@ -1399,15 +1909,15 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       try {
         const payload = await apiGet('/api/profile/' + encodeURIComponent(name) + '/exchange/probe' + query);
         const critical = Number(payload.critical_failures || 0);
-        document.getElementById('lastMessage').textContent = `${name} exchange probe ${payload.overall_passed ? 'PASS' : 'CHECK'} (critical=${critical})`;
-        showProfileResult(`${name} exchange probe`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('거래소 점검', 'exchange probe')} ${payload.overall_passed ? mt('common.pass') : mt('common.check')} (critical=${critical})`;
+        showProfileResult(`${name} ${mtr('거래소 점검', 'exchange probe')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} exchange probe failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('거래소 점검 실패: ', 'exchange probe failed: ')}` + e.message;
       }
     }
 
     async function saveExchangeProbeProfile(name) {
-      const customPath = window.prompt(`${name} exchange probe report path (empty = auto):`, '');
+      const customPath = window.prompt(`${name} ${mtr('거래소 점검 리포트 경로(비우면 자동):', 'exchange probe report path (empty = auto):')}`, '');
       const rawSymbols = String(document.getElementById('probeSymbolsInput').value || '').trim();
       const symbols = rawSymbols ? rawSymbols.split(',').map((x) => x.trim()).filter((x) => x.length > 0) : [];
       const body = {};
@@ -1415,20 +1925,20 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       if (symbols.length) body.symbols = symbols;
       try {
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/exchange/probe/report', body);
-        document.getElementById('lastMessage').textContent = `${name} exchange probe report saved`;
-        showProfileResult(`${name} exchange probe report`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('거래소 점검 리포트를 저장했습니다.', 'exchange probe report saved')}`;
+        showProfileResult(`${name} ${mtr('거래소 점검 리포트', 'exchange probe report')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} exchange probe report failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('거래소 점검 리포트 저장 실패: ', 'exchange probe report failed: ')}` + e.message;
       }
     }
 
     async function rejectMetricsProfile(name) {
       try {
         const payload = await apiGet('/api/profile/' + encodeURIComponent(name) + '/reject-metrics?limit=200');
-        document.getElementById('lastMessage').textContent = `${name} reject metrics loaded`;
-        showRejectMetricsResult(`${name} reject metrics`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('거부 메트릭을 불러왔습니다.', 'reject metrics loaded')}`;
+        showRejectMetricsResult(`${name} ${mtr('거부 메트릭', 'reject metrics')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} reject metrics failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('거부 메트릭 조회 실패: ', 'reject metrics failed: ')}` + e.message;
       }
     }
 
@@ -1436,11 +1946,11 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       try {
         const body = buildAlertConfigPayload();
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/alert/config', body);
-        document.getElementById('lastMessage').textContent = `${name} alert config applied`;
-        showProfileResult(`${name} alert config`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('알림 설정을 적용했습니다.', 'alert config applied')}`;
+        showProfileResult(`${name} ${mtr('알림 설정', 'alert config')}`, payload);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} alert config failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('알림 설정 적용 실패: ', 'alert config failed: ')}` + e.message;
       }
     }
 
@@ -1448,20 +1958,20 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const level = String(document.getElementById('alertLevelInput').value || 'warn').trim().toLowerCase();
       try {
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/alert/validation-test', { level });
-        document.getElementById('lastMessage').textContent = `${name} validation alert test sent`;
-        showProfileResult(`${name} validation alert test`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('검증 알림 테스트를 보냈습니다.', 'validation alert test sent')}`;
+        showProfileResult(`${name} ${mtr('검증 알림 테스트', 'validation alert test')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} validation alert test failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('검증 알림 테스트 실패: ', 'validation alert test failed: ')}` + e.message;
       }
     }
 
     async function learningStatusProfile(name) {
       try {
         const payload = await apiGet('/api/profile/' + encodeURIComponent(name) + '/learning/status');
-        document.getElementById('lastMessage').textContent = `${name} learning status loaded`;
-        showProfileResult(`${name} learning status`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('학습 상태를 불러왔습니다.', 'learning status loaded')}`;
+        showProfileResult(`${name} ${mtr('학습 상태', 'learning status')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} learning status failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('학습 상태 조회 실패: ', 'learning status failed: ')}` + e.message;
       }
     }
 
@@ -1469,10 +1979,10 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       const limit = toInt('validationHistoryLimitInput', 30);
       try {
         const payload = await apiGet('/api/profile/' + encodeURIComponent(name) + '/validation/history?limit=' + encodeURIComponent(String(limit)));
-        document.getElementById('lastMessage').textContent = `${name} validation history loaded`;
-        showProfileResult(`${name} validation history`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('검증 이력을 불러왔습니다.', 'validation history loaded')}`;
+        showProfileResult(`${name} ${mtr('검증 이력', 'validation history')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} validation history failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('검증 이력 조회 실패: ', 'validation history failed: ')}` + e.message;
       }
     }
 
@@ -1480,23 +1990,23 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       try {
         const body = buildLearningConfigPayload();
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/learning/config', body);
-        document.getElementById('lastMessage').textContent = `${name} learning config applied`;
-        showProfileResult(`${name} learning config`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('학습 설정을 적용했습니다.', 'learning config applied')}`;
+        showProfileResult(`${name} ${mtr('학습 설정', 'learning config')}`, payload);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} learning config failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('학습 설정 적용 실패: ', 'learning config failed: ')}` + e.message;
       }
     }
 
     async function loadStrategyBotProfile(name) {
       const strategyId = String(document.getElementById('strategyIdInput').value || '').trim();
       if (!strategyId) {
-        document.getElementById('lastMessage').textContent = 'Enter strategy id';
+        document.getElementById('lastMessage').textContent = mt('message.enterStrategyId');
         return;
       }
       try {
         const payload = await apiGet('/api/profile/' + encodeURIComponent(name) + '/strategy-bot?strategy_id=' + encodeURIComponent(strategyId));
-        document.getElementById('lastMessage').textContent = `${name} strategy bot loaded`;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('전략 Bot 설정을 불러왔습니다.', 'strategy bot loaded')}`;
         if (payload && typeof payload === 'object') {
           if (payload.bot_type) {
             document.getElementById('strategyBotTypeInput').value = String(payload.bot_type);
@@ -1509,9 +2019,9 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
           }
           hydrateStrategyBeginnerFromPayload(payload);
         }
-        showProfileResult(`${name} strategy bot load`, payload);
+        showProfileResult(`${name} ${mtr('전략 Bot 불러오기', 'strategy bot load')}`, payload);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} strategy bot load failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('전략 Bot 불러오기 실패: ', 'strategy bot load failed: ')}` + e.message;
       }
     }
 
@@ -1519,15 +2029,16 @@ def create_multi_dashboard_app(multi_config_path: str = "configs/multi_accounts.
       try {
         const body = buildStrategyBotPayload();
         const payload = await apiPost('/api/profile/' + encodeURIComponent(name) + '/strategy-bot', body);
-        document.getElementById('lastMessage').textContent = `${name} strategy bot applied`;
-        showProfileResult(`${name} strategy bot apply`, payload);
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('전략 Bot 설정을 적용했습니다.', 'strategy bot applied')}`;
+        showProfileResult(`${name} ${mtr('전략 Bot 적용', 'strategy bot apply')}`, payload);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = `${name} strategy bot apply failed: ` + e.message;
+        document.getElementById('lastMessage').textContent = `${name} ${mtr('전략 Bot 적용 실패: ', 'strategy bot apply failed: ')}` + e.message;
       }
     }
 
     window.addEventListener('load', () => {
+      loadMultiDisplay();
       initTabs();
       setView(currentView);
       setStrategyJsonEditorVisible();

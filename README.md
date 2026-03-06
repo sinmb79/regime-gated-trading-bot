@@ -11,15 +11,20 @@
 
 ## 실행 방법
 
-> 모든 실행은 아래 폴더를 기준으로 합니다.
-> `D:\신명범(25.07.01.~)\개인파일\매매봇`
+> 모든 실행은 프로젝트 루트 폴더를 기준으로 합니다.
+> 아래 예시의 `<PROJECT_ROOT>`는 사용자가 실제로 설치한 경로로 바꿔야 합니다.
+> 설치형 원클릭 배포를 사용했다면 기본 경로는 `%LOCALAPPDATA%\BossTradingSystem` 입니다.
 
 이 프로젝트는 `scripts` 폴더의 런처가 먼저 프로젝트 전용 가상환경(`.venv`)을 만들고, 의존성 설치를 보강한 뒤 실행합니다.
 
-### 1) CLI 단발/반복 실행
+### 1) CLI 단발/반복 실행(고급)
+
+`py -m trading_system.main ...`는 Windows Python Launcher로 모듈을 직접 실행하는 고급 방식입니다.
+일반 사용자는 바로 아래 `원클릭 실행`을 권장합니다.
 
 ```powershell
-Set-Location "D:\신명범(25.07.01.~)\개인파일\매매봇"
+Set-Location "<PROJECT_ROOT>"
+$env:PYTHONPATH = (Resolve-Path ".\src")
 py -m trading_system.main --config configs/default.json --mode dry
 ```
 
@@ -276,6 +281,13 @@ $env:TRADING_SYSTEM_PYTHON = "C:\Python311\python.exe"
 - Python이 경로에서 보이지 않으면: `TRADING_SYSTEM_PYTHON`을 절대 경로로 지정
 - PowerShell 차단 환경: `scripts/*.bat`는 PowerShell을 호출하지 않고 Python을 직접 실행합니다.
 - 첫 화면이 바로 안 뜨면: 설정 파일/권한 에러 메시지를 그대로 공유
+
+직접 `py -m trading_system.main ...` 형식의 CLI 명령을 사용할 때는 같은 PowerShell 세션에서 아래를 먼저 실행합니다.
+
+```powershell
+Set-Location "<PROJECT_ROOT>"
+$env:PYTHONPATH = (Resolve-Path ".\src")
+```
 
 ### 5) 백테스트/워크포워드 검증
 

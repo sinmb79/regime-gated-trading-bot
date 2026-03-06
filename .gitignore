@@ -10,4 +10,6 @@ logs/
 .venv/
 backups/
 data/tmp_smoke/
+data/validation/
+configs/data/validation/
 *.log

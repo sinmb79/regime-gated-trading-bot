@@ -184,6 +184,10 @@
     "telegram_chat_id": "",
     "include_reject_summary": true
   },
+  "ui": {
+    "style_preset": "premium",
+    "language": "ko"
+  },
   "validation_gate": {
     "enforce_for_live": true,
     "enforce_for_auto_learning": true,

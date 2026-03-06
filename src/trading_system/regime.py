@@ -24,17 +24,19 @@ def _f(v: Any, default: float = 0.0) -> float:
 
 
 def _metrics_from_market_like(rows: list[Any]) -> tuple[float, float, float, float, float]:
-    momentum = [_f(getattr(x, "momentum_7d", 0.0), 0.0) for x in rows]
-    volatility = [_f(getattr(x, "volatility", 0.0), 0.0) for x in rows]
-    spread = [_f(getattr(x, "spread_bps", 0.0), 0.0) for x in rows]
-    kalman_trend = [_f(getattr(x, "features", {}).get("kalman_trend_score", 0.0), 0.0) for x in rows]
-    kalman_shock = [abs(_f(getattr(x, "features", {}).get("kalman_innovation_z", 0.0), 0.0)) for x in rows]
+    market_rows = [x for x in rows if hasattr(x, "momentum_7d")]
+    momentum = [_f(getattr(x, "momentum_7d", 0.0), 0.0) for x in market_rows]
+    volatility = [_f(getattr(x, "volatility", 0.0), 0.0) for x in market_rows]
+    spread = [_f(getattr(x, "spread_bps", 0.0), 0.0) for x in market_rows]
+    kalman_trend = [_f(getattr(x, "features", {}).get("kalman_trend_score", 0.0), 0.0) for x in market_rows]
+    kalman_shock = [abs(_f(getattr(x, "features", {}).get("kalman_innovation_z", 0.0), 0.0)) for x in market_rows]
     if not momentum or not volatility or not spread:
         return 0.0, 0.0, 0.0, 0.0, 0.0
     return mean(momentum), mean(volatility), mean(spread), mean(kalman_trend), mean(kalman_shock)
 
 
 def _metrics_from_ohlcv_like(rows: list[Any]) -> tuple[float, float, float, float, float]:
+    rows = [x for x in rows if hasattr(x, "close")]
     closes: list[float] = []
     returns: list[float] = []
     spreads: list[float] = []
@@ -67,6 +69,11 @@ def _metrics_from_ohlcv_like(rows: list[Any]) -> tuple[float, float, float, floa
     return avg_momentum, avg_vol, avg_spread, 0.0, 0.0
 
 
+def _blend(primary: float, secondary: float, primary_weight: float = 0.65) -> float:
+    weight = max(0.0, min(1.0, float(primary_weight)))
+    return (primary * weight) + (secondary * (1.0 - weight))
+
+
 def classify_market_regime(symbol: str, snapshots: List[Any]) -> MarketRegime:
     if not snapshots:
         return MarketRegime(
@@ -78,10 +85,19 @@ def classify_market_regime(symbol: str, snapshots: List[Any]) -> MarketRegime:
         )
 
     rows = list(snapshots)
-    if hasattr(rows[0], "momentum_7d"):
-        avg_momentum, avg_vol, avg_spread, avg_kalman_trend, avg_kalman_shock = _metrics_from_market_like(rows)
+    market_rows = [row for row in rows if hasattr(row, "momentum_7d")]
+    ohlcv_rows = [row for row in rows if hasattr(row, "close")]
+
+    if market_rows and ohlcv_rows:
+        market_momentum, market_vol, market_spread, avg_kalman_trend, avg_kalman_shock = _metrics_from_market_like(market_rows)
+        ohlcv_momentum, ohlcv_vol, ohlcv_spread, _, _ = _metrics_from_ohlcv_like(ohlcv_rows)
+        avg_momentum = _blend(market_momentum, ohlcv_momentum, primary_weight=0.65)
+        avg_vol = _blend(market_vol, ohlcv_vol, primary_weight=0.55)
+        avg_spread = _blend(market_spread, ohlcv_spread, primary_weight=0.60)
+    elif market_rows:
+        avg_momentum, avg_vol, avg_spread, avg_kalman_trend, avg_kalman_shock = _metrics_from_market_like(market_rows)
     else:
-        avg_momentum, avg_vol, avg_spread, avg_kalman_trend, avg_kalman_shock = _metrics_from_ohlcv_like(rows)
+        avg_momentum, avg_vol, avg_spread, avg_kalman_trend, avg_kalman_shock = _metrics_from_ohlcv_like(ohlcv_rows)
 
     # Momentum + Kalman trend fusion with uncertainty penalty.
     trend_score = (avg_momentum * 72.0) + (avg_kalman_trend * 36.0) - (avg_vol * 18.0) - (avg_kalman_shock * 2.0)

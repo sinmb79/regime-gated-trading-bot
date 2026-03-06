@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from .config import AppConfig
+from .path_display import portable_path
 
 
 def _parse_iso(ts: str) -> datetime | None:
@@ -43,16 +44,18 @@ def evaluate_validation_gate(config: AppConfig, base_dir: str | Path | None = No
     enforced = bool(cfg.enforce_for_live or cfg.enforce_for_auto_learning)
     bypassed, bypass_reason = _resolve_bypass(config)
 
+    root = Path(base_dir) if base_dir else Path.cwd()
     report_path = Path(cfg.report_path)
     if not report_path.is_absolute():
-        root = Path(base_dir) if base_dir else Path.cwd()
         report_path = (root / report_path).resolve()
+    else:
+        report_path = report_path.resolve()
 
     result: Dict[str, Any] = {
         "enabled": enforced,
         "passed": True,
         "status": "disabled",
-        "report_path": str(report_path),
+        "report_path": portable_path(report_path, base_dir=root),
         "report_exists": False,
         "report_timestamp": None,
         "report_age_days": None,

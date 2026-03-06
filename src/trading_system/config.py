@@ -122,6 +122,12 @@ class NotificationConfig:
 
 
 @dataclass(frozen=True)
+class UIConfig:
+    style_preset: str = "premium"
+    language: str = "ko"
+
+
+@dataclass(frozen=True)
 class ValidationGateConfig:
     enforce_for_live: bool = True
     enforce_for_auto_learning: bool = True
@@ -183,6 +189,7 @@ class AppConfig:
     llm: LLMConfig
     journal: JournalConfig
     notifications: NotificationConfig
+    ui: UIConfig
     validation_gate: ValidationGateConfig
     auto_learning: AutoLearningConfig
 
@@ -213,6 +220,7 @@ class AppConfig:
             llm=cls._with_defaults(LLMConfig, raw.get("llm", {})),
             journal=cls._with_defaults(JournalConfig, raw.get("journal", {})),
             notifications=cls._with_defaults(NotificationConfig, raw.get("notifications", {})),
+            ui=cls._with_defaults(UIConfig, raw.get("ui", {})),
             validation_gate=cls._with_defaults(ValidationGateConfig, raw.get("validation_gate", {})),
             auto_learning=cls._with_defaults(AutoLearningConfig, raw.get("auto_learning", {})),
         )
@@ -234,6 +242,7 @@ class AppConfig:
             llm=self.llm,
             journal=self.journal,
             notifications=self.notifications,
+            ui=self.ui,
             validation_gate=self.validation_gate,
             auto_learning=self.auto_learning,
         )

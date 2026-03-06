@@ -14,6 +14,7 @@ from .data import MockMarketDataCollector
 from .exchange import build_exchange
 from .journal import TradeJournal
 from .llm import LLMAdvisor
+from .path_display import portable_path
 from .pipeline import TradingOrchestrator
 from .preflight import evaluate_live_preflight
 from .validation_gate import evaluate_validation_gate
@@ -354,7 +355,7 @@ def run_backtest_validation(config: AppConfig, args: argparse.Namespace) -> dict
         gate = _evaluate_gate(metrics, args)
         return {
             "mode": "backtest",
-            "journal_path": journal_path,
+            "journal_path": portable_path(journal_path, base_dir=Path.cwd()),
             "config_mode": run_cfg.mode,
             "cycles": cycles,
             "seed": int(args.validation_seed),
@@ -441,7 +442,7 @@ def run_walk_forward_validation(config: AppConfig, args: argparse.Namespace) -> 
                     "window": idx + 1,
                     "train_cycles": train_cycles,
                     "test_cycles": test_cycles,
-                    "journal_path": test_journal_path,
+                    "journal_path": portable_path(test_journal_path, base_dir=Path.cwd()),
                     "applied_tuning": [
                         {
                             "strategy": getattr(t, "strategy", ""),
@@ -473,7 +474,7 @@ def run_walk_forward_validation(config: AppConfig, args: argparse.Namespace) -> 
     overall_gate = _evaluate_gate(overall_metrics, args)
     return {
         "mode": "walk_forward",
-        "journal_path": journal_path,
+        "journal_path": portable_path(journal_path, base_dir=Path.cwd()),
         "windows": windows,
         "train_cycles": train_cycles,
         "test_cycles": test_cycles,
@@ -490,7 +491,7 @@ def run_validation(config_path: str, args: argparse.Namespace) -> dict[str, Any]
     config = AppConfig.from_file(config_path)
     report: dict[str, Any] = {
         "timestamp": datetime.utcnow().isoformat(),
-        "config_path": str(Path(config_path).resolve()),
+        "config_path": portable_path(config_path, base_dir=Path.cwd()),
         "validation": {},
     }
 
@@ -726,7 +727,7 @@ def main() -> None:
         for out in dedup:
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(report_json, encoding="utf-8")
-            print(f"[validation] report saved: {out}")
+            print(f"[validation] report saved: {portable_path(out, base_dir=Path.cwd())}")
 
         try:
             cfg = AppConfig.from_file(str(config_path))
@@ -738,10 +739,10 @@ def main() -> None:
                 snapshot = save_validation_snapshot(
                     report=report,
                     history_path=history_out,
-                    source_path=str(dedup[0]) if dedup else "",
+                    source_path=portable_path(dedup[0], base_dir=Path.cwd()) if dedup else "",
                 )
                 print(
-                    f"[validation] history appended: {history_out} "
+                    f"[validation] history appended: {portable_path(history_out, base_dir=Path.cwd())} "
                     f"(overall_passed={snapshot.get('overall_passed')}, ts={snapshot.get('timestamp')})"
                 )
         except Exception as exc:

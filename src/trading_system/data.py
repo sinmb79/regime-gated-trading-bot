@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from random import gauss
+from random import Random
 from statistics import mean, pstdev
 from typing import Deque, Dict, List, Optional
 
@@ -40,6 +40,7 @@ class MockMarketDataCollector(DataCollector):
     def __init__(self, seed: int = 42, symbols: Optional[List[str]] = None):
         self._rng_seed = seed
         self._rng_state = seed
+        self._rng = Random(seed)
         self._clock = datetime.utcnow().replace(second=0, microsecond=0)
         self._trend_state: Dict[str, float] = {}
         self._kalman: Dict[str, KalmanTrendTracker] = {}
@@ -85,12 +86,12 @@ class MockMarketDataCollector(DataCollector):
             vol = 0.006
 
         trend = float(self._trend_state.get(symbol, 0.0))
-        trend = (trend * 0.86) + gauss(0.0, vol * 0.22)
+        trend = (trend * 0.86) + self._rng.gauss(0.0, vol * 0.22)
         trend_cap = vol * 2.8
         trend = max(-trend_cap, min(trend_cap, trend))
         self._trend_state[symbol] = trend
 
-        noise = gauss(0.0, vol * 0.45)
+        noise = self._rng.gauss(0.0, vol * 0.45)
         cyclical = (i % 7 - 3) * 0.00008
         shock = trend + noise + cyclical
         return max(0.01, last * (1 + shock))

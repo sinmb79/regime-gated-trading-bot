@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Dict, List
 
-from .domain import MarketRegime, RegimeType, RiskDecision, StrategySignal
+from .domain import MarketRegime, RegimeType, RiskDecision, SignalDirection, StrategySignal
 
 
 @dataclass
@@ -48,6 +48,14 @@ class RiskEngine:
         self.max_consecutive_losses = max_consecutive_losses
         self.max_reject_ratio = max_reject_ratio
 
+    @staticmethod
+    def _direction_sign(direction: SignalDirection) -> int:
+        if direction == SignalDirection.BUY:
+            return 1
+        if direction == SignalDirection.SELL:
+            return -1
+        return 0
+
     def evaluate(
         self,
         signal: StrategySignal,
@@ -71,7 +79,7 @@ class RiskEngine:
         if signal.leverage > self.max_leverage:
             reasons.append("leverage_over_limit")
 
-        if signal.direction == "HOLD":
+        if signal.direction == SignalDirection.HOLD:
             reasons.append("no_direction")
 
         if regime.regime == RegimeType.PANIC:
@@ -88,12 +96,6 @@ class RiskEngine:
 
         total_exposure = sum(abs(x) for x in account.open_positions.values())
         equity_base = max(account.equity_usdt, 1.0)
-        if total_exposure / equity_base > self.max_total_exposure:
-            reasons.append("total_exposure_limit")
-
-        symbol_exposure = abs(account.open_positions.get(signal.symbol, 0.0))
-        if symbol_exposure / equity_base > self.max_symbol_exposure:
-            reasons.append("symbol_exposure_limit")
 
         if len(account.open_positions) >= self.max_open_positions and signal.symbol not in account.open_positions:
             reasons.append("position_count_limit")
@@ -108,8 +110,7 @@ class RiskEngine:
         if signal.meta.get("volatility", 0.0) > 0.12:
             reasons.append("high_volatility_cut")
 
-        allowed = not reasons
-        adjusted_ratio = signal.position_size_ratio
+        adjusted_ratio = max(0.0, float(signal.position_size_ratio or 0.0))
 
         if account.consecutive_loss_count >= 2:
             adjusted_ratio *= 0.7
@@ -120,8 +121,20 @@ class RiskEngine:
         if kalman_shock > 3.0:
             adjusted_ratio *= 0.85
 
+        signal_sign = self._direction_sign(signal.direction)
+        proposed_notional = max(0.0, adjusted_ratio) * equity_base
+        current_symbol_notional = float(account.open_positions.get(signal.symbol, 0.0) or 0.0)
+        proposed_symbol_notional = current_symbol_notional + (proposed_notional * signal_sign)
+        proposed_total_exposure = total_exposure - abs(current_symbol_notional) + abs(proposed_symbol_notional)
+
+        if proposed_total_exposure / equity_base > self.max_total_exposure:
+            reasons.append("total_exposure_limit")
+
+        if abs(proposed_symbol_notional) / equity_base > self.max_symbol_exposure:
+            reasons.append("symbol_exposure_limit")
+
         return RiskDecision(
-            allowed=allowed,
+            allowed=not reasons,
             reasons=reasons,
             adjusted_position_ratio=max(0.0, adjusted_ratio),
             adjusted_leverage=min(signal.leverage, self.max_leverage),

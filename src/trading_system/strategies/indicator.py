@@ -57,6 +57,9 @@ class BollingerReversionStrategy(TradingStrategy):
                 meta={
                     "bb_z": z_score,
                     "width_ratio": width,
+                    "volatility": snapshot.volatility,
+                    "spread_bps": snapshot.spread_bps,
+                    "momentum": snapshot.momentum_7d,
                     "regime": regime.regime.value,
                     "kalman_trend_score": kalman["trend_score"],
                     "kalman_innovation_z": kalman["innovation_z"],
@@ -125,6 +128,9 @@ class EmaCrossoverStrategy(TradingStrategy):
                     "ema_fast": ema_fast,
                     "ema_slow": ema_slow,
                     "spread": spread,
+                    "volatility": snapshot.volatility,
+                    "spread_bps": snapshot.spread_bps,
+                    "momentum": snapshot.momentum_7d,
                     "regime": regime.regime.value,
                     "kalman_trend_score": k_trend,
                     "kalman_innovation_z": kalman["innovation_z"],
@@ -183,6 +189,8 @@ class VolumeBreakoutStrategy(TradingStrategy):
                 meta={
                     "volume_ratio": ratio,
                     "momentum": snapshot.momentum_7d,
+                    "volatility": snapshot.volatility,
+                    "spread_bps": snapshot.spread_bps,
                     "regime": regime.regime.value,
                     "kalman_trend_score": k_trend,
                     "kalman_innovation_z": kalman["innovation_z"],

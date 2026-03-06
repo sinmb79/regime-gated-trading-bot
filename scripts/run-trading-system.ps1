@@ -39,16 +39,17 @@ function Resolve-SystemPython {
         Write-Warning "TRADING_SYSTEM_PYTHON가 경로와 맞지 않습니다. 무시하고 기본 탐색으로 진행합니다: $($env:TRADING_SYSTEM_PYTHON)"
     }
 
-    if (Test-Path -Path $venvPython -PathType Leaf) {
-        return @{ Exe = $venvPython; Args = @() }
-    }
-
     $command = Get-Command py -ErrorAction SilentlyContinue
     if ($command) {
         return @{ Exe = $command.Source; Args = @('-3') }
     }
 
     $command = Get-Command python -ErrorAction SilentlyContinue
+    if ($command) {
+        return @{ Exe = $command.Source; Args = @() }
+    }
+
+    $command = Get-Command python3 -ErrorAction SilentlyContinue
     if ($command) {
         return @{ Exe = $command.Source; Args = @() }
     }
@@ -64,19 +65,43 @@ function Invoke-Python {
     & $Runtime.Exe @($Runtime.Args + $Arguments)
 }
 
+function Test-PythonRuntime {
+    param(
+        [string]$ExePath,
+        [string[]]$Args = @()
+    )
+
+    if (-not $ExePath -or -not (Test-Path -Path $ExePath -PathType Leaf)) {
+        return $false
+    }
+
+    try {
+        & $ExePath @($Args + @('-c', 'import sys; sys.exit(0)')) *> $null
+        return ($LASTEXITCODE -eq 0)
+    } catch {
+        return $false
+    }
+}
+
 function Ensure-VenvAndDeps {
-    $runtime = Resolve-SystemPython
+    if (Test-PythonRuntime -ExePath $venvPython) {
+        $runtime = @{ Exe = $venvPython; Args = @() }
+    } else {
+        $runtime = Resolve-SystemPython
+        $rebuildArgs = @('-m', 'venv')
+        if (Test-Path -Path $venvDir -PathType Container) {
+            Write-Warning "기존 .venv가 손상되어 재생성합니다: $venvDir"
+            $rebuildArgs += '--clear'
+        } else {
+            Write-Host "가상환경이 없어서 생성합니다: $venvDir"
+        }
+        $rebuildArgs += $venvDir
+        Invoke-Python -Runtime $runtime -Arguments $rebuildArgs
 
-    if (-not (Test-Path -Path $venvPython -PathType Leaf)) {
-        Write-Host "가상환경이 없어서 생성합니다: $venvDir"
-        Invoke-Python -Runtime $runtime -Arguments @('-m', 'venv', $venvDir)
-
-        if (-not (Test-Path -Path $venvPython -PathType Leaf)) {
+        if (-not (Test-PythonRuntime -ExePath $venvPython)) {
             throw 'venv 생성에 실패했습니다. Python 3.11+ 설치 및 권한을 확인하세요.'
         }
 
-        $runtime = @{ Exe = $venvPython; Args = @() }
-    } elseif ($runtime.Exe -ne $venvPython) {
         $runtime = @{ Exe = $venvPython; Args = @() }
     }
 

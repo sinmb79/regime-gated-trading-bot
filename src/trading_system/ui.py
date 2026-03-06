@@ -42,11 +42,20 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       --warn: #f59e0b;
       --bad: #f87171;
       --accent: #3b82f6;
+      --surface: #070f24;
+      --surface-soft: rgba(8, 14, 28, 0.7);
+      --field-surface: rgba(7, 15, 36, 0.9);
+      --soft-border: #2f4166;
+      --mini-btn-bg: #243a66;
+      --mini-btn-border: #3f5b89;
+      --muted-box-bg: rgba(8, 15, 32, 0.72);
+      --muted-box-line: #45628f;
+      --font-ui: "Pretendard", "Apple SD Gothic Neo", Arial, sans-serif;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Pretendard", "Apple SD Gothic Neo", Arial, sans-serif;
+      font-family: var(--font-ui);
       color: var(--text);
       background: var(--bg);
     }
@@ -71,10 +80,10 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     }
     .metric {
-      border: 1px solid #314267;
+      border: 1px solid var(--soft-border);
       border-radius: 10px;
       padding: 10px;
-      background: rgba(8, 14, 28, 0.7);
+      background: var(--surface-soft);
     }
     .metric b { display: block; color: #bac7ea; font-size: 12px; margin-bottom: 6px; }
     .btn {
@@ -91,9 +100,9 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     .btn-good { background: #14b8a6; }
     textarea {
       width: 100%;
-      border: 1px solid #2f4166;
+      border: 1px solid var(--soft-border);
       border-radius: 10px;
-      background: #070f24;
+      background: var(--surface);
       color: #e5edff;
       padding: 10px;
       min-height: 260px;
@@ -106,7 +115,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       font-size: 13px;
     }
     th, td {
-      border-bottom: 1px solid #2f4166;
+      border-bottom: 1px solid var(--soft-border);
       padding: 7px;
       text-align: left;
       vertical-align: top;
@@ -117,10 +126,10 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     .warn { color: var(--warn); }
     .bad { color: var(--bad); }
     .canvas-wrap {
-      border: 1px solid #2f4166;
+      border: 1px solid var(--soft-border);
       border-radius: 10px;
       padding: 8px;
-      background: #070f24;
+      background: var(--surface);
       height: 220px;
     }
     canvas { width: 100%; height: 100%; }
@@ -138,8 +147,8 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     .step.warn { background: #41270f; color: #ffd28a; }
     .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     input {
-      background: #070f24;
-      border: 1px solid #2f4166;
+      background: var(--surface);
+      border: 1px solid var(--soft-border);
       color: #e5edff;
       border-radius: 10px;
       padding: 9px;
@@ -180,10 +189,10 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
     .field {
-      border: 1px solid #2f4166;
+      border: 1px solid var(--soft-border);
       border-radius: 10px;
       padding: 8px;
-      background: rgba(7, 15, 36, 0.9);
+      background: var(--field-surface);
     }
     .field label {
       font-size: 11px;
@@ -343,8 +352,8 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     .btn-mini {
       padding: 6px 10px;
       border-radius: 8px;
-      border: 1px solid #3f5b89;
-      background: #243a66;
+      border: 1px solid var(--mini-btn-border);
+      background: var(--mini-btn-bg);
       color: #e4ebff;
       font-size: 12px;
       cursor: pointer;
@@ -352,10 +361,10 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     .muted-box {
       color: #9fb0d0;
       font-size: 12px;
-      border: 1px dashed #45628f;
+      border: 1px dashed var(--muted-box-line);
       border-radius: 8px;
       padding: 6px;
-      background: rgba(8, 15, 32, 0.72);
+      background: var(--muted-box-bg);
     }
     .sketch-tab-view { display: none; }
     .sketch-tab-view.active { display: block; }
@@ -394,6 +403,85 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       min-width: 90px;
       padding: 6px;
     }
+    body.theme-style-premium {
+      background:
+        radial-gradient(circle at top, rgba(212, 166, 74, 0.18), transparent 34%),
+        radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.16), transparent 28%),
+        var(--bg);
+    }
+    body.theme-style-premium .panel {
+      box-shadow: 0 14px 36px rgba(0,0,0,0.34);
+    }
+    body.theme-style-simple {
+      background: linear-gradient(180deg, #111827, #0f172a 52%, #0b1220);
+    }
+    body.theme-style-simple .panel,
+    body.theme-style-simple .metric,
+    body.theme-style-simple .field,
+    body.theme-style-simple .sketch-card,
+    body.theme-style-simple .sketch-side-box,
+    body.theme-style-simple .sketch-label {
+      border-radius: 8px;
+      box-shadow: none;
+    }
+    body.theme-style-light {
+      background: linear-gradient(180deg, #f5f8fd, #e7eef8 48%, #dce7f4);
+      color: #0f172a;
+    }
+    body.theme-style-light .panel,
+    body.theme-style-light .metric,
+    body.theme-style-light .field,
+    body.theme-style-light .sketch-main,
+    body.theme-style-light .sketch-card,
+    body.theme-style-light .sketch-side,
+    body.theme-style-light .sketch-side-box,
+    body.theme-style-light .sketch-label,
+    body.theme-style-light .canvas-wrap {
+      background: rgba(255,255,255,0.92);
+      color: #0f172a;
+      border-color: #cfd8e5;
+      box-shadow: 0 12px 28px rgba(15,23,42,0.08);
+    }
+    body.theme-style-light textarea,
+    body.theme-style-light input,
+    body.theme-style-light .muted-box,
+    body.theme-style-light .step,
+    body.theme-style-light .btn-mini {
+      background: #f8fbff;
+      color: #0f172a;
+      border-color: #cfd8e5;
+    }
+    body.theme-style-light .sketch-tab {
+      background: #eef4fb;
+      color: #1f2d3d;
+      border-color: #c7d5e8;
+    }
+    body.theme-style-light th,
+    body.theme-style-light .metric b,
+    body.theme-style-light .step,
+    body.theme-style-light .field label {
+      color: #334155;
+    }
+    body.theme-style-terminal {
+      background:
+        radial-gradient(circle at top, rgba(34, 197, 94, 0.12), transparent 28%),
+        linear-gradient(180deg, #03110f, #071917 56%, #0a2620);
+    }
+    body.theme-style-terminal .panel,
+    body.theme-style-terminal .metric,
+    body.theme-style-terminal .field,
+    body.theme-style-terminal .sketch-main,
+    body.theme-style-terminal .sketch-card,
+    body.theme-style-terminal .sketch-side,
+    body.theme-style-terminal .sketch-side-box,
+    body.theme-style-terminal .sketch-label,
+    body.theme-style-terminal .canvas-wrap {
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.08), 0 18px 34px rgba(0,0,0,0.42);
+    }
+    body.theme-style-terminal .sketch-tab.active {
+      background: linear-gradient(135deg, #0f766e, #22c55e);
+      border-color: #6ee7b7;
+    }
     @media (max-width: 900px) {
       .sketch-layout { grid-template-columns: 1fr; }
       .sketch-row { grid-template-columns: 1fr; }
@@ -404,23 +492,23 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
 <body>
   <div class="wrap">
     <div class="panel">
-      <h1>AI 트레이딩 봇 운영 대시보드</h1>
+      <h1 data-i18n="title.main">AI 트레이딩 봇 운영 대시보드</h1>
       <div class="toolbar">
-        <button class="btn" onclick="runOnce()">1회 실행</button>
-        <button class="btn btn-good" onclick="startLoop()">자동 시작</button>
-        <button class="btn btn-danger" onclick="stopLoop()">중지</button>
-        <button class="btn btn-sub" onclick="runLiveReadiness()">실거래 준비 점검</button>
-        <button class="btn btn-sub" onclick="saveLiveReadinessReport()">점검 리포트 저장</button>
-        <button class="btn btn-sub" onclick="runLiveRehearsal()">실거래 리허설 계획</button>
-        <button class="btn btn-sub" onclick="saveLiveRehearsalReport()">리허설 리포트 저장</button>
-        <button class="btn btn-sub" onclick="runExchangeProbe()">거래소 파라미터 점검</button>
-        <button class="btn btn-sub" onclick="saveExchangeProbeReport()">거래소 점검 리포트 저장</button>
-        <button class="btn btn-sub" onclick="testLlmConnection()">AI 연결 테스트</button>
-        <input id="intervalInput" type="number" min="1" value="5" />초
-        <input id="liveConfirmTokenInput" type="text" placeholder="LIVE 시작 토큰" style="min-width:150px;" />
-        <button class="btn btn-sub" onclick="refreshAll()">새로고침</button>
+        <button class="btn" onclick="runOnce()" data-i18n="toolbar.runOnce">1회 실행</button>
+        <button class="btn btn-good" onclick="startLoop()" data-i18n="toolbar.autoStart">자동 시작</button>
+        <button class="btn btn-danger" onclick="stopLoop()" data-i18n="toolbar.stop">중지</button>
+        <button class="btn btn-sub" onclick="runLiveReadiness()" data-i18n="toolbar.readiness">실거래 준비 점검</button>
+        <button class="btn btn-sub" onclick="saveLiveReadinessReport()" data-i18n="toolbar.readinessReport">점검 리포트 저장</button>
+        <button class="btn btn-sub" onclick="runLiveRehearsal()" data-i18n="toolbar.rehearsal">실거래 리허설 계획</button>
+        <button class="btn btn-sub" onclick="saveLiveRehearsalReport()" data-i18n="toolbar.rehearsalReport">리허설 리포트 저장</button>
+        <button class="btn btn-sub" onclick="runExchangeProbe()" data-i18n="toolbar.exchangeProbe">거래소 파라미터 점검</button>
+        <button class="btn btn-sub" onclick="saveExchangeProbeReport()" data-i18n="toolbar.exchangeReport">거래소 점검 리포트 저장</button>
+        <button class="btn btn-sub" onclick="testLlmConnection()" data-i18n="toolbar.aiTest">AI 연결 테스트</button>
+        <input id="intervalInput" type="number" min="1" value="5" /><span data-i18n="unit.seconds">초</span>
+        <input id="liveConfirmTokenInput" type="text" placeholder="LIVE 시작 토큰" data-i18n-placeholder="placeholder.liveToken" style="min-width:150px;" />
+        <button class="btn btn-sub" onclick="refreshAll()" data-i18n="toolbar.refresh">새로고침</button>
       </div>
-      <div class="muted" style="margin-top:8px;">마지막 메시지: <span id="lastMessage">-</span></div>
+      <div class="muted" style="margin-top:8px;"><span id="lastMessageLabel" data-i18n="label.lastMessage">마지막 메시지</span>: <span id="lastMessage">-</span></div>
       <div id="flowArea" style="margin-top:8px;"></div>
       <div id="liveReadinessArea" style="margin-top:8px;"></div>
       <div id="liveRehearsalArea" style="margin-top:8px;"></div>
@@ -429,27 +517,27 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     </div>
 
     <div class="panel">
-      <h2>검증 리포트 비교 대시보드</h2>
+      <h2 data-i18n="title.validation">검증 리포트 비교 대시보드</h2>
       <div class="toolbar" style="margin-bottom:8px;">
-        <button class="btn btn-sub" onclick="triggerValidationAlertTest('warn')">검증 알람 테스트(경고)</button>
-        <button class="btn btn-sub" onclick="triggerValidationAlertTest('critical')">검증 알람 테스트(치명)</button>
+        <button class="btn btn-sub" onclick="triggerValidationAlertTest('warn')" data-i18n="validation.testWarn">검증 알람 테스트(경고)</button>
+        <button class="btn btn-sub" onclick="triggerValidationAlertTest('critical')" data-i18n="validation.testCritical">검증 알람 테스트(치명)</button>
       </div>
       <div class="grid" id="validationOverview"></div>
       <div id="validationAlertArea" style="margin-top:8px;"></div>
       <table style="margin-top:8px;">
         <thead>
           <tr>
-            <th>시각</th>
-            <th>전체통과</th>
-            <th>Backtest</th>
-            <th>WalkForward</th>
-            <th>PnL(USDT)</th>
-            <th>승률</th>
-            <th>MDD</th>
+            <th data-i18n="table.time">시각</th>
+            <th data-i18n="table.overallPassed">전체통과</th>
+            <th data-i18n="table.backtest">Backtest</th>
+            <th data-i18n="table.walkForward">WalkForward</th>
+            <th data-i18n="table.pnlUsdt">PnL(USDT)</th>
+            <th data-i18n="table.winRate">승률</th>
+            <th data-i18n="table.mdd">MDD</th>
           </tr>
         </thead>
         <tbody id="validationHistoryBody">
-          <tr><td colspan="7" class="muted">검증 이력 없음</td></tr>
+          <tr><td colspan="7" class="muted" data-i18n="validation.noHistory">검증 이력 없음</td></tr>
         </tbody>
       </table>
     </div>
@@ -457,56 +545,56 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     <div class="panel sketch-panel">
       <div class="sketch-header">
         <div class="sketch-tabs">
-          <button class="sketch-tab sketch-tab-cta active" data-tab="start" onclick="setSketchTab('start')">시작</button>
-          <button class="sketch-tab" data-tab="running" onclick="setSketchTab('running')">진행중인</button>
-          <button class="sketch-tab" data-tab="settings" onclick="setSketchTab('settings')">내설정</button>
-          <button class="sketch-tab" data-tab="api" onclick="setSketchTab('api')">연결 API</button>
-          <button class="sketch-tab" data-tab="logging" onclick="setSketchTab('logging')">로깅</button>
+          <button class="sketch-tab sketch-tab-cta active" data-tab="start" onclick="setSketchTab('start')" data-i18n="tab.start">시작</button>
+          <button class="sketch-tab" data-tab="running" onclick="setSketchTab('running')" data-i18n="tab.running">진행중인</button>
+          <button class="sketch-tab" data-tab="settings" onclick="setSketchTab('settings')" data-i18n="tab.settings">내설정</button>
+          <button class="sketch-tab" data-tab="api" onclick="setSketchTab('api')" data-i18n="tab.api">연결 API</button>
+          <button class="sketch-tab" data-tab="logging" onclick="setSketchTab('logging')" data-i18n="tab.logging">로깅</button>
         </div>
         <div class="sketch-statusline">
-          <span id="sketchRunStatus">실행: -</span>
-          <span id="sketchApiStatus">API: -</span>
-          <span id="sketchLoopStatus">자동: -</span>
+          <span id="sketchRunStatus" data-i18n="sketch.status.runIdle">실행: -</span>
+          <span id="sketchApiStatus" data-i18n="sketch.status.apiIdle">API: -</span>
+          <span id="sketchLoopStatus" data-i18n="sketch.status.loopIdle">자동: -</span>
         </div>
       </div>
       <div class="sketch-layout">
         <div class="sketch-main">
           <section id="tab-start" class="sketch-tab-view active">
             <div class="toolbar" style="margin-bottom:8px;">
-              <button class="btn btn-good" onclick="runOnce()">바로 1회 실행</button>
-              <button class="btn btn-sub" onclick="startLoop()">자동 시작</button>
-              <button class="btn btn-danger" onclick="stopLoop()">중지</button>
+              <button class="btn btn-good" onclick="runOnce()" data-i18n="sketch.action.runOnceNow">바로 1회 실행</button>
+              <button class="btn btn-sub" onclick="startLoop()" data-i18n="toolbar.autoStart">자동 시작</button>
+              <button class="btn btn-danger" onclick="stopLoop()" data-i18n="toolbar.stop">중지</button>
             </div>
             <div class="sketch-row">
-              <div class="sketch-label">시황 분석</div>
+              <div class="sketch-label" data-i18n="sketch.marketAnalysis">시황 분석</div>
               <div class="sketch-card">
                 <ul id="sketchMarketAnalysis" class="sketch-list">
-                  <li>데이터 대기 중...</li>
+                  <li data-i18n="sketch.waitingData">데이터 대기 중...</li>
                 </ul>
               </div>
             </div>
             <div class="sketch-note">
-              <b>* 근거1 (뉴스/심리):</b>
+              <b data-i18n="sketch.evidenceNews">* 근거1 (뉴스/심리):</b>
               <ul id="sketchMarketEvidence" class="sketch-list compact">
-                <li>아직 수집된 근거가 없습니다.</li>
+                <li data-i18n="sketch.noEvidenceYet">아직 수집된 근거가 없습니다.</li>
               </ul>
             </div>
             <div class="sketch-row">
-              <div class="sketch-label">매매 전략</div>
+              <div class="sketch-label" data-i18n="sketch.strategy">매매 전략</div>
               <div class="sketch-card">
                 <ul id="sketchStrategyList" class="sketch-list">
-                  <li>전략 추천 대기 중...</li>
+                  <li data-i18n="sketch.waitingStrategy">전략 추천 대기 중...</li>
                 </ul>
               </div>
             </div>
             <div class="sketch-note">
-              <b>* 근거2:</b>
+              <b data-i18n="sketch.evidenceStrategy">* 근거2:</b>
               <ul id="sketchStrategyEvidence" class="sketch-list compact">
-                <li>전략 근거 대기 중...</li>
+                <li data-i18n="sketch.waitingStrategyEvidence">전략 근거 대기 중...</li>
               </ul>
             </div>
             <div class="sketch-row">
-              <div class="sketch-label">매매 봇</div>
+              <div class="sketch-label" data-i18n="sketch.bot">매매 봇</div>
               <div class="sketch-card">
                 <ul id="sketchBotList" class="sketch-list">
                   <li>Grid / Trend / Defensive / Funding Arb / Indicator</li>
@@ -517,47 +605,47 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
 
           <section id="tab-running" class="sketch-tab-view">
             <div class="sketch-row">
-              <div class="sketch-label">실시간 모니터링</div>
+              <div class="sketch-label" data-i18n="sketch.monitoring">실시간 모니터링</div>
               <div class="sketch-card">
                 <table class="sketch-mini-table">
                   <thead>
                     <tr>
-                      <th>일시</th><th>종목</th><th>전략</th><th>상태</th><th>PnL</th>
+                      <th data-i18n="table.datetime">일시</th><th data-i18n="table.symbol">종목</th><th data-i18n="table.strategy">전략</th><th data-i18n="table.status">상태</th><th data-i18n="table.pnl">PnL</th>
                     </tr>
                   </thead>
                   <tbody id="sketchMonitorBody">
-                    <tr><td colspan="5" class="muted">체결 데이터 대기 중...</td></tr>
+                    <tr><td colspan="5" class="muted" data-i18n="sketch.waitingExecutionData">체결 데이터 대기 중...</td></tr>
                   </tbody>
                 </table>
-                <div id="sketchErrorLine" class="sketch-error-line">오류 점검: 정상</div>
+                <div id="sketchErrorLine" class="sketch-error-line" data-i18n="sketch.errorNormal">오류 점검: 정상</div>
               </div>
             </div>
             <div class="sketch-note">
-              <b>* 진행 상태:</b>
+              <b data-i18n="sketch.progressState">* 진행 상태:</b>
               <ul id="sketchRunningMeta" class="sketch-list compact">
-                <li>주기/상태 데이터 대기 중...</li>
+                <li data-i18n="sketch.waitingCycleState">주기/상태 데이터 대기 중...</li>
               </ul>
             </div>
           </section>
 
           <section id="tab-settings" class="sketch-tab-view">
             <div class="sketch-row">
-              <div class="sketch-label">내 설정</div>
+              <div class="sketch-label" data-i18n="sketch.mySettings">내 설정</div>
               <div class="sketch-card">
                 <ul id="sketchSettingsSummary" class="sketch-list">
-                  <li>설정 요약 대기 중...</li>
+                  <li data-i18n="sketch.waitingConfigSummary">설정 요약 대기 중...</li>
                 </ul>
                 <div id="sketchStrategyEditor" style="margin-top:8px;">
-                  <div class="muted">전략 설정 로딩 중...</div>
+                  <div class="muted" data-i18n="sketch.loadingStrategyConfig">전략 설정 로딩 중...</div>
                 </div>
                 <div id="sketchRiskEditor" style="margin-top:10px;">
-                  <div class="muted">리스크 설정 로딩 중...</div>
+                  <div class="muted" data-i18n="sketch.loadingRiskConfig">리스크 설정 로딩 중...</div>
                 </div>
                 <div class="toolbar" style="margin-top:8px;">
-                  <button class="btn btn-good" onclick="saveSketchStrategyConfig()">전략 설정 저장</button>
-                  <button class="btn btn-good" onclick="saveSketchRiskConfig()">리스크 설정 저장</button>
-                  <button class="btn btn-sub" onclick="goToConfig()">설정 JSON 이동</button>
-                  <button class="btn btn-sub" onclick="loadConfig()">설정 다시 로드</button>
+                  <button class="btn btn-good" onclick="saveSketchStrategyConfig()" data-i18n="button.saveStrategyConfig">전략 설정 저장</button>
+                  <button class="btn btn-good" onclick="saveSketchRiskConfig()" data-i18n="button.saveRiskConfig">리스크 설정 저장</button>
+                  <button class="btn btn-sub" onclick="goToConfig()" data-i18n="button.goToConfig">설정 JSON 이동</button>
+                  <button class="btn btn-sub" onclick="loadConfig()" data-i18n="button.reloadConfig">설정 다시 로드</button>
                 </div>
               </div>
             </div>
@@ -565,36 +653,36 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
 
           <section id="tab-api" class="sketch-tab-view">
             <div class="sketch-row">
-              <div class="sketch-label">API 상태</div>
+              <div class="sketch-label" data-i18n="sketch.apiStatus">API 상태</div>
               <div class="sketch-card">
                 <ul id="sketchApiDetails" class="sketch-list">
-                  <li>API 연결 상태 대기 중...</li>
+                  <li data-i18n="sketch.waitingApiStatus">API 연결 상태 대기 중...</li>
                 </ul>
                 <div class="toolbar" style="margin-top:8px;">
-                  <button class="btn btn-sub" onclick="runExchangeProbe()">거래소 파라미터 점검</button>
-                  <button class="btn btn-sub" onclick="testLlmConnection()">AI 연결 테스트</button>
+                  <button class="btn btn-sub" onclick="runExchangeProbe()" data-i18n="toolbar.exchangeProbe">거래소 파라미터 점검</button>
+                  <button class="btn btn-sub" onclick="testLlmConnection()" data-i18n="toolbar.aiTest">AI 연결 테스트</button>
                 </div>
-                <div id="llmTestResult" class="muted-box" style="margin-top:8px;">아직 테스트를 실행하지 않았습니다.</div>
+                <div id="llmTestResult" class="muted-box" style="margin-top:8px;" data-i18n="sketch.noAiTestYet">아직 테스트를 실행하지 않았습니다.</div>
               </div>
             </div>
           </section>
 
           <section id="tab-logging" class="sketch-tab-view">
             <div class="sketch-row">
-              <div class="sketch-label">운영 로깅</div>
+              <div class="sketch-label" data-i18n="sketch.opsLogging">운영 로깅</div>
               <div class="sketch-card">
                 <table class="sketch-mini-table">
                   <thead>
                     <tr>
-                      <th>시간</th><th>종목</th><th>상태</th><th>사유</th>
+                      <th data-i18n="table.time">시간</th><th data-i18n="table.symbol">종목</th><th data-i18n="table.status">상태</th><th data-i18n="table.reason">사유</th>
                     </tr>
                   </thead>
                   <tbody id="sketchLogBody">
-                    <tr><td colspan="4" class="muted">로그 데이터 대기 중...</td></tr>
+                    <tr><td colspan="4" class="muted" data-i18n="sketch.waitingLogData">로그 데이터 대기 중...</td></tr>
                   </tbody>
                 </table>
                 <div class="toolbar" style="margin-top:8px;">
-                  <button class="btn btn-sub" onclick="goToLogging()">상세 실행내역 이동</button>
+                  <button class="btn btn-sub" onclick="goToLogging()" data-i18n="button.goToExecutions">상세 실행내역 이동</button>
                 </div>
               </div>
             </div>
@@ -602,99 +690,115 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         </div>
 
         <aside class="sketch-side">
-          <h3>소스 연동</h3>
+          <h3 data-i18n="side.sourceIntegration">소스 연동</h3>
           <div class="sketch-side-box">
-            <b>심리 분석/리서치 소스</b>
+            <b data-i18n="side.researchSources">심리 분석/리서치 소스</b>
             <ul class="sketch-list compact">
               <li>TradingView</li>
               <li>Google Trends</li>
               <li>VIX 지수</li>
             </ul>
-            <div class="muted-box">사용자 소스는 아래에서 커스텀으로 추가합니다.</div>
+            <div class="muted-box" data-i18n="side.researchSourcesHelp">사용자 소스는 아래에서 커스텀으로 추가합니다.</div>
           </div>
           <div class="sketch-side-box">
-            <b>사용자 커스텀 소스</b>
+            <b data-i18n="side.customSources">사용자 커스텀 소스</b>
             <div class="sketch-inline">
-              <input id="sketchSourceInput" type="text" placeholder="예: https://example.com/feed" />
-              <button class="btn-mini" onclick="addSketchSource()">추가</button>
+              <input id="sketchSourceInput" type="text" placeholder="예: https://example.com/feed" data-i18n-placeholder="placeholder.customSource" />
+              <button class="btn-mini" onclick="addSketchSource()" data-i18n="button.add">추가</button>
             </div>
             <ul id="sketchSourceCustom" class="sketch-list compact">
-              <li>등록된 커스텀 소스가 없습니다.</li>
+              <li data-i18n="side.noCustomSources">등록된 커스텀 소스가 없습니다.</li>
             </ul>
           </div>
           <div class="sketch-side-box">
-            <b>사용자 전략 메모</b>
-            <textarea id="sketchStrategyMemo" rows="5" style="min-height:120px;" placeholder="사용자 전략 아이디어/규칙을 메모하세요."></textarea>
+            <b data-i18n="side.strategyMemo">사용자 전략 메모</b>
+            <textarea id="sketchStrategyMemo" rows="5" style="min-height:120px;" placeholder="사용자 전략 아이디어/규칙을 메모하세요." data-i18n-placeholder="placeholder.strategyMemo"></textarea>
             <div class="sketch-inline">
-              <button class="btn-mini" onclick="saveSketchMemo()">메모 저장</button>
+              <button class="btn-mini" onclick="saveSketchMemo()" data-i18n="button.saveMemo">메모 저장</button>
             </div>
           </div>
           <div class="sketch-side-box">
-            <b>UI 색상</b>
+            <b data-i18n="side.uiStyle">UI 스타일</b>
             <div class="sketch-inline">
               <select id="themePreset">
-                <option value="ocean">Ocean</option>
-                <option value="mono">Mono</option>
-                <option value="forest">Forest</option>
-                <option value="sunset">Sunset</option>
+                <option value="premium" data-i18n="theme.premium">더 고급스럽게</option>
+                <option value="simple" data-i18n="theme.simple">더 단순하게</option>
+                <option value="light" data-i18n="theme.light">라이트 테마</option>
+                <option value="terminal" data-i18n="theme.terminal">거래소 터미널</option>
               </select>
-              <button class="btn-mini" onclick="applyThemePreset()">프리셋 적용</button>
+              <button class="btn-mini" onclick="applyThemePreset()" data-i18n="button.preview">미리보기</button>
+              <button class="btn-mini" onclick="saveThemeStyleConfig()" data-i18n="button.saveSetting">설정 저장</button>
             </div>
             <div class="theme-grid">
               <div>
-                <label for="themeBg1">배경 1</label>
+                <label for="themeBg1" data-i18n="theme.bg1">배경 1</label>
                 <input id="themeBg1" type="color" value="#0b1a36" />
               </div>
               <div>
-                <label for="themeBg2">배경 2</label>
+                <label for="themeBg2" data-i18n="theme.bg2">배경 2</label>
                 <input id="themeBg2" type="color" value="#12213f" />
               </div>
               <div>
-                <label for="themeBg3">배경 3</label>
+                <label for="themeBg3" data-i18n="theme.bg3">배경 3</label>
                 <input id="themeBg3" type="color" value="#1d2f56" />
               </div>
               <div>
-                <label for="themeAccent">강조색</label>
+                <label for="themeAccent" data-i18n="theme.accent">강조색</label>
                 <input id="themeAccent" type="color" value="#3b82f6" />
               </div>
               <div>
-                <label for="themePanel">패널색</label>
+                <label for="themePanel" data-i18n="theme.panel">패널색</label>
                 <input id="themePanel" type="color" value="#0c162d" />
               </div>
               <div>
-                <label for="themeLine">라인색</label>
+                <label for="themeLine" data-i18n="theme.line">라인색</label>
                 <input id="themeLine" type="color" value="#2f3e5c" />
               </div>
             </div>
             <div class="sketch-inline">
-              <button class="btn-mini" onclick="applyCustomTheme()">색상 적용</button>
-              <button class="btn-mini" onclick="resetTheme()">기본 복원</button>
+              <button class="btn-mini" onclick="applyCustomTheme()" data-i18n="button.applyColors">색상 적용</button>
+              <button class="btn-mini" onclick="resetTheme()" data-i18n="button.resetDefault">기본 복원</button>
             </div>
+          </div>
+          <div class="sketch-side-box">
+            <b data-i18n="side.language">언어 설정</b>
+            <div class="sketch-inline">
+              <select id="languagePreset">
+                <option value="ko">한국어</option>
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+                <option value="ja">日本語</option>
+                <option value="fr">Français</option>
+              </select>
+              <button class="btn-mini" onclick="applyLanguagePreview()" data-i18n="button.preview">미리보기</button>
+              <button class="btn-mini" onclick="saveLanguageConfig()" data-i18n="button.saveSetting">설정 저장</button>
+            </div>
+            <div class="muted-box" data-i18n="side.languageHelp">저장하면 이후 접속에도 선택 언어를 유지합니다.</div>
           </div>
         </aside>
       </div>
     </div>
 
     <div class="panel">
-      <h2>계정/포지션</h2>
+      <h2 data-i18n="title.account">계정/포지션</h2>
       <div class="grid" id="accountArea"></div>
       <div id="positionArea" class="muted"></div>
     </div>
 
     <div class="panel">
-      <h2>리스크 상태</h2>
+      <h2 data-i18n="title.risk">리스크 상태</h2>
       <div class="grid" id="riskGuardArea"></div>
       <div class="toolbar" style="margin-top:8px;">
-        <button id="clearRiskBtn" class="btn btn-sub" onclick="clearRiskHalt()" style="display:none;">리스크 해제</button>
+        <button id="clearRiskBtn" class="btn btn-sub" onclick="clearRiskHalt()" style="display:none;" data-i18n="button.clearRisk">리스크 해제</button>
       </div>
     </div>
 
     <div class="panel">
-      <h2>리스크 이벤트</h2>
+      <h2 data-i18n="title.riskEvents">리스크 이벤트</h2>
       <table>
         <thead>
           <tr>
-            <th>시간</th><th>이벤트</th><th>이전 사유</th><th>현재 사유</th><th>비고</th>
+            <th data-i18n="table.time">시간</th><th data-i18n="table.event">이벤트</th><th data-i18n="table.previousReason">이전 사유</th><th data-i18n="table.currentReason">현재 사유</th><th data-i18n="table.note">비고</th>
           </tr>
         </thead>
         <tbody id="riskEventBody"></tbody>
@@ -702,13 +806,13 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     </div>
 
     <div class="panel">
-      <h2>거부사유 운영 대시보드</h2>
+      <h2 data-i18n="title.rejectDashboard">거부사유 운영 대시보드</h2>
       <div id="rejectReasonAlertArea"></div>
       <div class="grid" id="rejectReasonSummary" style="margin-bottom: 8px;"></div>
       <table>
         <thead>
           <tr>
-            <th>거부사유</th><th>건수</th><th>비율</th><th>상태</th>
+            <th data-i18n="table.rejectReason">거부사유</th><th data-i18n="table.count">건수</th><th data-i18n="table.ratio">비율</th><th data-i18n="table.status">상태</th>
           </tr>
         </thead>
         <tbody id="rejectReasonBody"></tbody>
@@ -716,18 +820,18 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     </div>
 
     <div class="panel">
-      <h2>레짐 기반 전략 추천</h2>
+      <h2 data-i18n="title.regimeStrategy">레짐 기반 전략 추천</h2>
       <div id="strategyPlanSummary" class="grid" style="margin-bottom: 8px;"></div>
       <table>
         <thead>
           <tr>
-            <th>종목</th>
-            <th>레짐</th>
-            <th>전략</th>
-            <th>방향</th>
-            <th>점수</th>
-            <th>신뢰도</th>
-            <th>이유</th>
+            <th data-i18n="table.symbol">종목</th>
+            <th data-i18n="table.regime">레짐</th>
+            <th data-i18n="table.strategy">전략</th>
+            <th data-i18n="table.direction">방향</th>
+            <th data-i18n="table.score">점수</th>
+            <th data-i18n="table.confidence">신뢰도</th>
+            <th data-i18n="table.reason">이유</th>
           </tr>
         </thead>
         <tbody id="strategyPlanBody"></tbody>
@@ -735,31 +839,31 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     </div>
 
     <div class="panel">
-      <h2>수익 곡선</h2>
+      <h2 data-i18n="title.pnlCurve">수익 곡선</h2>
       <div class="canvas-wrap"><canvas id="pnlChart"></canvas></div>
       <div id="pnlSummary" class="muted" style="margin-top:6px;"></div>
     </div>
 
     <div class="panel">
-      <h2>실행 내역</h2>
+      <h2 data-i18n="title.executions">실행 내역</h2>
       <div class="toolbar" style="margin-bottom:8px; gap:6px;">
-        <span class="muted">상태</span>
+        <span class="muted" data-i18n="filter.status">상태</span>
         <select id="execStatusFilter" onchange="renderExecutions()">
-          <option value="">전체</option>
+          <option value="" data-i18n="filter.all">전체</option>
           <option value="filled">filled</option>
           <option value="partially_filled">partially_filled</option>
           <option value="rejected">rejected</option>
           <option value="cancelled">cancelled</option>
         </select>
-        <span class="muted">부분체결</span>
+        <span class="muted" data-i18n="filter.partialFill">부분체결</span>
         <select id="execPartialFilter" onchange="renderExecutions()">
-          <option value="">전체</option>
-          <option value="true">있음</option>
-          <option value="false">아님</option>
+          <option value="" data-i18n="filter.all">전체</option>
+          <option value="true" data-i18n="filter.hasValue">있음</option>
+          <option value="false" data-i18n="filter.notValue">아님</option>
         </select>
-        <span class="muted">거부사유</span>
+        <span class="muted" data-i18n="filter.rejectReason">거부사유</span>
         <select id="execRejectFilter" onchange="renderExecutions()">
-          <option value="">전체</option>
+          <option value="" data-i18n="filter.all">전체</option>
           <option value="risk_rejected">risk_rejected</option>
           <option value="invalid_position_size">invalid_position_size</option>
           <option value="insufficient_cash">insufficient_cash</option>
@@ -777,12 +881,12 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           <option value="exchange_reject">exchange_reject</option>
           <option value="unknown_reject">unknown_reject</option>
         </select>
-        <button class="btn btn-sub" onclick="renderExecutions()">조회</button>
+        <button class="btn btn-sub" onclick="renderExecutions()" data-i18n="button.query">조회</button>
       </div>
       <table>
         <thead>
           <tr>
-            <th>시간</th><th>전략</th><th>종목</th><th>방향</th><th>상태</th><th>요청금액(USDT)</th><th>체결금액(USDT)</th><th>레버리지</th><th>예상가</th><th>체결가</th><th>슬리피지(bps)</th><th>시도</th><th>재시도사유</th><th>수수료(USDT)</th><th>GrossPnL</th><th>NetPnL</th><th>레짐</th><th>진입근거</th><th>시장상태</th><th>슬리피지 원인</th>
+            <th data-i18n="table.time">시간</th><th data-i18n="table.strategy">전략</th><th data-i18n="table.symbol">종목</th><th data-i18n="table.direction">방향</th><th data-i18n="table.status">상태</th><th data-i18n="table.requestUsdt">요청금액(USDT)</th><th data-i18n="table.filledUsdt">체결금액(USDT)</th><th data-i18n="table.leverage">레버리지</th><th data-i18n="table.expectedPrice">예상가</th><th data-i18n="table.fillPrice">체결가</th><th data-i18n="table.slippageBps">슬리피지(bps)</th><th data-i18n="table.attempts">시도</th><th data-i18n="table.retryReason">재시도사유</th><th data-i18n="table.feeUsdt">수수료(USDT)</th><th data-i18n="table.grossPnl">GrossPnL</th><th data-i18n="table.netPnl">NetPnL</th><th data-i18n="table.regime">레짐</th><th data-i18n="table.entryReason">진입근거</th><th data-i18n="table.marketState">시장상태</th><th data-i18n="table.slippageCause">슬리피지 원인</th>
           </tr>
         </thead>
         <tbody id="executionBody"></tbody>
@@ -790,21 +894,21 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     </div>
 
     <div class="panel">
-      <h2>AI 복기/튜닝</h2>
+      <h2 data-i18n="title.learning">AI 복기/튜닝</h2>
       <div class="toolbar">
-        <span class="muted">회고 기간</span>
-        <input id="windowDays" type="number" min="1" max="60" value="14" />일
-        <button class="btn btn-sub" onclick="loadLearning()">분석 조회</button>
-        <button class="btn btn-sub" onclick="applyLearning('selected')">선택 전략 적용</button>
-        <button class="btn btn-good" onclick="applyLearning('all')">전체 제안 일괄 적용</button>
-        <button class="btn btn-sub" onclick="reviewLearningProposals('approve')">대기 제안 승인 적용</button>
-        <button class="btn btn-sub" onclick="reviewLearningProposals('reject')">대기 제안 거절</button>
+        <span class="muted" data-i18n="learning.windowDays">회고 기간</span>
+        <input id="windowDays" type="number" min="1" max="60" value="14" /><span data-i18n="unit.days">일</span>
+        <button class="btn btn-sub" onclick="loadLearning()" data-i18n="button.loadAnalysis">분석 조회</button>
+        <button class="btn btn-sub" onclick="applyLearning('selected')" data-i18n="button.applySelectedStrategy">선택 전략 적용</button>
+        <button class="btn btn-good" onclick="applyLearning('all')" data-i18n="button.applyAllSuggestions">전체 제안 일괄 적용</button>
+        <button class="btn btn-sub" onclick="reviewLearningProposals('approve')" data-i18n="button.approvePending">대기 제안 승인 적용</button>
+        <button class="btn btn-sub" onclick="reviewLearningProposals('reject')" data-i18n="button.rejectPending">대기 제안 거절</button>
       </div>
       <div id="learningMsg" class="muted" style="margin:8px 0;"></div>
       <table>
         <thead>
           <tr>
-            <th>적용</th><th>전략</th><th>제안</th><th>현재 가중치</th><th>제안 가중치</th><th>신뢰도</th><th>사유</th>
+            <th data-i18n="table.apply">적용</th><th data-i18n="table.strategy">전략</th><th data-i18n="table.suggestion">제안</th><th data-i18n="table.currentWeight">현재 가중치</th><th data-i18n="table.suggestedWeight">제안 가중치</th><th data-i18n="table.confidence">신뢰도</th><th data-i18n="table.reason">사유</th>
           </tr>
         </thead>
         <tbody id="learningBody"></tbody>
@@ -813,7 +917,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       <table>
         <thead>
           <tr>
-            <th>선택</th><th>ID</th><th>전략</th><th>제안</th><th>현재</th><th>제안값</th><th>신뢰도</th><th>사유</th><th>상태</th><th>시각</th>
+            <th data-i18n="table.select">선택</th><th>ID</th><th data-i18n="table.strategy">전략</th><th data-i18n="table.suggestion">제안</th><th data-i18n="table.currentValue">현재</th><th data-i18n="table.suggestedValue">제안값</th><th data-i18n="table.confidence">신뢰도</th><th data-i18n="table.reason">사유</th><th data-i18n="table.status">상태</th><th data-i18n="table.time">시각</th>
           </tr>
         </thead>
         <tbody id="learningProposalBody"></tbody>
@@ -822,7 +926,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       <table>
         <thead>
           <tr>
-            <th>카테고리</th><th>키</th><th>거래수</th><th>승률</th><th>총PnL</th><th>평균PnL</th>
+            <th data-i18n="table.category">카테고리</th><th data-i18n="table.key">키</th><th data-i18n="table.tradeCount">거래수</th><th data-i18n="table.winRate">승률</th><th data-i18n="table.totalPnl">총PnL</th><th data-i18n="table.avgPnl">평균PnL</th>
           </tr>
         </thead>
         <tbody id="learningLeaderboardBody"></tbody>
@@ -830,23 +934,23 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     </div>
 
     <div class="panel">
-      <h2>거부사유 알림/임계치</h2>
+      <h2 data-i18n="title.notificationThreshold">거부사유 알림/임계치</h2>
       <div class="form-grid">
         <div class="field">
-          <label>알림 사용</label>
+          <label data-i18n="notify.enabled">알림 사용</label>
           <label class="inline-check">
             <input id="notifyEnabled" type="checkbox" />
-            사용
+            <span data-i18n="common.use">사용</span>
           </label>
         </div>
         <div class="field">
-          <label>알림 발송 레벨</label>
+          <label data-i18n="notify.levels">알림 발송 레벨</label>
           <label class="inline-check"><input id="notifyLevelCritical" type="checkbox" /> critical</label>
           <label class="inline-check"><input id="notifyLevelWarn" type="checkbox" /> warn</label>
           <label class="inline-check"><input id="notifyLevelInfo" type="checkbox" /> info</label>
         </div>
         <div class="field">
-          <label>임계치 모드</label>
+          <label data-i18n="notify.profile">임계치 모드</label>
           <select id="rejectAlertProfile">
             <option value="auto">auto</option>
             <option value="safe">safe</option>
@@ -855,70 +959,70 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           </select>
         </div>
         <div class="field">
-          <label>거부율 경고 임계치</label>
+          <label data-i18n="notify.rejectWarn">거부율 경고 임계치</label>
           <input id="rejectRateWarnInput" type="number" step="0.01" min="0" max="1" />
         </div>
         <div class="field">
-          <label>거부율 critical 임계치</label>
+          <label data-i18n="notify.rejectCritical">거부율 critical 임계치</label>
           <input id="rejectRateCriticalInput" type="number" step="0.01" min="0" max="1" />
         </div>
         <div class="field">
-          <label>거부사유 경고 임계치</label>
+          <label data-i18n="notify.reasonWarn">거부사유 경고 임계치</label>
           <input id="rejectReasonWarnInput" type="number" step="0.01" min="0" max="1" />
         </div>
         <div class="field">
-          <label>거부사유 critical 임계치</label>
+          <label data-i18n="notify.reasonCritical">거부사유 critical 임계치</label>
           <input id="rejectReasonCriticalInput" type="number" step="0.01" min="0" max="1" />
         </div>
         <div class="field">
-          <label>최소 샘플 수</label>
+          <label data-i18n="notify.minSamples">최소 샘플 수</label>
           <input id="rejectReasonMinSamplesInput" type="number" min="1" />
         </div>
         <div class="field">
-          <label>쿨다운(초)</label>
+          <label data-i18n="notify.cooldownSeconds">쿨다운(초)</label>
           <input id="notifyCooldownSeconds" type="number" min="0" />
         </div>
         <div class="field">
-          <label>시간당 발송 상한(0=무제한)</label>
+          <label data-i18n="notify.maxPerHour">시간당 발송 상한(0=무제한)</label>
           <input id="notifyMaxPerHour" type="number" min="0" />
         </div>
         <div class="field">
-          <label>일반 웹훅 URL</label>
+          <label data-i18n="notify.webhook">일반 웹훅 URL</label>
           <input id="notifyWebhook" type="text" />
         </div>
         <div class="field">
-          <label>Slack 웹훅 URL</label>
+          <label data-i18n="notify.slackWebhook">Slack 웹훅 URL</label>
           <input id="notifySlackWebhook" type="text" />
         </div>
         <div class="field">
-          <label>텔레그램 Bot Token</label>
+          <label data-i18n="notify.telegramToken">텔레그램 Bot Token</label>
           <input id="notifyTelegramToken" type="text" placeholder="[HIDDEN]" />
         </div>
         <div class="field">
-          <label>텔레그램 Chat ID</label>
+          <label data-i18n="notify.telegramChatId">텔레그램 Chat ID</label>
           <input id="notifyTelegramChatId" type="text" placeholder="[HIDDEN]" />
         </div>
         <div class="field">
-          <label>메세지 상세 요약</label>
+          <label data-i18n="notify.includeSummary">메세지 상세 요약</label>
           <label class="inline-check">
-            <input id="notifyIncludeSummary" type="checkbox" /> 포함
+            <input id="notifyIncludeSummary" type="checkbox" /> <span data-i18n="common.include">포함</span>
           </label>
         </div>
       </div>
       <div class="toolbar" style="margin-top:8px; gap:8px;">
-        <button class="btn btn-good" onclick="saveNotificationConfig()">알림 설정만 저장</button>
-        <button class="btn btn-sub" onclick="loadConfig()">설정값 다시 불러오기</button>
+        <button class="btn btn-good" onclick="saveNotificationConfig()" data-i18n="button.saveNotificationsOnly">알림 설정만 저장</button>
+        <button class="btn btn-sub" onclick="loadConfig()" data-i18n="button.reloadValues">설정값 다시 불러오기</button>
       </div>
     </div>
 
     <div class="panel">
-      <h2>설정 편집</h2>
+      <h2 data-i18n="title.configEdit">설정 편집</h2>
       <div class="toolbar" style="margin-bottom:8px;">
-        <button class="btn btn-sub" onclick="loadConfig()">설정 불러오기</button>
-        <button class="btn btn-good" onclick="saveConfig()">저장</button>
+        <button class="btn btn-sub" onclick="loadConfig()" data-i18n="button.loadConfig">설정 불러오기</button>
+        <button class="btn btn-good" onclick="saveConfig()" data-i18n="button.save">저장</button>
       </div>
       <textarea id="configJson" rows="20"></textarea>
-      <p class="muted" style="margin-top:8px;">API 비밀값은 화면에서 [HIDDEN]로 표시되며, 저장 시 그대로 유지됩니다.</p>
+      <p class="muted" style="margin-top:8px;" data-i18n="config.hiddenSecretHelp">API 비밀값은 화면에서 [HIDDEN]로 표시되며, 저장 시 그대로 유지됩니다.</p>
     </div>
   </div>
 
@@ -929,12 +1033,734 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     const SKETCH_MEMO_KEY = 'boss_sketch_memo_v1';
     const SKETCH_TAB_KEY = 'boss_sketch_tab_v1';
     const SKETCH_THEME_KEY = 'boss_sketch_theme_v1';
-    const THEME_PRESETS = {
-      ocean: { bg1: '#0b1a36', bg2: '#12213f', bg3: '#1d2f56', accent: '#3b82f6', panel: '#0c162d', line: '#2f3e5c' },
-      mono: { bg1: '#151515', bg2: '#1f1f1f', bg3: '#2b2b2b', accent: '#b7c0cc', panel: '#1a1a1a', line: '#414141' },
-      forest: { bg1: '#0d2017', bg2: '#133424', bg3: '#194932', accent: '#22c55e', panel: '#10271c', line: '#2f5b44' },
-      sunset: { bg1: '#2a1620', bg2: '#3f1d2f', bg3: '#5b2d43', accent: '#f97316', panel: '#271724', line: '#63405a' },
+    const SKETCH_LANGUAGE_KEY = 'boss_sketch_language_v1';
+    const LANGUAGE_OPTIONS = {
+      ko: { key: 'ko', label: '한국어' },
+      en: { key: 'en', label: 'English' },
+      zh: { key: 'zh', label: '中文' },
+      ja: { key: 'ja', label: '日本語' },
+      fr: { key: 'fr', label: 'Français' },
     };
+    const THEME_PRESETS = {
+      premium: {
+        key: 'premium',
+        label: '더 고급스럽게',
+        className: 'theme-style-premium',
+        bg1: '#0b1424',
+        bg2: '#13233f',
+        bg3: '#20385e',
+        accent: '#d4a64a',
+        panel: '#0f1b2d',
+        line: '#41597b',
+        text: '#eef3ff',
+        muted: '#a9b7cf',
+        surface: '#0a1423',
+        surfaceSoft: 'rgba(10, 20, 35, 0.78)',
+        fieldSurface: 'rgba(10, 19, 34, 0.92)',
+        softBorder: '#314965',
+        miniBtnBg: '#2f4668',
+        miniBtnBorder: '#4f6788',
+        mutedBoxBg: 'rgba(12, 23, 40, 0.76)',
+        mutedBoxLine: '#61799a',
+        fontUi: '"Pretendard", "Apple SD Gothic Neo", Arial, sans-serif',
+      },
+      simple: {
+        key: 'simple',
+        label: '더 단순하게',
+        className: 'theme-style-simple',
+        bg1: '#111827',
+        bg2: '#18202d',
+        bg3: '#1f2937',
+        accent: '#cbd5e1',
+        panel: '#141b24',
+        line: '#374151',
+        text: '#f3f4f6',
+        muted: '#9ca3af',
+        surface: '#0f1720',
+        surfaceSoft: 'rgba(15, 23, 32, 0.76)',
+        fieldSurface: 'rgba(17, 24, 39, 0.94)',
+        softBorder: '#334155',
+        miniBtnBg: '#1f2937',
+        miniBtnBorder: '#475569',
+        mutedBoxBg: 'rgba(15, 23, 32, 0.72)',
+        mutedBoxLine: '#475569',
+        fontUi: '"Pretendard", "Apple SD Gothic Neo", Arial, sans-serif',
+      },
+      light: {
+        key: 'light',
+        label: '라이트 테마',
+        className: 'theme-style-light',
+        bg1: '#f5f8fd',
+        bg2: '#e8eef8',
+        bg3: '#dce7f4',
+        accent: '#2563eb',
+        panel: '#ffffff',
+        line: '#cfd8e5',
+        text: '#0f172a',
+        muted: '#64748b',
+        surface: '#f8fbff',
+        surfaceSoft: 'rgba(255, 255, 255, 0.92)',
+        fieldSurface: 'rgba(248, 251, 255, 0.95)',
+        softBorder: '#cfd8e5',
+        miniBtnBg: '#eef4fb',
+        miniBtnBorder: '#c7d5e8',
+        mutedBoxBg: 'rgba(247, 250, 255, 0.9)',
+        mutedBoxLine: '#c7d5e8',
+        fontUi: '"Pretendard", "Apple SD Gothic Neo", Arial, sans-serif',
+      },
+      terminal: {
+        key: 'terminal',
+        label: '거래소 터미널',
+        className: 'theme-style-terminal',
+        bg1: '#03110f',
+        bg2: '#08201d',
+        bg3: '#0d332b',
+        accent: '#22c55e',
+        panel: '#071815',
+        line: '#1f6a57',
+        text: '#d8ffee',
+        muted: '#89c8b4',
+        surface: '#031410',
+        surfaceSoft: 'rgba(4, 20, 16, 0.78)',
+        fieldSurface: 'rgba(5, 24, 20, 0.92)',
+        softBorder: '#1f5f4c',
+        miniBtnBg: '#0b2a23',
+        miniBtnBorder: '#1f6a57',
+        mutedBoxBg: 'rgba(5, 21, 17, 0.74)',
+        mutedBoxLine: '#1f6a57',
+        fontUi: '"Consolas", "Pretendard", "Apple SD Gothic Neo", monospace',
+      },
+    };
+    const STYLE_CLASSES = Object.values(THEME_PRESETS).map((item) => item.className);
+    const I18N = { ko: {}, en: {}, zh: {}, ja: {}, fr: {} };
+
+    function formatMessage(template, vars) {
+      return String(template || '').replace(/\{(\w+)\}/g, (_m, key) => {
+        const value = vars && Object.prototype.hasOwnProperty.call(vars, key) ? vars[key] : `{${key}}`;
+        return value == null ? '' : String(value);
+      });
+    }
+
+    function normalizeLanguage(value) {
+      const raw = String(value || 'ko').trim().toLowerCase().replace('_', '-');
+      const base = raw.split('-')[0];
+      return LANGUAGE_OPTIONS[base] ? base : 'ko';
+    }
+
+    function languageLabel(language) {
+      const normalized = normalizeLanguage(language);
+      return (LANGUAGE_OPTIONS[normalized] || LANGUAGE_OPTIONS.ko).label;
+    }
+
+    function t(key, vars, fallback) {
+      const lang = normalizeLanguage(window.__currentLanguage || 'ko');
+      const pack = I18N[lang] || I18N.ko;
+      const base = I18N.ko || {};
+      const template = pack[key] || base[key] || fallback || key;
+      return formatMessage(template, vars);
+    }
+
+    function tr(koText, enText) {
+      return normalizeLanguage(window.__currentLanguage || 'ko') === 'ko' ? koText : enText;
+    }
+
+    function readStoredLanguage() {
+      try {
+        return normalizeLanguage(localStorage.getItem(SKETCH_LANGUAGE_KEY) || 'ko');
+      } catch (_e) {
+        return 'ko';
+      }
+    }
+
+    function setLanguagePresetSelect(language) {
+      const node = document.getElementById('languagePreset');
+      if (node) node.value = normalizeLanguage(language);
+    }
+
+    function getConfiguredLanguage() {
+      const cfg = window.__loadedConfig || {};
+      const ui = cfg.ui || {};
+      return normalizeLanguage(ui.language || 'ko');
+    }
+
+    function localizeStaticText() {
+      document.documentElement.lang = normalizeLanguage(window.__currentLanguage || 'ko');
+      document.title = t('title.page', null, 'AI 트레이딩 봇 대시보드');
+      document.querySelectorAll('[data-i18n]').forEach((node) => {
+        node.textContent = t(node.getAttribute('data-i18n'));
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
+        node.placeholder = t(node.getAttribute('data-i18n-placeholder'));
+      });
+    }
+
+    function applyLanguage(language, persist) {
+      const normalized = normalizeLanguage(language);
+      window.__currentLanguage = normalized;
+      setLanguagePresetSelect(normalized);
+      localizeStaticText();
+      if (persist !== false) {
+        localStorage.setItem(SKETCH_LANGUAGE_KEY, normalized);
+      }
+    }
+
+    function loadLanguage() {
+      applyLanguage(readStoredLanguage(), false);
+    }
+
+    Object.assign(I18N.ko, {
+      'title.page': 'AI 트레이딩 봇 대시보드',
+      'title.main': 'AI 트레이딩 봇 운영 대시보드',
+      'title.validation': '검증 리포트 비교 대시보드',
+      'title.account': '계정/포지션',
+      'title.risk': '리스크 상태',
+      'title.riskEvents': '리스크 이벤트',
+      'title.rejectDashboard': '거부사유 운영 대시보드',
+      'title.regimeStrategy': '레짐 기반 전략 추천',
+      'title.pnlCurve': '수익 곡선',
+      'title.executions': '실행 내역',
+      'title.learning': 'AI 복기/튜닝',
+      'title.notificationThreshold': '거부사유 알림/임계치',
+      'title.configEdit': '설정 편집',
+      'toolbar.runOnce': '1회 실행',
+      'toolbar.autoStart': '자동 시작',
+      'toolbar.stop': '중지',
+      'toolbar.readiness': '실거래 준비 점검',
+      'toolbar.readinessReport': '점검 리포트 저장',
+      'toolbar.rehearsal': '실거래 리허설 계획',
+      'toolbar.rehearsalReport': '리허설 리포트 저장',
+      'toolbar.exchangeProbe': '거래소 파라미터 점검',
+      'toolbar.exchangeReport': '거래소 점검 리포트 저장',
+      'toolbar.aiTest': 'AI 연결 테스트',
+      'toolbar.refresh': '새로고침',
+      'unit.seconds': '초',
+      'unit.days': '일',
+      'label.lastMessage': '마지막 메시지',
+      'validation.testWarn': '검증 알람 테스트(경고)',
+      'validation.testCritical': '검증 알람 테스트(치명)',
+      'validation.noHistory': '검증 이력 없음',
+      'tab.start': '시작',
+      'tab.running': '진행중인',
+      'tab.settings': '내설정',
+      'tab.api': '연결 API',
+      'tab.logging': '로깅',
+      'sketch.status.runIdle': '실행: -',
+      'sketch.status.apiIdle': 'API: -',
+      'sketch.status.loopIdle': '자동: -',
+      'sketch.action.runOnceNow': '바로 1회 실행',
+      'sketch.marketAnalysis': '시황 분석',
+      'sketch.waitingData': '데이터 대기 중...',
+      'sketch.evidenceNews': '* 근거1 (뉴스/심리):',
+      'sketch.noEvidenceYet': '아직 수집된 근거가 없습니다.',
+      'sketch.strategy': '매매 전략',
+      'sketch.waitingStrategy': '전략 추천 대기 중...',
+      'sketch.evidenceStrategy': '* 근거2:',
+      'sketch.waitingStrategyEvidence': '전략 근거 대기 중...',
+      'sketch.bot': '매매 봇',
+      'sketch.monitoring': '실시간 모니터링',
+      'sketch.waitingExecutionData': '체결 데이터 대기 중...',
+      'sketch.errorNormal': '오류 점검: 정상',
+      'sketch.progressState': '* 진행 상태:',
+      'sketch.waitingCycleState': '주기/상태 데이터 대기 중...',
+      'sketch.mySettings': '내 설정',
+      'sketch.waitingConfigSummary': '설정 요약 대기 중...',
+      'sketch.loadingStrategyConfig': '전략 설정 로딩 중...',
+      'sketch.loadingRiskConfig': '리스크 설정 로딩 중...',
+      'sketch.apiStatus': 'API 상태',
+      'sketch.waitingApiStatus': 'API 연결 상태 대기 중...',
+      'sketch.noAiTestYet': '아직 테스트를 실행하지 않았습니다.',
+      'sketch.opsLogging': '운영 로깅',
+      'sketch.waitingLogData': '로그 데이터 대기 중...',
+      'side.sourceIntegration': '소스 연동',
+      'side.researchSources': '심리 분석/리서치 소스',
+      'side.researchSourcesHelp': '사용자 소스는 아래에서 커스텀으로 추가합니다.',
+      'side.customSources': '사용자 커스텀 소스',
+      'side.noCustomSources': '등록된 커스텀 소스가 없습니다.',
+      'side.strategyMemo': '사용자 전략 메모',
+      'side.uiStyle': 'UI 스타일',
+      'side.language': '언어 설정',
+      'side.languageHelp': '저장하면 이후 접속에도 선택 언어를 유지합니다.',
+      'theme.premium': '더 고급스럽게',
+      'theme.simple': '더 단순하게',
+      'theme.light': '라이트 테마',
+      'theme.terminal': '거래소 터미널',
+      'theme.bg1': '배경 1',
+      'theme.bg2': '배경 2',
+      'theme.bg3': '배경 3',
+      'theme.accent': '강조색',
+      'theme.panel': '패널색',
+      'theme.line': '라인색',
+      'table.time': '시간',
+      'table.datetime': '일시',
+      'table.overallPassed': '전체통과',
+      'table.backtest': 'Backtest',
+      'table.walkForward': 'WalkForward',
+      'table.pnlUsdt': 'PnL(USDT)',
+      'table.winRate': '승률',
+      'table.mdd': 'MDD',
+      'table.symbol': '종목',
+      'table.strategy': '전략',
+      'table.status': '상태',
+      'table.pnl': 'PnL',
+      'table.reason': '사유',
+      'table.event': '이벤트',
+      'table.previousReason': '이전 사유',
+      'table.currentReason': '현재 사유',
+      'table.note': '비고',
+      'table.rejectReason': '거부사유',
+      'table.count': '건수',
+      'table.ratio': '비율',
+      'table.regime': '레짐',
+      'table.direction': '방향',
+      'table.score': '점수',
+      'table.confidence': '신뢰도',
+      'table.requestUsdt': '요청금액(USDT)',
+      'table.filledUsdt': '체결금액(USDT)',
+      'table.leverage': '레버리지',
+      'table.expectedPrice': '예상가',
+      'table.fillPrice': '체결가',
+      'table.slippageBps': '슬리피지(bps)',
+      'table.attempts': '시도',
+      'table.retryReason': '재시도사유',
+      'table.feeUsdt': '수수료(USDT)',
+      'table.grossPnl': 'GrossPnL',
+      'table.netPnl': 'NetPnL',
+      'table.entryReason': '진입근거',
+      'table.marketState': '시장상태',
+      'table.apply': '적용',
+      'table.suggestion': '제안',
+      'table.currentWeight': '현재 가중치',
+      'table.suggestedWeight': '제안 가중치',
+      'table.select': '선택',
+      'table.currentValue': '현재',
+      'table.suggestedValue': '제안값',
+      'table.category': '카테고리',
+      'table.key': '키',
+      'table.tradeCount': '거래수',
+      'table.totalPnl': '총PnL',
+      'table.avgPnl': '평균PnL',
+      'filter.status': '상태',
+      'filter.all': '전체',
+      'filter.partialFill': '부분체결',
+      'filter.hasValue': '있음',
+      'filter.notValue': '아님',
+      'filter.rejectReason': '거부사유',
+      'learning.windowDays': '회고 기간',
+      'notify.enabled': '알림 사용',
+      'notify.levels': '알림 발송 레벨',
+      'notify.profile': '임계치 모드',
+      'notify.rejectWarn': '거부율 경고 임계치',
+      'notify.rejectCritical': '거부율 critical 임계치',
+      'notify.reasonWarn': '거부사유 경고 임계치',
+      'notify.reasonCritical': '거부사유 critical 임계치',
+      'notify.minSamples': '최소 샘플 수',
+      'notify.cooldownSeconds': '쿨다운(초)',
+      'notify.maxPerHour': '시간당 발송 상한(0=무제한)',
+      'notify.webhook': '일반 웹훅 URL',
+      'notify.slackWebhook': 'Slack 웹훅 URL',
+      'notify.telegramToken': '텔레그램 Bot Token',
+      'notify.telegramChatId': '텔레그램 Chat ID',
+      'notify.includeSummary': '메세지 상세 요약',
+      'common.use': '사용',
+      'common.include': '포함',
+      'button.saveStrategyConfig': '전략 설정 저장',
+      'button.saveRiskConfig': '리스크 설정 저장',
+      'button.goToConfig': '설정 JSON 이동',
+      'button.reloadConfig': '설정 다시 로드',
+      'button.goToExecutions': '상세 실행내역 이동',
+      'button.add': '추가',
+      'button.saveMemo': '메모 저장',
+      'button.preview': '미리보기',
+      'button.saveSetting': '설정 저장',
+      'button.applyColors': '색상 적용',
+      'button.resetDefault': '기본 복원',
+      'button.clearRisk': '리스크 해제',
+      'button.query': '조회',
+      'button.loadAnalysis': '분석 조회',
+      'button.applySelectedStrategy': '선택 전략 적용',
+      'button.applyAllSuggestions': '전체 제안 일괄 적용',
+      'button.approvePending': '대기 제안 승인 적용',
+      'button.rejectPending': '대기 제안 거절',
+      'button.saveNotificationsOnly': '알림 설정만 저장',
+      'button.reloadValues': '설정값 다시 불러오기',
+      'button.loadConfig': '설정 불러오기',
+      'button.save': '저장',
+      'config.hiddenSecretHelp': 'API 비밀값은 화면에서 [HIDDEN]로 표시되며, 저장 시 그대로 유지됩니다.',
+      'placeholder.liveToken': 'LIVE 시작 토큰',
+      'placeholder.customSource': '예: https://example.com/feed',
+      'placeholder.strategyMemo': '사용자 전략 아이디어/규칙을 메모하세요.',
+      'message.themePreview': 'UI 스타일 미리보기: {label}',
+      'message.customThemeApplied': '커스텀 UI 색상을 적용했습니다.',
+      'message.themeReset': '설정에 저장된 UI 스타일로 복원했습니다.',
+      'message.themeSaved': 'UI 스타일 설정 저장: {label}',
+      'message.themeSaveFailed': 'UI 스타일 저장 실패: {error}',
+      'message.languagePreview': '언어 미리보기: {label}',
+      'message.languageSaved': '언어 설정 저장: {label}',
+      'message.languageSaveFailed': '언어 저장 실패: {error}',
+      'common.on': 'ON',
+      'common.off': 'OFF',
+      'common.none': '없음',
+      'common.normal': '정상',
+      'common.waiting': '대기',
+      'common.ready': 'READY',
+      'common.check': 'CHECK',
+      'common.pass': 'PASS',
+      'common.fail': 'FAIL',
+      'common.ok': 'OK',
+      'common.block': 'BLOCK',
+    });
+
+    Object.assign(I18N.en, {
+      'title.page': 'AI Trading Bot Dashboard',
+      'title.main': 'AI Trading Bot Operations Dashboard',
+      'title.validation': 'Validation Report Comparison Dashboard',
+      'title.account': 'Account / Positions',
+      'title.risk': 'Risk Status',
+      'title.riskEvents': 'Risk Events',
+      'title.rejectDashboard': 'Reject Reason Dashboard',
+      'title.regimeStrategy': 'Regime-Based Strategy Recommendations',
+      'title.pnlCurve': 'PnL Curve',
+      'title.executions': 'Executions',
+      'title.learning': 'AI Review / Tuning',
+      'title.notificationThreshold': 'Reject Alerts / Thresholds',
+      'title.configEdit': 'Config Editor',
+      'toolbar.runOnce': 'Run Once',
+      'toolbar.autoStart': 'Start Auto',
+      'toolbar.stop': 'Stop',
+      'toolbar.readiness': 'Live Readiness Check',
+      'toolbar.readinessReport': 'Save Readiness Report',
+      'toolbar.rehearsal': 'Live Rehearsal Plan',
+      'toolbar.rehearsalReport': 'Save Rehearsal Report',
+      'toolbar.exchangeProbe': 'Exchange Parameter Check',
+      'toolbar.exchangeReport': 'Save Exchange Report',
+      'toolbar.aiTest': 'AI Connection Test',
+      'toolbar.refresh': 'Refresh',
+      'unit.seconds': 's',
+      'unit.days': 'days',
+      'label.lastMessage': 'Last message',
+      'validation.testWarn': 'Validation Alert Test (Warn)',
+      'validation.testCritical': 'Validation Alert Test (Critical)',
+      'validation.noHistory': 'No validation history',
+      'tab.start': 'Start',
+      'tab.running': 'Running',
+      'tab.settings': 'My Settings',
+      'tab.api': 'Connected APIs',
+      'tab.logging': 'Logging',
+      'sketch.status.runIdle': 'Run: -',
+      'sketch.status.apiIdle': 'API: -',
+      'sketch.status.loopIdle': 'Auto: -',
+      'sketch.action.runOnceNow': 'Run Once Now',
+      'sketch.marketAnalysis': 'Market Analysis',
+      'sketch.waitingData': 'Waiting for data...',
+      'sketch.evidenceNews': '* Evidence 1 (News/Sentiment):',
+      'sketch.noEvidenceYet': 'No collected evidence yet.',
+      'sketch.strategy': 'Trading Strategy',
+      'sketch.waitingStrategy': 'Waiting for strategy recommendations...',
+      'sketch.evidenceStrategy': '* Evidence 2:',
+      'sketch.waitingStrategyEvidence': 'Waiting for strategy evidence...',
+      'sketch.bot': 'Trading Bots',
+      'sketch.monitoring': 'Real-Time Monitoring',
+      'sketch.waitingExecutionData': 'Waiting for execution data...',
+      'sketch.errorNormal': 'Error check: normal',
+      'sketch.progressState': '* Progress:',
+      'sketch.waitingCycleState': 'Waiting for cycle/status data...',
+      'sketch.mySettings': 'My Settings',
+      'sketch.waitingConfigSummary': 'Waiting for config summary...',
+      'sketch.loadingStrategyConfig': 'Loading strategy settings...',
+      'sketch.loadingRiskConfig': 'Loading risk settings...',
+      'sketch.apiStatus': 'API Status',
+      'sketch.waitingApiStatus': 'Waiting for API status...',
+      'sketch.noAiTestYet': 'No test has been run yet.',
+      'sketch.opsLogging': 'Operations Logging',
+      'sketch.waitingLogData': 'Waiting for log data...',
+      'side.sourceIntegration': 'Source Integration',
+      'side.researchSources': 'Sentiment / Research Sources',
+      'side.researchSourcesHelp': 'Add custom user sources below.',
+      'side.customSources': 'Custom User Sources',
+      'side.noCustomSources': 'No custom sources registered.',
+      'side.strategyMemo': 'Strategy Memo',
+      'side.uiStyle': 'UI Style',
+      'side.language': 'Language',
+      'side.languageHelp': 'Saved language is kept for future sessions.',
+      'theme.premium': 'Premium',
+      'theme.simple': 'Simple',
+      'theme.light': 'Light',
+      'theme.terminal': 'Exchange Terminal',
+      'theme.bg1': 'Background 1',
+      'theme.bg2': 'Background 2',
+      'theme.bg3': 'Background 3',
+      'theme.accent': 'Accent',
+      'theme.panel': 'Panel',
+      'theme.line': 'Line',
+      'table.time': 'Time',
+      'table.datetime': 'Date/Time',
+      'table.overallPassed': 'Overall Pass',
+      'table.backtest': 'Backtest',
+      'table.walkForward': 'WalkForward',
+      'table.pnlUsdt': 'PnL (USDT)',
+      'table.winRate': 'Win Rate',
+      'table.mdd': 'MDD',
+      'table.symbol': 'Symbol',
+      'table.strategy': 'Strategy',
+      'table.status': 'Status',
+      'table.pnl': 'PnL',
+      'table.reason': 'Reason',
+      'table.event': 'Event',
+      'table.previousReason': 'Previous Reason',
+      'table.currentReason': 'Current Reason',
+      'table.note': 'Note',
+      'table.rejectReason': 'Reject Reason',
+      'table.count': 'Count',
+      'table.ratio': 'Ratio',
+      'table.regime': 'Regime',
+      'table.direction': 'Direction',
+      'table.score': 'Score',
+      'table.confidence': 'Confidence',
+      'table.requestUsdt': 'Requested (USDT)',
+      'table.filledUsdt': 'Filled (USDT)',
+      'table.leverage': 'Leverage',
+      'table.expectedPrice': 'Expected Price',
+      'table.fillPrice': 'Fill Price',
+      'table.slippageBps': 'Slippage (bps)',
+      'table.attempts': 'Attempts',
+      'table.retryReason': 'Retry Reason',
+      'table.feeUsdt': 'Fee (USDT)',
+      'table.grossPnl': 'Gross PnL',
+      'table.netPnl': 'Net PnL',
+      'table.entryReason': 'Entry Rationale',
+      'table.marketState': 'Market State',
+      'table.apply': 'Apply',
+      'table.suggestion': 'Suggestion',
+      'table.currentWeight': 'Current Weight',
+      'table.suggestedWeight': 'Suggested Weight',
+      'table.select': 'Select',
+      'table.currentValue': 'Current',
+      'table.suggestedValue': 'Suggested',
+      'table.category': 'Category',
+      'table.key': 'Key',
+      'table.tradeCount': 'Trades',
+      'table.totalPnl': 'Total PnL',
+      'table.avgPnl': 'Avg PnL',
+      'filter.status': 'Status',
+      'filter.all': 'All',
+      'filter.partialFill': 'Partial Fill',
+      'filter.hasValue': 'Yes',
+      'filter.notValue': 'No',
+      'filter.rejectReason': 'Reject Reason',
+      'learning.windowDays': 'Lookback',
+      'notify.enabled': 'Alerts Enabled',
+      'notify.levels': 'Alert Levels',
+      'notify.profile': 'Threshold Profile',
+      'notify.rejectWarn': 'Reject Rate Warn Threshold',
+      'notify.rejectCritical': 'Reject Rate Critical Threshold',
+      'notify.reasonWarn': 'Reason Warn Threshold',
+      'notify.reasonCritical': 'Reason Critical Threshold',
+      'notify.minSamples': 'Minimum Samples',
+      'notify.cooldownSeconds': 'Cooldown (sec)',
+      'notify.maxPerHour': 'Max per Hour (0=unlimited)',
+      'notify.webhook': 'Generic Webhook URL',
+      'notify.slackWebhook': 'Slack Webhook URL',
+      'notify.telegramToken': 'Telegram Bot Token',
+      'notify.telegramChatId': 'Telegram Chat ID',
+      'notify.includeSummary': 'Detailed Message Summary',
+      'common.use': 'Use',
+      'common.include': 'Include',
+      'button.saveStrategyConfig': 'Save Strategy Settings',
+      'button.saveRiskConfig': 'Save Risk Settings',
+      'button.goToConfig': 'Open Config JSON',
+      'button.reloadConfig': 'Reload Config',
+      'button.goToExecutions': 'Open Execution Details',
+      'button.add': 'Add',
+      'button.saveMemo': 'Save Memo',
+      'button.preview': 'Preview',
+      'button.saveSetting': 'Save',
+      'button.applyColors': 'Apply Colors',
+      'button.resetDefault': 'Reset',
+      'button.clearRisk': 'Clear Risk Halt',
+      'button.query': 'Query',
+      'button.loadAnalysis': 'Load Analysis',
+      'button.applySelectedStrategy': 'Apply Selected',
+      'button.applyAllSuggestions': 'Apply All Suggestions',
+      'button.approvePending': 'Approve Pending',
+      'button.rejectPending': 'Reject Pending',
+      'button.saveNotificationsOnly': 'Save Alerts Only',
+      'button.reloadValues': 'Reload Values',
+      'button.loadConfig': 'Load Config',
+      'button.save': 'Save',
+      'config.hiddenSecretHelp': 'API secrets are shown as [HIDDEN] and kept unchanged when saved.',
+      'placeholder.liveToken': 'LIVE start token',
+      'placeholder.customSource': 'e.g. https://example.com/feed',
+      'placeholder.strategyMemo': 'Write your strategy ideas and rules.',
+      'message.themePreview': 'UI style preview: {label}',
+      'message.customThemeApplied': 'Custom UI colors applied.',
+      'message.themeReset': 'Restored saved UI style.',
+      'message.themeSaved': 'UI style saved: {label}',
+      'message.themeSaveFailed': 'Failed to save UI style: {error}',
+      'message.languagePreview': 'Language preview: {label}',
+      'message.languageSaved': 'Language saved: {label}',
+      'message.languageSaveFailed': 'Failed to save language: {error}',
+      'common.on': 'ON',
+      'common.off': 'OFF',
+      'common.none': 'None',
+      'common.normal': 'Normal',
+      'common.waiting': 'Waiting',
+      'common.ready': 'READY',
+      'common.check': 'CHECK',
+      'common.pass': 'PASS',
+      'common.fail': 'FAIL',
+      'common.ok': 'OK',
+      'common.block': 'BLOCK',
+    });
+
+    Object.assign(I18N.zh, I18N.en, {
+      'title.page': 'AI 交易机器人仪表板',
+      'title.main': 'AI 交易机器人运营仪表板',
+      'title.validation': '验证报告对比仪表板',
+      'title.account': '账户/仓位',
+      'title.risk': '风险状态',
+      'title.riskEvents': '风险事件',
+      'title.rejectDashboard': '拒单原因仪表板',
+      'title.regimeStrategy': '市场状态策略推荐',
+      'title.pnlCurve': '收益曲线',
+      'title.executions': '执行记录',
+      'title.learning': 'AI 复盘/调优',
+      'title.notificationThreshold': '拒单告警/阈值',
+      'title.configEdit': '配置编辑',
+      'toolbar.runOnce': '执行一次',
+      'toolbar.autoStart': '自动开始',
+      'toolbar.stop': '停止',
+      'toolbar.readiness': '实盘准备检查',
+      'toolbar.readinessReport': '保存检查报告',
+      'toolbar.rehearsal': '实盘演练计划',
+      'toolbar.rehearsalReport': '保存演练报告',
+      'toolbar.exchangeProbe': '交易所参数检查',
+      'toolbar.exchangeReport': '保存交易所报告',
+      'toolbar.aiTest': 'AI 连接测试',
+      'toolbar.refresh': '刷新',
+      'unit.seconds': '秒',
+      'unit.days': '天',
+      'label.lastMessage': '最后消息',
+      'tab.start': '开始',
+      'tab.running': '运行中',
+      'tab.settings': '我的设置',
+      'tab.api': 'API 连接',
+      'tab.logging': '日志',
+      'side.sourceIntegration': '数据源联动',
+      'side.language': '语言',
+      'side.languageHelp': '保存后会在后续访问中保持所选语言。',
+      'theme.premium': '高级',
+      'theme.simple': '简洁',
+      'theme.light': '浅色',
+      'theme.terminal': '交易终端',
+      'button.preview': '预览',
+      'button.saveSetting': '保存',
+      'button.save': '保存',
+      'button.add': '添加',
+      'common.use': '使用',
+      'common.include': '包含',
+      'placeholder.liveToken': 'LIVE 启动令牌',
+      'message.languagePreview': '语言预览: {label}',
+      'message.languageSaved': '语言已保存: {label}',
+      'message.languageSaveFailed': '保存语言失败: {error}',
+    });
+
+    Object.assign(I18N.ja, I18N.en, {
+      'title.page': 'AI トレーディングボット ダッシュボード',
+      'title.main': 'AI トレーディングボット運用ダッシュボード',
+      'title.validation': '検証レポート比較ダッシュボード',
+      'title.account': '口座/ポジション',
+      'title.risk': 'リスク状態',
+      'title.riskEvents': 'リスクイベント',
+      'title.rejectDashboard': '拒否理由ダッシュボード',
+      'title.regimeStrategy': 'レジーム別戦略推薦',
+      'title.pnlCurve': '損益カーブ',
+      'title.executions': '実行履歴',
+      'title.learning': 'AI レビュー/調整',
+      'title.notificationThreshold': '拒否アラート/閾値',
+      'title.configEdit': '設定編集',
+      'toolbar.runOnce': '1回実行',
+      'toolbar.autoStart': '自動開始',
+      'toolbar.stop': '停止',
+      'toolbar.readiness': '実取引準備チェック',
+      'toolbar.rehearsal': '実取引リハーサル計画',
+      'toolbar.exchangeProbe': '取引所パラメータ点検',
+      'toolbar.aiTest': 'AI 接続テスト',
+      'toolbar.refresh': '更新',
+      'unit.seconds': '秒',
+      'unit.days': '日',
+      'label.lastMessage': '最新メッセージ',
+      'tab.start': '開始',
+      'tab.running': '実行中',
+      'tab.settings': '設定',
+      'tab.api': 'API 接続',
+      'tab.logging': 'ログ',
+      'side.sourceIntegration': 'ソース連携',
+      'side.language': '言語',
+      'side.languageHelp': '保存すると次回以降も選択言語を維持します。',
+      'theme.premium': 'プレミアム',
+      'theme.simple': 'シンプル',
+      'theme.light': 'ライト',
+      'theme.terminal': '取引所ターミナル',
+      'button.preview': 'プレビュー',
+      'button.saveSetting': '保存',
+      'button.save': '保存',
+      'button.add': '追加',
+      'common.use': '使用',
+      'common.include': '含む',
+      'placeholder.liveToken': 'LIVE 開始トークン',
+      'message.languagePreview': '言語プレビュー: {label}',
+      'message.languageSaved': '言語設定保存: {label}',
+      'message.languageSaveFailed': '言語保存失敗: {error}',
+    });
+
+    Object.assign(I18N.fr, I18N.en, {
+      'title.page': 'Tableau de bord du bot de trading IA',
+      'title.main': 'Tableau de bord d’exploitation du bot de trading IA',
+      'title.validation': 'Comparaison des rapports de validation',
+      'title.account': 'Compte / Positions',
+      'title.risk': 'Statut du risque',
+      'title.riskEvents': 'Événements de risque',
+      'title.rejectDashboard': 'Tableau des motifs de rejet',
+      'title.regimeStrategy': 'Recommandations par régime',
+      'title.pnlCurve': 'Courbe de PnL',
+      'title.executions': 'Exécutions',
+      'title.learning': 'Revue / Ajustement IA',
+      'title.notificationThreshold': 'Alertes de rejet / Seuils',
+      'title.configEdit': 'Édition de configuration',
+      'toolbar.runOnce': 'Exécuter une fois',
+      'toolbar.autoStart': 'Démarrer auto',
+      'toolbar.stop': 'Arrêter',
+      'toolbar.readiness': 'Vérification live',
+      'toolbar.rehearsal': 'Plan de répétition live',
+      'toolbar.exchangeProbe': 'Vérifier les paramètres exchange',
+      'toolbar.aiTest': 'Test de connexion IA',
+      'toolbar.refresh': 'Actualiser',
+      'unit.seconds': 's',
+      'unit.days': 'jours',
+      'label.lastMessage': 'Dernier message',
+      'tab.start': 'Démarrer',
+      'tab.running': 'En cours',
+      'tab.settings': 'Mes réglages',
+      'tab.api': 'API connectées',
+      'tab.logging': 'Journalisation',
+      'side.sourceIntegration': 'Intégration des sources',
+      'side.language': 'Langue',
+      'side.languageHelp': 'La langue enregistrée est conservée pour les prochaines sessions.',
+      'theme.premium': 'Premium',
+      'theme.simple': 'Simple',
+      'theme.light': 'Clair',
+      'theme.terminal': 'Terminal exchange',
+      'button.preview': 'Aperçu',
+      'button.saveSetting': 'Enregistrer',
+      'button.save': 'Enregistrer',
+      'button.add': 'Ajouter',
+      'common.use': 'Utiliser',
+      'common.include': 'Inclure',
+      'placeholder.liveToken': 'Jeton LIVE de démarrage',
+      'message.languagePreview': 'Aperçu de langue : {label}',
+      'message.languageSaved': 'Langue enregistrée : {label}',
+      'message.languageSaveFailed': 'Échec de l’enregistrement de la langue : {error}',
+    });
 
     function hexToRgba(hex, alpha) {
       const value = String(hex || '').trim();
@@ -955,6 +1781,37 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       } catch (_e) {
         return null;
       }
+    }
+
+    function resolveTheme(theme) {
+      if (typeof theme === 'string') {
+        return THEME_PRESETS[theme] || THEME_PRESETS.premium;
+      }
+      if (!theme || typeof theme !== 'object') {
+        return THEME_PRESETS.premium;
+      }
+      const key = typeof theme.key === 'string' ? theme.key : 'premium';
+      const base = THEME_PRESETS[key] || THEME_PRESETS.premium;
+      return { ...base, ...theme, key, className: base.className };
+    }
+
+    function setThemePresetSelect(key) {
+      const node = document.getElementById('themePreset');
+      if (node && typeof key === 'string' && THEME_PRESETS[key]) {
+        node.value = key;
+      }
+    }
+
+    function getConfiguredThemeKey() {
+      const cfg = window.__loadedConfig || {};
+      const ui = cfg.ui || {};
+      const raw = String(ui.style_preset || 'premium').trim().toLowerCase();
+      return THEME_PRESETS[raw] ? raw : 'premium';
+    }
+
+    function themePresetLabel(key) {
+      const normalized = THEME_PRESETS[key] ? key : 'premium';
+      return t(`theme.${normalized}`, null, (THEME_PRESETS[normalized] || THEME_PRESETS.premium).label);
     }
 
     function getThemeFromInputs() {
@@ -983,41 +1840,95 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     }
 
     function applyTheme(theme, persist) {
-      const selected = theme || THEME_PRESETS.ocean;
+      const selected = resolveTheme(theme);
       const root = document.documentElement;
+      document.body.classList.remove(...STYLE_CLASSES);
+      document.body.classList.add(selected.className);
       root.style.setProperty('--bg', `linear-gradient(140deg, ${selected.bg1}, ${selected.bg2} 48%, ${selected.bg3})`);
       root.style.setProperty('--accent', selected.accent);
       root.style.setProperty('--panel', hexToRgba(selected.panel, 0.94));
       root.style.setProperty('--line', selected.line);
+      root.style.setProperty('--text', selected.text);
+      root.style.setProperty('--muted', selected.muted);
+      root.style.setProperty('--surface', selected.surface);
+      root.style.setProperty('--surface-soft', selected.surfaceSoft);
+      root.style.setProperty('--field-surface', selected.fieldSurface);
+      root.style.setProperty('--soft-border', selected.softBorder);
+      root.style.setProperty('--mini-btn-bg', selected.miniBtnBg);
+      root.style.setProperty('--mini-btn-border', selected.miniBtnBorder);
+      root.style.setProperty('--muted-box-bg', selected.mutedBoxBg);
+      root.style.setProperty('--muted-box-line', selected.mutedBoxLine);
+      root.style.setProperty('--font-ui', selected.fontUi);
       if (persist !== false) {
         localStorage.setItem(SKETCH_THEME_KEY, JSON.stringify(selected));
       }
       setThemeInputs(selected);
+      setThemePresetSelect(selected.key);
     }
 
     function applyThemePreset() {
       const node = document.getElementById('themePreset');
-      const key = node ? node.value : 'ocean';
-      const preset = THEME_PRESETS[key] || THEME_PRESETS.ocean;
+      const key = node ? node.value : 'premium';
+      const preset = THEME_PRESETS[key] || THEME_PRESETS.premium;
       applyTheme(preset, true);
-      document.getElementById('lastMessage').textContent = `UI 색상 프리셋 적용: ${key}`;
+      document.getElementById('lastMessage').textContent = t('message.themePreview', { label: themePresetLabel(preset.key) });
     }
 
     function applyCustomTheme() {
-      applyTheme(getThemeFromInputs(), true);
-      document.getElementById('lastMessage').textContent = '커스텀 UI 색상을 적용했습니다.';
+      const base = resolveTheme(document.getElementById('themePreset')?.value || getConfiguredThemeKey());
+      applyTheme({ ...base, ...getThemeFromInputs() }, true);
+      document.getElementById('lastMessage').textContent = t('message.customThemeApplied');
     }
 
     function resetTheme() {
-      applyTheme(THEME_PRESETS.ocean, true);
-      const preset = document.getElementById('themePreset');
-      if (preset) preset.value = 'ocean';
-      document.getElementById('lastMessage').textContent = 'UI 색상을 기본값으로 복원했습니다.';
+      const key = getConfiguredThemeKey();
+      applyTheme(THEME_PRESETS[key] || THEME_PRESETS.premium, true);
+      document.getElementById('lastMessage').textContent = t('message.themeReset');
     }
 
     function loadTheme() {
       const stored = readStoredTheme();
-      applyTheme(stored || THEME_PRESETS.ocean, false);
+      applyTheme(stored || THEME_PRESETS.premium, false);
+    }
+
+    async function saveThemeStyleConfig() {
+      try {
+        const node = document.getElementById('themePreset');
+        const key = node ? node.value : 'premium';
+        const preset = THEME_PRESETS[key] || THEME_PRESETS.premium;
+        await apiPost('/api/config', { ui: { style_preset: preset.key } });
+        applyTheme(preset, true);
+        await loadConfig();
+        document.getElementById('lastMessage').textContent = t('message.themeSaved', { label: themePresetLabel(preset.key) });
+      } catch (e) {
+        document.getElementById('lastMessage').textContent = t('message.themeSaveFailed', { error: e.message }, 'UI 스타일 저장 실패: ' + e.message);
+      }
+    }
+
+    async function saveLanguageConfig() {
+      try {
+        const node = document.getElementById('languagePreset');
+        const lang = normalizeLanguage(node ? node.value : 'ko');
+        await apiPost('/api/config', { ui: { language: lang } });
+        applyLanguage(lang, true);
+        await loadConfig();
+        document.getElementById('lastMessage').textContent = t('message.languageSaved', { label: languageLabel(lang) });
+      } catch (e) {
+        document.getElementById('lastMessage').textContent = t('message.languageSaveFailed', { error: e.message }, '언어 저장 실패: ' + e.message);
+      }
+    }
+
+    function applyLanguagePreview() {
+      const node = document.getElementById('languagePreset');
+      const lang = normalizeLanguage(node ? node.value : 'ko');
+      applyLanguage(lang, true);
+      if (window.__loadedConfig) {
+        renderSketchConfigSummary(window.__loadedConfig);
+        renderNotificationSettings(window.__loadedConfig);
+      }
+      refreshAll();
+      loadLearning();
+      document.getElementById('lastMessage').textContent = t('message.languagePreview', { label: languageLabel(lang) });
     }
 
     function setSketchTab(tab) {
@@ -1072,13 +1983,13 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       if (!node) return;
       const values = readSketchSources();
       if (!values.length) {
-        node.innerHTML = '<li>등록된 커스텀 소스가 없습니다.</li>';
+        node.innerHTML = `<li>${tr('등록된 커스텀 소스가 없습니다.', 'No custom sources registered.')}</li>`;
         return;
       }
       node.innerHTML = values.map((item, idx) => `
         <li>
           <span>${item}</span>
-          <button class="btn-mini" style="margin-left:6px;" onclick="removeSketchSource(${idx})">삭제</button>
+          <button class="btn-mini" style="margin-left:6px;" onclick="removeSketchSource(${idx})">${tr('삭제', 'Delete')}</button>
         </li>
       `).join('');
     }
@@ -1090,14 +2001,14 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       if (!value) return;
       const values = readSketchSources();
       if (values.includes(value)) {
-        document.getElementById('lastMessage').textContent = '이미 등록된 커스텀 소스입니다.';
+        document.getElementById('lastMessage').textContent = tr('이미 등록된 커스텀 소스입니다.', 'This custom source is already registered.');
         return;
       }
       values.unshift(value);
       writeSketchSources(values.slice(0, 20));
       input.value = '';
       renderSketchSources();
-      document.getElementById('lastMessage').textContent = '커스텀 소스를 추가했습니다.';
+      document.getElementById('lastMessage').textContent = tr('커스텀 소스를 추가했습니다.', 'Custom source added.');
     }
 
     function removeSketchSource(index) {
@@ -1107,7 +2018,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       values.splice(i, 1);
       writeSketchSources(values);
       renderSketchSources();
-      document.getElementById('lastMessage').textContent = '커스텀 소스를 삭제했습니다.';
+      document.getElementById('lastMessage').textContent = tr('커스텀 소스를 삭제했습니다.', 'Custom source removed.');
     }
 
     function loadSketchMemo() {
@@ -1120,7 +2031,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const node = document.getElementById('sketchStrategyMemo');
       if (!node) return;
       localStorage.setItem(SKETCH_MEMO_KEY, String(node.value || ''));
-      document.getElementById('lastMessage').textContent = '전략 메모를 저장했습니다.';
+      document.getElementById('lastMessage').textContent = tr('전략 메모를 저장했습니다.', 'Strategy memo saved.');
     }
 
     function renderSketchStrategyEditor(cfg) {
@@ -1130,7 +2041,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const strategies = config.strategies || {};
       const names = Object.keys(strategies).sort();
       if (!names.length) {
-        wrap.innerHTML = '<div class="muted">전략 설정이 없습니다.</div>';
+        wrap.innerHTML = `<div class="muted">${tr('전략 설정이 없습니다.', 'No strategy settings found.')}</div>`;
         return;
       }
 
@@ -1152,7 +2063,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         <table class="strategy-edit-table">
           <thead>
             <tr>
-              <th>전략</th><th>사용</th><th>가중치</th>
+              <th>${tr('전략', 'Strategy')}</th><th>${tr('사용', 'Enabled')}</th><th>${tr('가중치', 'Weight')}</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1166,18 +2077,18 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const config = cfg || {};
       const limits = config.risk_limits || {};
       const fields = [
-        { key: 'daily_max_loss_pct', label: '일일 최대손실(비율)', step: '0.005', min: '0', max: '1', type: 'float' },
-        { key: 'max_total_exposure', label: '총 노출 상한(비율)', step: '0.01', min: '0', max: '1', type: 'float' },
-        { key: 'max_symbol_exposure', label: '종목 노출 상한(비율)', step: '0.01', min: '0', max: '1', type: 'float' },
-        { key: 'max_open_positions', label: '최대 포지션 수', step: '1', min: '1', max: '30', type: 'int' },
-        { key: 'max_daily_trades', label: '일일 최대 거래수', step: '1', min: '1', max: '500', type: 'int' },
-        { key: 'max_leverage', label: '최대 레버리지', step: '0.5', min: '1', max: '20', type: 'float' },
-        { key: 'min_signal_confidence', label: '최소 신호 신뢰도', step: '0.01', min: '0', max: '1', type: 'float' },
-        { key: 'max_slippage_bps', label: '최대 슬리피지(bps)', step: '1', min: '1', max: '300', type: 'float' },
-        { key: 'min_expectancy_pct', label: '최소 기대수익(비율)', step: '0.005', min: '0', max: '1', type: 'float' },
-        { key: 'cooldown_minutes', label: '쿨다운(분)', step: '1', min: '0', max: '240', type: 'int' },
-        { key: 'max_consecutive_losses', label: '최대 연속손실', step: '1', min: '1', max: '20', type: 'int' },
-        { key: 'max_reject_ratio', label: '최대 거부율(비율)', step: '0.01', min: '0', max: '1', type: 'float' },
+        { key: 'daily_max_loss_pct', label: tr('일일 최대손실(비율)', 'Daily max loss (ratio)'), step: '0.005', min: '0', max: '1', type: 'float' },
+        { key: 'max_total_exposure', label: tr('총 노출 상한(비율)', 'Total exposure cap (ratio)'), step: '0.01', min: '0', max: '1', type: 'float' },
+        { key: 'max_symbol_exposure', label: tr('종목 노출 상한(비율)', 'Symbol exposure cap (ratio)'), step: '0.01', min: '0', max: '1', type: 'float' },
+        { key: 'max_open_positions', label: tr('최대 포지션 수', 'Max open positions'), step: '1', min: '1', max: '30', type: 'int' },
+        { key: 'max_daily_trades', label: tr('일일 최대 거래수', 'Max daily trades'), step: '1', min: '1', max: '500', type: 'int' },
+        { key: 'max_leverage', label: tr('최대 레버리지', 'Max leverage'), step: '0.5', min: '1', max: '20', type: 'float' },
+        { key: 'min_signal_confidence', label: tr('최소 신호 신뢰도', 'Minimum signal confidence'), step: '0.01', min: '0', max: '1', type: 'float' },
+        { key: 'max_slippage_bps', label: tr('최대 슬리피지(bps)', 'Max slippage (bps)'), step: '1', min: '1', max: '300', type: 'float' },
+        { key: 'min_expectancy_pct', label: tr('최소 기대수익(비율)', 'Minimum expectancy (ratio)'), step: '0.005', min: '0', max: '1', type: 'float' },
+        { key: 'cooldown_minutes', label: tr('쿨다운(분)', 'Cooldown (min)'), step: '1', min: '0', max: '240', type: 'int' },
+        { key: 'max_consecutive_losses', label: tr('최대 연속손실', 'Max consecutive losses'), step: '1', min: '1', max: '20', type: 'int' },
+        { key: 'max_reject_ratio', label: tr('최대 거부율(비율)', 'Max reject rate (ratio)'), step: '0.01', min: '0', max: '1', type: 'float' },
       ];
 
       const rows = fields.map((field) => {
@@ -1209,7 +2120,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         <table class="strategy-edit-table">
           <thead>
             <tr>
-              <th>리스크 항목</th><th>값</th>
+              <th>${tr('리스크 항목', 'Risk Item')}</th><th>${tr('값', 'Value')}</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1221,7 +2132,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       try {
         const rows = [...document.querySelectorAll('#sketchStrategyEditor tr[data-strategy]')];
         if (!rows.length) {
-          document.getElementById('lastMessage').textContent = '저장할 전략 설정이 없습니다.';
+          document.getElementById('lastMessage').textContent = tr('저장할 전략 설정이 없습니다.', 'No strategy settings to save.');
           return;
         }
 
@@ -1241,11 +2152,11 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         }
 
         await apiPost('/api/config', payload);
-        document.getElementById('lastMessage').textContent = '전략 ON/OFF 및 가중치를 저장했습니다.';
+        document.getElementById('lastMessage').textContent = tr('전략 ON/OFF 및 가중치를 저장했습니다.', 'Strategy enabled flags and weights saved.');
         await loadConfig();
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '전략 설정 저장 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('전략 설정 저장 실패: ', 'Failed to save strategy settings: ') + e.message;
       }
     }
 
@@ -1253,7 +2164,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       try {
         const inputs = [...document.querySelectorAll('#sketchRiskEditor .sketch-risk-input')];
         if (!inputs.length) {
-          document.getElementById('lastMessage').textContent = '저장할 리스크 설정이 없습니다.';
+          document.getElementById('lastMessage').textContent = tr('저장할 리스크 설정이 없습니다.', 'No risk settings to save.');
           return;
         }
 
@@ -1279,11 +2190,11 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         }
 
         await apiPost('/api/config', { risk_limits: limits });
-        document.getElementById('lastMessage').textContent = '리스크 설정을 저장했습니다.';
+        document.getElementById('lastMessage').textContent = tr('리스크 설정을 저장했습니다.', 'Risk settings saved.');
         await loadConfig();
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '리스크 설정 저장 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('리스크 설정 저장 실패: ', 'Failed to save risk settings: ') + e.message;
       }
     }
 
@@ -1293,34 +2204,40 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const enabledStrategies = Object.entries(strategies).filter(([, v]) => !(v && v.enabled === false)).map(([k]) => k);
       const exchange = config.exchange || {};
       const llm = config.llm || {};
+      const ui = config.ui || {};
       const llmTest = window.__lastLlmTest || null;
       const exchangeProbe = window.__lastExchangeProbe || null;
       const mode = config.mode || '-';
+      const styleKey = THEME_PRESETS[String(ui.style_preset || 'premium').trim().toLowerCase()] ? String(ui.style_preset || 'premium').trim().toLowerCase() : 'premium';
+      const styleLabel = themePresetLabel(styleKey);
+      const languageName = languageLabel(window.__currentLanguage || ui.language || 'ko');
 
       const summary = document.getElementById('sketchSettingsSummary');
       if (summary) {
         summary.innerHTML = `
-          <li>모드: ${mode}</li>
-          <li>활성 전략: ${enabledStrategies.slice(0, 6).join(', ') || '-'}</li>
-          <li>거래소 타입: ${exchange.type || '-'}, testnet=${exchange.testnet ? 'ON' : 'OFF'}</li>
-          <li>리스크 max leverage: ${(config.risk_limits || {}).max_leverage || '-'}</li>
+          <li>${tr('모드', 'Mode')}: ${mode}</li>
+          <li>${tr('활성 전략', 'Active strategies')}: ${enabledStrategies.slice(0, 6).join(', ') || '-'}</li>
+          <li>${tr('거래소 타입', 'Exchange type')}: ${exchange.type || '-'}, testnet=${exchange.testnet ? t('common.on') : t('common.off')}</li>
+          <li>${tr('리스크 max leverage', 'Risk max leverage')}: ${(config.risk_limits || {}).max_leverage || '-'}</li>
+          <li>${tr('UI 스타일', 'UI style')}: ${styleLabel}</li>
+          <li>${tr('UI 언어', 'UI language')}: ${languageName}</li>
         `;
       }
 
       const apiNode = document.getElementById('sketchApiDetails');
       if (apiNode) {
         const probeLine = exchangeProbe
-          ? `<li>거래소 점검: ${exchangeProbe.overall_passed ? 'PASS' : 'CHECK'} / critical=${exchangeProbe.critical_failures || 0}</li>`
-          : '<li>거래소 점검: 미실행</li>';
+          ? `<li>${tr('거래소 점검', 'Exchange probe')}: ${exchangeProbe.overall_passed ? t('common.pass') : t('common.check')} / critical=${exchangeProbe.critical_failures || 0}</li>`
+          : `<li>${tr('거래소 점검', 'Exchange probe')}: ${tr('미실행', 'Not run')}</li>`;
         const llmTestLine = llmTest
-          ? `<li>LLM 테스트: ${llmTest.passed ? 'PASS' : 'FAIL'} / ${llmTest.status || '-'}</li>`
-          : '<li>LLM 테스트: 미실행</li>';
+          ? `<li>${tr('LLM 테스트', 'LLM test')}: ${llmTest.passed ? t('common.pass') : t('common.fail')} / ${llmTest.status || '-'}</li>`
+          : `<li>${tr('LLM 테스트', 'LLM test')}: ${tr('미실행', 'Not run')}</li>`;
         apiNode.innerHTML = `
-          <li>거래소 API Key: ${exchange.api_key ? '입력됨' : '미입력'}</li>
-          <li>거래소 Secret: ${exchange.api_secret ? '입력됨' : '미입력'}</li>
+          <li>${tr('거래소 API Key', 'Exchange API Key')}: ${exchange.api_key ? tr('입력됨', 'Provided') : tr('미입력', 'Missing')}</li>
+          <li>${tr('거래소 Secret', 'Exchange Secret')}: ${exchange.api_secret ? tr('입력됨', 'Provided') : tr('미입력', 'Missing')}</li>
           ${probeLine}
-          <li>LLM 사용: ${llm.enabled ? 'ON' : 'OFF'} / ${llm.provider || '-'}</li>
-          <li>LLM Key: ${llm.api_key ? '입력됨' : '미입력'}</li>
+          <li>${tr('LLM 사용', 'LLM enabled')}: ${llm.enabled ? t('common.on') : t('common.off')} / ${llm.provider || '-'}</li>
+          <li>${tr('LLM Key', 'LLM Key')}: ${llm.api_key ? tr('입력됨', 'Provided') : tr('미입력', 'Missing')}</li>
           ${llmTestLine}
         `;
       }
@@ -1334,18 +2251,18 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const apiNode = document.getElementById('sketchApiStatus');
       const loopNode = document.getElementById('sketchLoopStatus');
       const preflight = status.live_preflight || {};
-      if (runNode) runNode.textContent = `실행: ${status.running ? '동작중' : '정지'}`;
+      if (runNode) runNode.textContent = `${tr('실행', 'Run')}: ${status.running ? tr('동작중', 'Running') : tr('정지', 'Stopped')}`;
       if (apiNode) apiNode.textContent = `API: ${status.exchange || '-'} / ${status.testnet ? 'testnet' : 'mainnet'}`;
-      if (loopNode) loopNode.textContent = `자동: ${status.interval_seconds || '-'}초 / cycle ${status.cycle_count || 0}`;
+      if (loopNode) loopNode.textContent = `${tr('자동', 'Auto')}: ${status.interval_seconds || '-'}${t('unit.seconds')} / cycle ${status.cycle_count || 0}`;
 
       const runningMeta = document.getElementById('sketchRunningMeta');
       const cycle = status.last_cycle || {};
       if (runningMeta) {
         runningMeta.innerHTML = `
-          <li>선택 후보: ${cycle.selected || 0}건</li>
-          <li>실행/거부: ${cycle.executed || 0} / ${cycle.rejected || 0}</li>
-          <li>최근 에러: ${status.last_error || '없음'}</li>
-          <li>Live preflight: ${preflight.passed ? 'PASS' : 'CHECK'}</li>
+          <li>${tr('선택 후보', 'Selected candidates')}: ${cycle.selected || 0}</li>
+          <li>${tr('실행/거부', 'Executed / Rejected')}: ${cycle.executed || 0} / ${cycle.rejected || 0}</li>
+          <li>${tr('최근 에러', 'Last error')}: ${status.last_error || tr('없음', 'None')}</li>
+          <li>Live preflight: ${preflight.passed ? t('common.pass') : t('common.check')}</li>
         `;
       }
 
@@ -1358,7 +2275,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
 
       const list = (rows || []).slice(0, 8);
       if (!list.length) {
-        body.innerHTML = '<tr><td colspan="5" class="muted">체결 데이터 대기 중...</td></tr>';
+        body.innerHTML = `<tr><td colspan="5" class="muted">${tr('체결 데이터 대기 중...', 'Waiting for execution data...')}</td></tr>`;
       } else {
         body.innerHTML = list.map((r) => `
           <tr>
@@ -1373,8 +2290,8 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
 
       const rejected = list.filter((x) => String(x.order_status || '') === 'rejected');
       const text = rejected.length
-        ? `오류 점검: 최근 ${list.length}건 중 거부 ${rejected.length}건 (${rejected[0].reject_reason || 'unknown'})`
-        : '오류 점검: 최근 실행 정상';
+        ? tr(`오류 점검: 최근 ${list.length}건 중 거부 ${rejected.length}건 (${rejected[0].reject_reason || 'unknown'})`, `Error check: ${rejected.length} rejects in recent ${list.length} runs (${rejected[0].reject_reason || 'unknown'})`)
+        : tr('오류 점검: 최근 실행 정상', 'Error check: recent executions look normal');
       const errNode = document.getElementById('sketchErrorLine');
       if (errNode) errNode.textContent = text;
 
@@ -1387,7 +2304,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
             <td>${r.order_status || '-'}</td>
             <td>${r.reject_reason || '-'}</td>
           </tr>
-        `).join('') : '<tr><td colspan="4" class="muted">로그 데이터 대기 중...</td></tr>';
+        `).join('') : `<tr><td colspan="4" class="muted">${tr('로그 데이터 대기 중...', 'Waiting for log data...')}</td></tr>`;
       }
     }
 
@@ -1424,11 +2341,11 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
 
     function renderFlow(cycle, halted) {
       const steps = [
-        '시장분석',
-        '시그널 생성',
-        '리스크 게이트',
-        '실행/반려',
-        '복기 로그'
+        tr('시장분석', 'Market analysis'),
+        tr('시그널 생성', 'Signal generation'),
+        tr('리스크 게이트', 'Risk gate'),
+        tr('실행/반려', 'Execution / reject'),
+        tr('복기 로그', 'Review log'),
       ];
       const marks = [];
       const selected = cycle.selected || 0;
@@ -1453,28 +2370,28 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const stagingTrades = Number(liveStaging.today_trades || 0);
       const stagingPnl = Number(liveStaging.today_pnl || 0);
       const stagingStatus = !liveStaging.enabled
-        ? 'OFF'
-        : (liveStaging.active ? `Stage ${stagingStage || 1}` : '대기');
+        ? t('common.off')
+        : (liveStaging.active ? `Stage ${stagingStage || 1}` : t('common.waiting'));
       document.getElementById('overview').innerHTML = `
-        <div class="metric"><b>실행 상태</b>${status.running ? statusBadge('동작중', true) : statusBadge('정지', false)}</div>
-        <div class="metric"><b>모드</b>${status.mode}</div>
-        <div class="metric"><b>사이클</b>${status.cycle_count}</div>
-        <div class="metric"><b>주기</b>${status.interval_seconds}초</div>
-        <div class="metric"><b>거래소</b>${status.exchange}</div>
-        <div class="metric"><b>실거래 허용</b>${status.allow_live ? 'ON' : 'OFF'}</div>
-        <div class="metric"><b>테스트넷</b>${status.testnet ? 'ON' : 'OFF'}</div>
-        <div class="metric"><b>거부 알림</b>${rejectAlert.enabled ? 'ON' : 'OFF'} / ${rejectAlert.profile || 'auto'}</div>
-        <div class="metric"><b>거부 알림 임계치</b>${resolvedWarn == null ? "-" : resolvedWarn.toFixed(1) + "%"} / ${resolvedCritical == null ? "-" : resolvedCritical.toFixed(1) + "%"}</div>
-        <div class="metric"><b>최근 알림시각</b>${rejectAlert.last_alert_ts ? new Date(rejectAlert.last_alert_ts).toLocaleString() : '없음'}</div>
-        <div class="metric"><b>Live Preflight</b>${preflight.passed ? '<span class="ok">PASS</span>' : '<span class="warn">CHECK</span>'}</div>
+        <div class="metric"><b>${tr('실행 상태', 'Run status')}</b>${status.running ? statusBadge(tr('동작중', 'Running'), true) : statusBadge(tr('정지', 'Stopped'), false)}</div>
+        <div class="metric"><b>${tr('모드', 'Mode')}</b>${status.mode}</div>
+        <div class="metric"><b>${tr('사이클', 'Cycle')}</b>${status.cycle_count}</div>
+        <div class="metric"><b>${tr('주기', 'Interval')}</b>${status.interval_seconds}${t('unit.seconds')}</div>
+        <div class="metric"><b>${tr('거래소', 'Exchange')}</b>${status.exchange}</div>
+        <div class="metric"><b>${tr('실거래 허용', 'Live allowed')}</b>${status.allow_live ? t('common.on') : t('common.off')}</div>
+        <div class="metric"><b>${tr('테스트넷', 'Testnet')}</b>${status.testnet ? t('common.on') : t('common.off')}</div>
+        <div class="metric"><b>${tr('거부 알림', 'Reject alert')}</b>${rejectAlert.enabled ? t('common.on') : t('common.off')} / ${rejectAlert.profile || 'auto'}</div>
+        <div class="metric"><b>${tr('거부 알림 임계치', 'Reject alert thresholds')}</b>${resolvedWarn == null ? "-" : resolvedWarn.toFixed(1) + "%"} / ${resolvedCritical == null ? "-" : resolvedCritical.toFixed(1) + "%"}</div>
+        <div class="metric"><b>${tr('최근 알림시각', 'Last alert time')}</b>${rejectAlert.last_alert_ts ? new Date(rejectAlert.last_alert_ts).toLocaleString() : t('common.none')}</div>
+        <div class="metric"><b>Live Preflight</b>${preflight.passed ? `<span class="ok">${t('common.pass')}</span>` : `<span class="warn">${t('common.check')}</span>`}</div>
         <div class="metric"><b>Live Staging</b>${stagingStatus}</div>
-        <div class="metric"><b>주문 캡(USDT)</b>${stagingCap > 0 ? stagingCap.toFixed(2) : '-'}</div>
-        <div class="metric"><b>당일 실거래</b>${stagingTrades}회 / PnL ${stagingPnl.toFixed(2)}</div>
-        <div class="metric"><b>Staging 차단</b>${liveStaging.blocked ? '<span class="bad">BLOCK</span>' : '<span class="ok">OK</span>'}</div>
+        <div class="metric"><b>${tr('주문 캡(USDT)', 'Order cap (USDT)')}</b>${stagingCap > 0 ? stagingCap.toFixed(2) : '-'}</div>
+        <div class="metric"><b>${tr('당일 실거래', 'Today live trades')}</b>${stagingTrades}${tr('회', '')} / PnL ${stagingPnl.toFixed(2)}</div>
+        <div class="metric"><b>${tr('Staging 차단', 'Staging block')}</b>${liveStaging.blocked ? `<span class="bad">${t('common.block')}</span>` : `<span class="ok">${t('common.ok')}</span>`}</div>
       `;
       const tokenInput = document.getElementById('liveConfirmTokenInput');
       if (tokenInput && liveGuard.confirm_token_hint) {
-        tokenInput.placeholder = `LIVE 시작 토큰 (${liveGuard.confirm_token_hint})`;
+        tokenInput.placeholder = `${t('placeholder.liveToken')} (${liveGuard.confirm_token_hint})`;
       }
       renderSketchTop(status);
     }
@@ -1485,14 +2402,14 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       document.getElementById('accountArea').innerHTML = `
         <div class="metric"><b>USDT</b>${numberOrText(b.USDT)}</div>
         <div class="metric"><b>Equity</b>${numberOrText(b.equity_usdt)}</div>
-        <div class="metric"><b>총 포지션 Notional</b>${numberOrText(b.notional_exposure)}</div>
-        <div class="metric"><b>포지션 수</b>${open ? Object.keys(open).length : 0}</div>
+        <div class="metric"><b>${tr('총 포지션 Notional', 'Total position notional')}</b>${numberOrText(b.notional_exposure)}</div>
+        <div class="metric"><b>${tr('포지션 수', 'Open positions')}</b>${open ? Object.keys(open).length : 0}</div>
       `;
 
       const entries = Object.entries(open);
       document.getElementById('positionArea').textContent = entries.length
         ? entries.map(([symbol, notional]) => `${symbol}: ${Number(notional).toFixed(2)}`).join('  ')
-        : '현재 열린 포지션이 없습니다.';
+        : tr('현재 열린 포지션이 없습니다.', 'There are no open positions.');
     }
 
     function renderRisk(status) {
@@ -1516,7 +2433,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const failCount = Math.max(0, Number(clearProtection.failed_attempts || 0));
       const lockMs = Math.max(0, Number(clearProtection.locked_remaining_ms || 0));
       const tokenHint = clearProtection.confirm_token_hint || 'UNHALT';
-      const lockText = lockMs > 0 ? `잠금중 ${Math.max(1, Math.ceil(lockMs / 1000))}초` : '정상';
+      const lockText = lockMs > 0 ? tr(`잠금중 ${Math.max(1, Math.ceil(lockMs / 1000))}초`, `Locked ${Math.max(1, Math.ceil(lockMs / 1000))}s`) : t('common.normal');
 
       window.__riskClearPolicy = {
         maxFailedAttempts: maxAttempts,
@@ -1529,20 +2446,20 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       if (clearBtn) {
         clearBtn.style.display = halted ? 'inline-block' : 'none';
         clearBtn.disabled = lockMs > 0;
-        clearBtn.textContent = lockMs > 0 ? `리스크 해제 (${lockText})` : '리스크 해제';
+        clearBtn.textContent = lockMs > 0 ? `${tr('리스크 해제', 'Clear Risk Halt')} (${lockText})` : tr('리스크 해제', 'Clear Risk Halt');
       }
 
       renderFlow(cycle, halted);
 
       document.getElementById('riskGuardArea').innerHTML = `
-        <div class="metric"><b>리스크 상태</b>${halted ? statusBadge('정지', false) : statusBadge('정상', true)}</div>
-        <div class="metric"><b>금일 손실 비율</b>${percentOrText(lossRate)}</div>
-        <div class="metric"><b>연속 손실</b>${Number(account.consecutive_loss_count || 0)} / ${limits.max_consecutive_losses || 0}</div>
-        <div class="metric"><b>거절 비율</b>${percentOrText(rejectRate, '0.00%')} / ${percentOrText(limits.max_reject_ratio || 0)}</div>
-        <div class="metric"><b>일일 손실 상한</b>${percentOrText(limits.daily_max_loss_pct || 0)}</div>
-        <div class="metric"><b>사유</b><span class="muted">${reason}</span></div>
-        <div class="metric"><b>해제 보안</b>${failCount}/${maxAttempts} 실패, ${lockText}</div>
-        <div class="metric"><b>확인 토큰 힌트</b><code>${tokenHint}</code></div>
+        <div class="metric"><b>${tr('리스크 상태', 'Risk status')}</b>${halted ? statusBadge(tr('정지', 'Stopped'), false) : statusBadge(tr('정상', 'Normal'), true)}</div>
+        <div class="metric"><b>${tr('금일 손실 비율', 'Today loss ratio')}</b>${percentOrText(lossRate)}</div>
+        <div class="metric"><b>${tr('연속 손실', 'Consecutive losses')}</b>${Number(account.consecutive_loss_count || 0)} / ${limits.max_consecutive_losses || 0}</div>
+        <div class="metric"><b>${tr('거절 비율', 'Reject ratio')}</b>${percentOrText(rejectRate, '0.00%')} / ${percentOrText(limits.max_reject_ratio || 0)}</div>
+        <div class="metric"><b>${tr('일일 손실 상한', 'Daily loss limit')}</b>${percentOrText(limits.daily_max_loss_pct || 0)}</div>
+        <div class="metric"><b>${tr('사유', 'Reason')}</b><span class="muted">${reason}</span></div>
+        <div class="metric"><b>${tr('해제 보안', 'Clear protection')}</b>${failCount}/${maxAttempts} ${tr('실패', 'failures')}, ${lockText}</div>
+        <div class="metric"><b>${tr('확인 토큰 힌트', 'Confirm token hint')}</b><code>${tokenHint}</code></div>
       `;
     }
 
@@ -1558,12 +2475,12 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const rowsHtml = [];
       const regimes = Object.entries(distribution).sort((a, b) => b[1] - a[1]);
       for (const [r, count] of regimes) {
-        rowsHtml.push(`<div class="metric"><b>레짐 ${r}</b>종목 ${count}개</div>`);
+        rowsHtml.push(`<div class="metric"><b>${tr('레짐', 'Regime')} ${r}</b>${tr('종목', 'Symbols')} ${count}</div>`);
       }
-      const selectedLabel = Object.entries(selectedCounts).map(([k, v]) => `${k}: ${v}개`).join(' / ') || '없음';
-      const signalLabel = Object.entries(signalCounts).map(([k, v]) => `${k}: ${v}개`).join(' / ') || '없음';
-      rowsHtml.push(`<div class="metric"><b>선택 전략</b>${selectedLabel}</div>`);
-      rowsHtml.push(`<div class="metric"><b>후보 생성</b>${signalLabel}</div>`);
+      const selectedLabel = Object.entries(selectedCounts).map(([k, v]) => `${k}: ${v}`).join(' / ') || tr('없음', 'None');
+      const signalLabel = Object.entries(signalCounts).map(([k, v]) => `${k}: ${v}`).join(' / ') || tr('없음', 'None');
+      rowsHtml.push(`<div class="metric"><b>${tr('선택 전략', 'Selected strategies')}</b>${selectedLabel}</div>`);
+      rowsHtml.push(`<div class="metric"><b>${tr('후보 생성', 'Candidate generation')}</b>${signalLabel}</div>`);
       document.getElementById('strategyPlanSummary').innerHTML = rowsHtml.join('');
 
       document.getElementById('strategyPlanBody').innerHTML = selectedPlan.map((row) => `
@@ -1576,32 +2493,32 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           <td>${percentOrText(Number(row.confidence || 0))}</td>
           <td>${row.comment || '-'}</td>
         </tr>
-      `).join('') || '<tr><td colspan="7" class="muted">현재 주기에서 선택 후보가 없습니다.</td></tr>';
+      `).join('') || `<tr><td colspan="7" class="muted">${tr('현재 주기에서 선택 후보가 없습니다.', 'No candidates selected in the current cycle.')}</td></tr>`;
 
       const marketAnalysis = document.getElementById('sketchMarketAnalysis');
       if (marketAnalysis) {
         const marketItems = snapshots.slice(0, 8).map((item) =>
           `<li>${item.symbol || '-'} / ${item.regime || '-'} (${percentOrText(Number(item.regime_confidence || 0))})</li>`
         );
-        marketAnalysis.innerHTML = marketItems.join('') || '<li>시황 분석 데이터가 없습니다.</li>';
+        marketAnalysis.innerHTML = marketItems.join('') || `<li>${tr('시황 분석 데이터가 없습니다.', 'No market analysis data.')}</li>`;
       }
 
       const marketEvidence = document.getElementById('sketchMarketEvidence');
       if (marketEvidence) {
         const evidence = snapshots.slice(0, 6).map((item) => `<li>${item.symbol || '-'}: ${item.regime_reason || '-'}</li>`);
-        marketEvidence.innerHTML = evidence.join('') || '<li>근거 데이터가 없습니다.</li>';
+        marketEvidence.innerHTML = evidence.join('') || `<li>${tr('근거 데이터가 없습니다.', 'No evidence data.')}</li>`;
       }
 
       const strategyList = document.getElementById('sketchStrategyList');
       if (strategyList) {
         const lines = selectedPlan.slice(0, 8).map((row) => `<li>${row.symbol || '-'}: ${row.strategy || '-'} / ${row.direction || '-'}</li>`);
-        strategyList.innerHTML = lines.join('') || '<li>전략 후보가 없습니다.</li>';
+        strategyList.innerHTML = lines.join('') || `<li>${tr('전략 후보가 없습니다.', 'No strategy candidates.')}</li>`;
       }
 
       const strategyEvidence = document.getElementById('sketchStrategyEvidence');
       if (strategyEvidence) {
         const lines = selectedPlan.slice(0, 8).map((row) => `<li>${row.symbol || '-'}: ${row.comment || '-'} (score ${Number(row.score || 0).toFixed(2)})</li>`);
-        strategyEvidence.innerHTML = lines.join('') || '<li>전략 근거가 없습니다.</li>';
+        strategyEvidence.innerHTML = lines.join('') || `<li>${tr('전략 근거가 없습니다.', 'No strategy evidence.')}</li>`;
       }
 
       const botList = document.getElementById('sketchBotList');
@@ -1609,7 +2526,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         const activeBots = Object.entries(selectedCounts).map(([name, count]) => `${name}(${count})`);
         botList.innerHTML = (activeBots.length
           ? activeBots.map((x) => `<li>${x}</li>`).join('')
-          : '<li>활성 매매 봇 데이터가 없습니다.</li>');
+          : `<li>${tr('활성 매매 봇 데이터가 없습니다.', 'No active trading bot data.')}</li>`);
       }
     }
 
@@ -1618,7 +2535,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       try {
         const rows = await apiGet('/api/risk/events?limit=50');
         if (!rows.length) {
-          body.innerHTML = '<tr><td colspan="5" class="muted">이벤트가 없습니다.</td></tr>';
+          body.innerHTML = `<tr><td colspan="5" class="muted">${tr('이벤트가 없습니다.', 'No events found.')}</td></tr>`;
           return;
         }
         const list = rows.filter((x) => String(x.action || '').includes('risk_halt_clear')).slice(0, 10);
@@ -1632,7 +2549,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           </tr>
         `).join('');
       } catch (_e) {
-        body.innerHTML = '<tr><td colspan="5" class="muted">이벤트 조회 실패</td></tr>';
+        body.innerHTML = `<tr><td colspan="5" class="muted">${tr('이벤트 조회 실패', 'Failed to load events')}</td></tr>`;
       }
     }
 
@@ -1653,9 +2570,9 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
 
       const summary = document.getElementById('pnlSummary');
       if (points.length === 0) {
-        summary.textContent = '실행 데이터가 없습니다.';
+        summary.textContent = tr('실행 데이터가 없습니다.', 'No execution data.');
       } else {
-        summary.textContent = `총 거래: ${filledRows.length}건 | 누적 PnL: ${cum.toFixed(2)} USDT`;
+        summary.textContent = tr(`총 거래: ${filledRows.length}건 | 누적 PnL: ${cum.toFixed(2)} USDT`, `Total trades: ${filledRows.length} | Cumulative PnL: ${cum.toFixed(2)} USDT`);
       }
 
       const width = canvas.clientWidth;
@@ -1723,19 +2640,19 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         const profile = th.profile || '-';
 
         summaryArea.innerHTML = `
-          <div class="metric"><b>알람 모드</b>${profile}</div>
-          <div class="metric"><b>샘플 수</b>${total}</div>
-          <div class="metric"><b>거부 총건수</b>${rejected}</div>
-          <div class="metric"><b>거부율</b>${percentOrText(rejectRate, '0.00%')}</div>
-          <div class="metric"><b>임계치(거부율)</b>${percentOrText(th.reject_rate_warn || 0)} / ${percentOrText(th.reject_rate_critical || 0)}</div>
-          <div class="metric"><b>거부사유 임계치</b>${percentOrText(th.reject_reason_rate_warn || 0)} / ${percentOrText(th.reject_reason_rate_critical || 0)}</div>
+          <div class="metric"><b>${tr('알람 모드', 'Alert mode')}</b>${profile}</div>
+          <div class="metric"><b>${tr('샘플 수', 'Samples')}</b>${total}</div>
+          <div class="metric"><b>${tr('거부 총건수', 'Total rejects')}</b>${rejected}</div>
+          <div class="metric"><b>${tr('거부율', 'Reject rate')}</b>${percentOrText(rejectRate, '0.00%')}</div>
+          <div class="metric"><b>${tr('임계치(거부율)', 'Thresholds (reject rate)')}</b>${percentOrText(th.reject_rate_warn || 0)} / ${percentOrText(th.reject_rate_critical || 0)}</div>
+          <div class="metric"><b>${tr('거부사유 임계치', 'Reason thresholds')}</b>${percentOrText(th.reject_reason_rate_warn || 0)} / ${percentOrText(th.reject_reason_rate_critical || 0)}</div>
         `;
 
         const alerts = (payload.alerts || []).slice(0, 8);
         if (!alerts.length) {
-          alertArea.innerHTML = '<div class="reject-alert ok">현재 기준치 이상 위험 징후가 없습니다.</div>';
+          alertArea.innerHTML = `<div class="reject-alert ok">${tr('현재 기준치 이상 위험 징후가 없습니다.', 'No risk signals above the current thresholds.')}</div>`;
           const errNode = document.getElementById('sketchErrorLine');
-          if (errNode) errNode.textContent = '오류 점검: 경보 없음';
+          if (errNode) errNode.textContent = tr('오류 점검: 경보 없음', 'Error check: no alert');
         } else {
           alertArea.innerHTML = alerts.map((item) => {
             const cls = item.level || 'info';
@@ -1743,12 +2660,12 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
             return `<div class="reject-alert ${clsName}">${item.message || '-'}</div>`;
           }).join('');
           const errNode = document.getElementById('sketchErrorLine');
-          if (errNode) errNode.textContent = `오류 점검: ${alerts[0].message || '경보 발생'}`;
+          if (errNode) errNode.textContent = tr(`오류 점검: ${alerts[0].message || '경보 발생'}`, `Error check: ${alerts[0].message || 'Alert raised'}`);
         }
 
         const rows = payload.reasons || [];
         if (!rows.length) {
-          body.innerHTML = '<tr><td colspan="4" class="muted">거부 데이터가 아직 충분하지 않습니다.</td></tr>';
+          body.innerHTML = `<tr><td colspan="4" class="muted">${tr('거부 데이터가 아직 충분하지 않습니다.', 'Reject data is not sufficient yet.')}</td></tr>`;
           return;
         }
 
@@ -1761,11 +2678,11 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           </tr>
         `).join('');
       } catch (_e) {
-        summaryArea.innerHTML = '<div class="metric"><b>거부사유 통계</b>조회 실패</div>';
-        alertArea.innerHTML = '<div class="reject-alert critical">거부사유 통계 조회 중 오류가 발생했습니다.</div>';
-        body.innerHTML = '<tr><td colspan="4" class="muted">거부사유 통계를 불러오지 못했습니다.</td></tr>';
+        summaryArea.innerHTML = `<div class="metric"><b>${tr('거부사유 통계', 'Reject stats')}</b> ${tr('조회 실패', 'load failed')}</div>`;
+        alertArea.innerHTML = `<div class="reject-alert critical">${tr('거부사유 통계 조회 중 오류가 발생했습니다.', 'An error occurred while loading reject statistics.')}</div>`;
+        body.innerHTML = `<tr><td colspan="4" class="muted">${tr('거부사유 통계를 불러오지 못했습니다.', 'Unable to load reject statistics.')}</td></tr>`;
         const errNode = document.getElementById('sketchErrorLine');
-        if (errNode) errNode.textContent = '오류 점검: 거부사유 통계 조회 실패';
+        if (errNode) errNode.textContent = tr('오류 점검: 거부사유 통계 조회 실패', 'Error check: failed to load reject statistics');
       }
     }
 
@@ -1821,7 +2738,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const payload = (status || {}).validation_alert || {};
       const alerts = (payload.alerts || []).filter((x) => ['warn', 'critical'].includes(String(x.level || '').toLowerCase()));
       if (!alerts.length) {
-        area.innerHTML = '<div class="reject-alert ok">검증 알람 상태: 정상</div>';
+        area.innerHTML = `<div class="reject-alert ok">${tr('검증 알람 상태: 정상', 'Validation alert status: normal')}</div>`;
         return;
       }
       area.innerHTML = alerts.slice(0, 3).map((a) => `
@@ -1836,18 +2753,18 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         const lv = String(level || 'warn').toLowerCase();
         const result = await apiPost('/api/validation/alert/test', { level: lv });
         if (result.status === 'sent') {
-          document.getElementById('lastMessage').textContent = `검증 알람 테스트(${lv}) 발송 시도 완료`;
+          document.getElementById('lastMessage').textContent = tr(`검증 알람 테스트(${lv}) 발송 시도 완료`, `Validation alert test (${lv}) send attempt completed`);
         } else {
-          document.getElementById('lastMessage').textContent = `검증 알람 테스트(${lv}) 실패/스킵: ${result.reason || result.status}`;
+          document.getElementById('lastMessage').textContent = tr(`검증 알람 테스트(${lv}) 실패/스킵: ${result.reason || result.status}`, `Validation alert test (${lv}) failed/skipped: ${result.reason || result.status}`);
         }
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '검증 알람 테스트 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('검증 알람 테스트 실패: ', 'Validation alert test failed: ') + e.message;
       }
     }
 
     function yesNo(v) {
-      return v ? 'PASS' : 'FAIL';
+      return v ? t('common.pass') : t('common.fail');
     }
 
     async function renderValidationHistory() {
@@ -1861,17 +2778,17 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         const avgDd = Number(payload.avg_max_drawdown_pct || 0);
         const latest = payload.latest || {};
         document.getElementById('validationOverview').innerHTML = `
-          <div class="metric"><b>최근 검증 횟수</b>${total}</div>
-          <div class="metric"><b>통과율</b>${percentOrText(passRate)}</div>
-          <div class="metric"><b>평균 PnL</b>${numberOrText(avgPnl, 2)}</div>
-          <div class="metric"><b>평균 승률</b>${percentOrText(avgWin)}</div>
-          <div class="metric"><b>평균 MDD</b>${percentOrText(avgDd)}</div>
-          <div class="metric"><b>최근 상태</b>${yesNo(!!latest.overall_passed)}</div>
+          <div class="metric"><b>${tr('최근 검증 횟수', 'Recent validation runs')}</b>${total}</div>
+          <div class="metric"><b>${tr('통과율', 'Pass rate')}</b>${percentOrText(passRate)}</div>
+          <div class="metric"><b>${tr('평균 PnL', 'Average PnL')}</b>${numberOrText(avgPnl, 2)}</div>
+          <div class="metric"><b>${tr('평균 승률', 'Average win rate')}</b>${percentOrText(avgWin)}</div>
+          <div class="metric"><b>${tr('평균 MDD', 'Average MDD')}</b>${percentOrText(avgDd)}</div>
+          <div class="metric"><b>${tr('최근 상태', 'Latest status')}</b>${yesNo(!!latest.overall_passed)}</div>
         `;
 
         const tbody = document.getElementById('validationHistoryBody');
         if (!rows.length) {
-          tbody.innerHTML = '<tr><td colspan="7" class="muted">검증 이력이 없습니다.</td></tr>';
+          tbody.innerHTML = `<tr><td colspan="7" class="muted">${tr('검증 이력이 없습니다.', 'No validation history.')}</td></tr>`;
           return;
         }
         tbody.innerHTML = rows.map((r) => `
@@ -1886,8 +2803,8 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           </tr>
         `).join('');
       } catch (_e) {
-        document.getElementById('validationOverview').innerHTML = '<div class="metric"><b>검증 비교</b>조회 실패</div>';
-        document.getElementById('validationHistoryBody').innerHTML = '<tr><td colspan="7" class="muted">검증 비교 데이터를 불러오지 못했습니다.</td></tr>';
+        document.getElementById('validationOverview').innerHTML = `<div class="metric"><b>${tr('검증 비교', 'Validation comparison')}</b> ${tr('조회 실패', 'load failed')}</div>`;
+        document.getElementById('validationHistoryBody').innerHTML = `<tr><td colspan="7" class="muted">${tr('검증 비교 데이터를 불러오지 못했습니다.', 'Unable to load validation comparison data.')}</td></tr>`;
       }
     }
 
@@ -1966,7 +2883,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           <td>${x.status || '-'}</td>
           <td>${String(x.ts || '-').slice(0, 19)}</td>
         </tr>
-      `).join('') || '<tr><td colspan="10" class="muted">대기 중인 승인 제안이 없습니다.</td></tr>';
+      `).join('') || `<tr><td colspan="10" class="muted">${tr('대기 중인 승인 제안이 없습니다.', 'There are no pending approval proposals.')}</td></tr>`;
 
       const lbRows = flattenLeaderboardRows(leaderboard);
       document.getElementById('learningLeaderboardBody').innerHTML = lbRows.map((x) => `
@@ -1978,29 +2895,29 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           <td>${numberOrText(x.total_pnl, 2)}</td>
           <td>${numberOrText(x.avg_pnl, 2)}</td>
         </tr>
-      `).join('') || '<tr><td colspan="6" class="muted">리더보드 샘플이 아직 부족합니다.</td></tr>';
+      `).join('') || `<tr><td colspan="6" class="muted">${tr('리더보드 샘플이 아직 부족합니다.', 'Leaderboard sample size is still too small.')}</td></tr>`;
 
       document.getElementById('learningLeaderboardSummary').innerHTML = `
-        <div class="metric"><b>리더보드 샘플</b>${Number(leaderboard.sample_count || 0)}건</div>
-        <div class="metric"><b>전략 Top</b>${(leaderboard.strategy || []).length}개</div>
-        <div class="metric"><b>레짐 Top</b>${(leaderboard.regime || []).length}개</div>
-        <div class="metric"><b>심볼 Top</b>${(leaderboard.symbol || []).length}개</div>
+        <div class="metric"><b>${tr('리더보드 샘플', 'Leaderboard samples')}</b>${Number(leaderboard.sample_count || 0)}</div>
+        <div class="metric"><b>${tr('전략 Top', 'Top strategies')}</b>${(leaderboard.strategy || []).length}</div>
+        <div class="metric"><b>${tr('레짐 Top', 'Top regimes')}</b>${(leaderboard.regime || []).length}</div>
+        <div class="metric"><b>${tr('심볼 Top', 'Top symbols')}</b>${(leaderboard.symbol || []).length}</div>
       `;
 
       const pendingCount = Number(proposalStats.pending || pending.length || 0);
       const applyMode = String(auto.apply_mode || 'manual_approval');
       document.getElementById('learningProposalMsg').textContent =
-        `대기 제안 ${pendingCount}개 | 모드=${applyMode} | 만료=${Number(auto.proposal_expiry_hours || 0)}h`;
+        tr(`대기 제안 ${pendingCount}개 | 모드=${applyMode} | 만료=${Number(auto.proposal_expiry_hours || 0)}h`, `Pending proposals ${pendingCount} | mode=${applyMode} | expiry=${Number(auto.proposal_expiry_hours || 0)}h`);
 
       const changeCount = rows.filter((r) => r.action !== 'hold').length;
-      let learningMsg = `변경 제안: ${changeCount}개`;
-      if (!rows.length) learningMsg = '적용 가능한 제안이 없습니다.';
+      let learningMsg = tr(`변경 제안: ${changeCount}개`, `Change suggestions: ${changeCount}`);
+      if (!rows.length) learningMsg = tr('적용 가능한 제안이 없습니다.', 'No applicable suggestions.');
       if (auto.enabled) {
         const autoStatus = ((auto.last_result || {}).status) || 'idle';
         const remain = Number(auto.remaining_cycles_to_next_apply || 0);
-        learningMsg += ` | 자동학습: ${autoStatus} (다음까지 ${remain} cycle, 모드=${applyMode})`;
+        learningMsg += tr(` | 자동학습: ${autoStatus} (다음까지 ${remain} cycle, 모드=${applyMode})`, ` | Auto-learning: ${autoStatus} (${remain} cycles to next apply, mode=${applyMode})`);
       } else {
-        learningMsg += ' | 자동학습: 비활성';
+        learningMsg += tr(' | 자동학습: 비활성', ' | Auto-learning: disabled');
       }
       document.getElementById('learningMsg').textContent = learningMsg;
     }
@@ -2011,14 +2928,14 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const body = { window_days: days };
       if (mode === 'selected') {
         if (!selected.length) {
-          document.getElementById('learningMsg').textContent = '선택할 전략이 없습니다.';
+          document.getElementById('learningMsg').textContent = tr('선택할 전략이 없습니다.', 'No strategies selected.');
           return;
         }
         body.strategy_filter = selected;
       }
 
       const result = await apiPost('/api/learning/apply', body);
-      document.getElementById('learningMsg').textContent = `튜닝 적용: ${result.applied_count}개`;
+      document.getElementById('learningMsg').textContent = tr(`튜닝 적용: ${result.applied_count}개`, `Tuning applied: ${result.applied_count}`);
       await loadLearning();
       await loadConfig();
     }
@@ -2033,9 +2950,9 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         all_pending: selectedIds.length === 0,
       };
       const result = await apiPost('/api/learning/proposals/review', body);
-      const verb = body.action === 'reject' ? '거절' : '승인적용';
+      const verb = body.action === 'reject' ? tr('거절', 'Rejected') : tr('승인적용', 'Approved');
       const changed = Number(result.changed_count || result.applied_count || 0);
-      document.getElementById('learningMsg').textContent = `제안 ${verb}: ${changed}개 (${result.status || '-'})`;
+      document.getElementById('learningMsg').textContent = tr(`제안 ${verb}: ${changed}개 (${result.status || '-'})`, `Proposal ${verb}: ${changed} (${result.status || '-'})`);
       await loadLearning();
       await loadConfig();
     }
@@ -2055,7 +2972,6 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
     }
 
     function ensureValidationAlertControls() {
-      if (document.getElementById('validationAlertEnabled')) return;
       const anchor = document.getElementById('notifyIncludeSummary');
       if (!anchor) return;
 
@@ -2063,23 +2979,26 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const host = (fieldNode && fieldNode.parentElement) ? fieldNode.parentElement : anchor.parentElement;
       if (!host) return;
 
-      const wrap = document.createElement('div');
-      wrap.className = 'field';
-      wrap.id = 'validationAlertControlWrap';
+      let wrap = document.getElementById('validationAlertControlWrap');
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.className = 'field';
+        wrap.id = 'validationAlertControlWrap';
+        host.appendChild(wrap);
+      }
       wrap.innerHTML = `
-        <label><b>검증 이력 알람 임계치</b></label>
+        <label><b>${tr('검증 이력 알람 임계치', 'Validation history alert thresholds')}</b></label>
         <div class="inline-check">
-          <input id="validationAlertEnabled" type="checkbox" checked /> 활성화
+          <input id="validationAlertEnabled" type="checkbox" checked /> ${tr('활성화', 'Enabled')}
         </div>
         <div class="form-grid" style="margin-top:8px;">
-          <div><label for="validationAlertMinSamples">최소 샘플 수</label><input id="validationAlertMinSamples" type="number" min="1" value="5" /></div>
-          <div><label for="validationPassWarn">통과율 경고 이하(0~1)</label><input id="validationPassWarn" type="number" step="0.01" min="0" max="1" value="0.6" /></div>
-          <div><label for="validationPassCritical">통과율 critical 이하(0~1)</label><input id="validationPassCritical" type="number" step="0.01" min="0" max="1" value="0.4" /></div>
-          <div><label for="validationDdWarn">MDD 경고 이상(0~1)</label><input id="validationDdWarn" type="number" step="0.01" min="0" max="1" value="0.25" /></div>
-          <div><label for="validationDdCritical">MDD critical 이상(0~1)</label><input id="validationDdCritical" type="number" step="0.01" min="0" max="1" value="0.35" /></div>
+          <div><label for="validationAlertMinSamples">${tr('최소 샘플 수', 'Minimum samples')}</label><input id="validationAlertMinSamples" type="number" min="1" value="5" /></div>
+          <div><label for="validationPassWarn">${tr('통과율 경고 이하(0~1)', 'Pass rate warn below (0~1)')}</label><input id="validationPassWarn" type="number" step="0.01" min="0" max="1" value="0.6" /></div>
+          <div><label for="validationPassCritical">${tr('통과율 critical 이하(0~1)', 'Pass rate critical below (0~1)')}</label><input id="validationPassCritical" type="number" step="0.01" min="0" max="1" value="0.4" /></div>
+          <div><label for="validationDdWarn">${tr('MDD 경고 이상(0~1)', 'MDD warn above (0~1)')}</label><input id="validationDdWarn" type="number" step="0.01" min="0" max="1" value="0.25" /></div>
+          <div><label for="validationDdCritical">${tr('MDD critical 이상(0~1)', 'MDD critical above (0~1)')}</label><input id="validationDdCritical" type="number" step="0.01" min="0" max="1" value="0.35" /></div>
         </div>
       `;
-      host.appendChild(wrap);
     }
 
     function renderNotificationSettings(cfg) {
@@ -2185,20 +3104,20 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       try {
         const payload = buildNotificationPayload();
         await apiPost('/api/config', payload);
-        document.getElementById('lastMessage').textContent = '알림 설정이 저장되었습니다.';
+        document.getElementById('lastMessage').textContent = tr('알림 설정이 저장되었습니다.', 'Notification settings saved.');
         await loadConfig();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '알림 설정 저장 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('알림 설정 저장 실패: ', 'Failed to save notification settings: ') + e.message;
       }
     }
     async function runOnce() {
       try {
         const result = await apiPost('/api/run-once', {});
         const detail = result.auto_halt?.reason ? ` (${result.auto_halt.reason})` : '';
-        document.getElementById('lastMessage').textContent = `1회 실행 완료: executed=${result.executed || 0}, rejected=${result.rejected || 0}${detail}`;
+        document.getElementById('lastMessage').textContent = tr(`1회 실행 완료: executed=${result.executed || 0}, rejected=${result.rejected || 0}${detail}`, `Run once complete: executed=${result.executed || 0}, rejected=${result.rejected || 0}${detail}`);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '1회 실행 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('1회 실행 실패: ', 'Run once failed: ') + e.message;
       }
     }
 
@@ -2212,25 +3131,25 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         });
         if (result.status === 'reject_preflight') {
           const errors = ((result.preflight || {}).errors || []).join(' / ') || 'unknown';
-          document.getElementById('lastMessage').textContent = `자동 실행 차단(preflight): ${errors}`;
+          document.getElementById('lastMessage').textContent = tr(`자동 실행 차단(preflight): ${errors}`, `Auto start blocked (preflight): ${errors}`);
           await refreshAll();
           return;
         }
         if (result.status === 'reject_validation_gate') {
           const errors = ((result.validation_gate || {}).errors || []).join(' / ') || 'validation gate failed';
-          document.getElementById('lastMessage').textContent = `자동 실행 차단(validation): ${errors}`;
+          document.getElementById('lastMessage').textContent = tr(`자동 실행 차단(validation): ${errors}`, `Auto start blocked (validation): ${errors}`);
           await refreshAll();
           return;
         }
         if (result.status === 'reject_live_ack') {
-          document.getElementById('lastMessage').textContent = '자동 실행 차단: LIVE 시작 토큰 불일치';
+          document.getElementById('lastMessage').textContent = tr('자동 실행 차단: LIVE 시작 토큰 불일치', 'Auto start blocked: LIVE start token mismatch');
           await refreshAll();
           return;
         }
-        document.getElementById('lastMessage').textContent = `자동 실행: ${result.status}`;
+        document.getElementById('lastMessage').textContent = tr(`자동 실행: ${result.status}`, `Auto run: ${result.status}`);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '시작 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('시작 실패: ', 'Start failed: ') + e.message;
       }
     }
 
@@ -2240,8 +3159,8 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         const checks = payload.checks || [];
         const failed = checks.filter((c) => c.required && !c.passed);
         document.getElementById('lastMessage').textContent = payload.overall_passed
-          ? '실거래 준비 점검 통과'
-          : `실거래 준비 점검 실패(${failed.length}개)`;
+          ? tr('실거래 준비 점검 통과', 'Live readiness check passed')
+          : tr(`실거래 준비 점검 실패(${failed.length}개)`, `Live readiness check failed (${failed.length})`);
 
         const boxClass = payload.overall_passed ? 'reject-alert ok' : 'reject-alert critical';
         const lines = checks.slice(0, 8).map((c) => {
@@ -2250,26 +3169,26 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         }).join('');
         document.getElementById('liveReadinessArea').innerHTML = `
           <div class="${boxClass}">
-            <b>실거래 준비 점검 결과: ${payload.overall_passed ? 'PASS' : 'FAIL'}</b>
-            <ul class="sketch-list compact" style="margin-top:6px;">${lines || '<li>점검 항목 없음</li>'}</ul>
+            <b>${tr('실거래 준비 점검 결과', 'Live readiness result')}: ${payload.overall_passed ? t('common.pass') : t('common.fail')}</b>
+            <ul class="sketch-list compact" style="margin-top:6px;">${lines || `<li>${tr('점검 항목 없음', 'No checks')}</li>`}</ul>
           </div>
         `;
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '실거래 준비 점검 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('실거래 준비 점검 실패: ', 'Live readiness check failed: ') + e.message;
       }
     }
 
     async function saveLiveReadinessReport() {
       try {
-        const customPath = window.prompt('저장 경로(비우면 자동 경로):', '');
+        const customPath = window.prompt(tr('저장 경로(비우면 자동 경로):', 'Save path (leave blank for automatic path):'), '');
         const body = {};
         if (customPath && customPath.trim()) body.output_path = customPath.trim();
         const payload = await apiPost('/api/live/readiness/report', body);
         const reportPath = (payload || {}).report_path || '-';
-        document.getElementById('lastMessage').textContent = `실거래 점검 리포트 저장 완료: ${reportPath}`;
+        document.getElementById('lastMessage').textContent = tr(`실거래 점검 리포트 저장 완료: ${reportPath}`, `Live readiness report saved: ${reportPath}`);
         await runLiveReadiness();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '실거래 점검 리포트 저장 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('실거래 점검 리포트 저장 실패: ', 'Failed to save live readiness report: ') + e.message;
       }
     }
 
@@ -2293,12 +3212,12 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const css = pass ? 'reject-alert ok' : 'reject-alert warn';
       box.innerHTML = `
         <div class="${css}">
-          <b>실거래 리허설 계획: ${pass ? 'READY' : 'CHECK'}</b>
+          <b>${tr('실거래 리허설 계획', 'Live rehearsal plan')}: ${pass ? t('common.ready') : t('common.check')}</b>
           <span class="small" style="margin-left:8px;">preflight=${yesNo(!!readiness.preflight_passed)}, gate=${yesNo(!!readiness.validation_gate_passed)}, probe=${yesNo(!!readiness.exchange_probe_passed)}</span>
-          <div class="small" style="margin-top:6px;">Stage Plan</div>
-          <ul class="sketch-list compact">${stageLines || '<li>stage plan 없음</li>'}</ul>
-          <div class="small" style="margin-top:6px;">Failure Scenarios</div>
-          <ul class="sketch-list compact">${scenarioLines || '<li>시나리오 없음</li>'}</ul>
+          <div class="small" style="margin-top:6px;">${tr('Stage Plan', 'Stage Plan')}</div>
+          <ul class="sketch-list compact">${stageLines || `<li>${tr('stage plan 없음', 'No stage plan')}</li>`}</ul>
+          <div class="small" style="margin-top:6px;">${tr('Failure Scenarios', 'Failure Scenarios')}</div>
+          <ul class="sketch-list compact">${scenarioLines || `<li>${tr('시나리오 없음', 'No scenarios')}</li>`}</ul>
         </div>
       `;
     }
@@ -2309,23 +3228,23 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         renderLiveRehearsal(payload);
         const ready = (payload.readiness_summary || {});
         document.getElementById('lastMessage').textContent =
-          `리허설 생성 완료(preflight=${yesNo(!!ready.preflight_passed)}, gate=${yesNo(!!ready.validation_gate_passed)}, probe=${yesNo(!!ready.exchange_probe_passed)})`;
+          tr(`리허설 생성 완료(preflight=${yesNo(!!ready.preflight_passed)}, gate=${yesNo(!!ready.validation_gate_passed)}, probe=${yesNo(!!ready.exchange_probe_passed)})`, `Rehearsal created (preflight=${yesNo(!!ready.preflight_passed)}, gate=${yesNo(!!ready.validation_gate_passed)}, probe=${yesNo(!!ready.exchange_probe_passed)})`);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '실거래 리허설 생성 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('실거래 리허설 생성 실패: ', 'Failed to create live rehearsal: ') + e.message;
       }
     }
 
     async function saveLiveRehearsalReport() {
       try {
-        const customPath = window.prompt('리허설 리포트 저장 경로(비우면 자동):', '');
+        const customPath = window.prompt(tr('리허설 리포트 저장 경로(비우면 자동):', 'Rehearsal report save path (blank for auto):'), '');
         const body = {};
         if (customPath && customPath.trim()) body.output_path = customPath.trim();
         const payload = await apiPost('/api/live/rehearsal/report', body);
         const reportPath = (payload || {}).report_path || '-';
         renderLiveRehearsal((payload || {}).report || {});
-        document.getElementById('lastMessage').textContent = `리허설 리포트 저장 완료: ${reportPath}`;
+        document.getElementById('lastMessage').textContent = tr(`리허설 리포트 저장 완료: ${reportPath}`, `Rehearsal report saved: ${reportPath}`);
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '리허설 리포트 저장 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('리허설 리포트 저장 실패: ', 'Failed to save rehearsal report: ') + e.message;
       }
     }
 
@@ -2347,18 +3266,18 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const warnLines = warnings.slice(0, 3).map((w) => `<li>${w}</li>`).join('');
       const symbolRows = Array.isArray(payload.symbols) ? payload.symbols.slice(0, 4) : [];
       const symbolLines = symbolRows.map((row) => {
-        const verdict = row.verdict || 'CHECK';
+        const verdict = row.verdict || t('common.check');
         const minOrder = row.min_order_usdt_estimate == null ? '-' : Number(row.min_order_usdt_estimate).toFixed(4);
         const precision = row.precision_verified ? 'ok' : 'check';
         return `<li>${row.symbol || '-'}: ${verdict}, minOrder=${minOrder}, precision=${precision}, reduceOnly=${yesNo(!!row.reduce_only_supported)}, posMode=${yesNo(!!row.position_mode_supported)}</li>`;
       }).join('');
       box.innerHTML = `
         <div class="${css}">
-          <b>거래소 파라미터 점검: ${payload.overall_passed ? 'PASS' : 'CHECK'}</b>
-          <span class="small" style="margin-left:8px;">필수 실패 ${failedRequired.length} / critical ${payload.critical_failures || 0}</span>
-          <ul class="sketch-list compact" style="margin-top:6px;">${lines || '<li>점검 항목 없음</li>'}</ul>
-          ${symbolLines ? `<div class="small" style="margin-top:6px;">심볼 실증</div><ul class="sketch-list compact">${symbolLines}</ul>` : ''}
-          ${warnLines ? `<div class="small" style="margin-top:6px;">주요 경고</div><ul class="sketch-list compact">${warnLines}</ul>` : ''}
+          <b>${tr('거래소 파라미터 점검', 'Exchange parameter check')}: ${payload.overall_passed ? t('common.pass') : t('common.check')}</b>
+          <span class="small" style="margin-left:8px;">${tr('필수 실패', 'Required failures')} ${failedRequired.length} / critical ${payload.critical_failures || 0}</span>
+          <ul class="sketch-list compact" style="margin-top:6px;">${lines || `<li>${tr('점검 항목 없음', 'No checks')}</li>`}</ul>
+          ${symbolLines ? `<div class="small" style="margin-top:6px;">${tr('심볼 실증', 'Symbol verification')}</div><ul class="sketch-list compact">${symbolLines}</ul>` : ''}
+          ${warnLines ? `<div class="small" style="margin-top:6px;">${tr('주요 경고', 'Key warnings')}</div><ul class="sketch-list compact">${warnLines}</ul>` : ''}
         </div>
       `;
     }
@@ -2369,17 +3288,17 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         window.__lastExchangeProbe = payload;
         renderExchangeProbe(payload);
         document.getElementById('lastMessage').textContent = payload.overall_passed
-          ? `거래소 파라미터 점검 PASS (critical=${payload.critical_failures || 0})`
-          : `거래소 파라미터 점검 CHECK (critical=${payload.critical_failures || 0})`;
+          ? tr(`거래소 파라미터 점검 PASS (critical=${payload.critical_failures || 0})`, `Exchange parameter check PASS (critical=${payload.critical_failures || 0})`)
+          : tr(`거래소 파라미터 점검 CHECK (critical=${payload.critical_failures || 0})`, `Exchange parameter check CHECK (critical=${payload.critical_failures || 0})`);
         renderSketchConfigSummary((window.__loadedConfig || {}));
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '거래소 파라미터 점검 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('거래소 파라미터 점검 실패: ', 'Exchange parameter check failed: ') + e.message;
       }
     }
 
     async function saveExchangeProbeReport() {
       try {
-        const customPath = window.prompt('저장 경로(비우면 자동 경로):', '');
+        const customPath = window.prompt(tr('저장 경로(비우면 자동 경로):', 'Save path (leave blank for automatic path):'), '');
         const body = {};
         if (customPath && customPath.trim()) body.output_path = customPath.trim();
         const payload = await apiPost('/api/exchange/probe/report', body);
@@ -2387,10 +3306,10 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         const report = (payload || {}).report || {};
         window.__lastExchangeProbe = report;
         renderExchangeProbe(report);
-        document.getElementById('lastMessage').textContent = `거래소 점검 리포트 저장 완료: ${reportPath}`;
+        document.getElementById('lastMessage').textContent = tr(`거래소 점검 리포트 저장 완료: ${reportPath}`, `Exchange report saved: ${reportPath}`);
         renderSketchConfigSummary((window.__loadedConfig || {}));
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '거래소 점검 리포트 저장 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('거래소 점검 리포트 저장 실패: ', 'Failed to save exchange report: ') + e.message;
       }
     }
 
@@ -2398,7 +3317,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const box = document.getElementById('llmTestResult');
       if (!box) return;
       if (!payload || typeof payload !== 'object') {
-        box.textContent = 'AI 연결 테스트 결과를 표시할 수 없습니다.';
+        box.textContent = tr('AI 연결 테스트 결과를 표시할 수 없습니다.', 'Unable to display AI connection test results.');
         return;
       }
       const status = String(payload.status || '-');
@@ -2406,9 +3325,9 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const mode = String(payload.request_mode || '-');
       const model = String(payload.model || '-');
       const scored = Number(payload.scored_count || 0);
-      const passText = payload.passed ? '<span class="ok">PASS</span>' : '<span class="warn">CHECK</span>';
+      const passText = payload.passed ? `<span class="ok">${t('common.pass')}</span>` : `<span class="warn">${t('common.check')}</span>`;
       box.innerHTML = `
-        <b>AI 연결 테스트:</b> ${passText}<br/>
+        <b>${tr('AI 연결 테스트', 'AI connection test')}:</b> ${passText}<br/>
         provider=${provider}, mode=${mode}, model=${model}, status=${status}, scored=${scored}
       `;
     }
@@ -2419,21 +3338,21 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         window.__lastLlmTest = payload;
         renderLlmTestResult(payload);
         document.getElementById('lastMessage').textContent = payload.passed
-          ? `AI 연결 테스트 PASS (${payload.status || '-'})`
-          : `AI 연결 테스트 CHECK (${payload.status || '-'})`;
+          ? tr(`AI 연결 테스트 PASS (${payload.status || '-'})`, `AI connection test PASS (${payload.status || '-'})`)
+          : tr(`AI 연결 테스트 CHECK (${payload.status || '-'})`, `AI connection test CHECK (${payload.status || '-'})`);
         renderSketchConfigSummary((window.__loadedConfig || {}));
       } catch (e) {
-        document.getElementById('lastMessage').textContent = 'AI 연결 테스트 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('AI 연결 테스트 실패: ', 'AI connection test failed: ') + e.message;
       }
     }
 
     async function stopLoop() {
       try {
         const result = await apiPost('/api/stop', {});
-        document.getElementById('lastMessage').textContent = `자동 실행: ${result.status}`;
+        document.getElementById('lastMessage').textContent = tr(`자동 실행: ${result.status}`, `Auto run: ${result.status}`);
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '중지 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('중지 실패: ', 'Stop failed: ') + e.message;
       }
     }
 
@@ -2441,12 +3360,12 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       const now = Date.now();
       if (clearState.lockUntil > now) {
         const remain = Math.max(1, Math.ceil((clearState.lockUntil - now) / 1000));
-        document.getElementById('lastMessage').textContent = `리스크 해제 잠금중 ${remain}초 남았습니다.`;
+        document.getElementById('lastMessage').textContent = tr(`리스크 해제 잠금중 ${remain}초 남았습니다.`, `Risk clear is locked for ${remain}s.`);
         return;
       }
 
       const policy = window.__riskClearPolicy || { confirmTokenHint: 'UNHALT' };
-      const token = window.prompt(`리스크 해제 확인 토큰을 입력하세요 (${policy.confirmTokenHint})`);
+      const token = window.prompt(tr(`리스크 해제 확인 토큰을 입력하세요 (${policy.confirmTokenHint})`, `Enter the risk clear confirmation token (${policy.confirmTokenHint})`));
       if (token === null) return;
 
       try {
@@ -2460,30 +3379,32 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
           clearState.lockUntil = 0;
           const detail = result.previous_reason ? ` (${result.previous_reason})` : '';
           const evt = result.event_id ? ` | event #${result.event_id}` : '';
-          document.getElementById('lastMessage').textContent = `리스크 해제가 완료되었습니다.${detail}${evt}`;
+          document.getElementById('lastMessage').textContent = tr(`리스크 해제가 완료되었습니다.${detail}${evt}`, `Risk clear completed.${detail}${evt}`);
           await refreshAll();
           return;
         }
 
         if (clearProtection.locked || clearProtection.locked_remaining_ms > 0 || result.locked) {
           const remain = Math.max(1, Math.ceil(Number(clearProtection.locked_remaining_ms || 0) / 1000));
-          document.getElementById('lastMessage').textContent = `리스크 해제 실패 누적로 잠금됩니다. ${remain}초 뒤 재시도 가능합니다.`;
+          document.getElementById('lastMessage').textContent = tr(`리스크 해제 실패 누적으로 잠금됩니다. ${remain}초 뒤 재시도 가능합니다.`, `Risk clear locked after repeated failures. Retry in ${remain}s.`);
         } else {
-          document.getElementById('lastMessage').textContent = `리스크 해제 실패 (${result.reason || '토큰 불일치'}). 시도 ${clearState.failCount}/${policy.maxFailedAttempts}`;
+          document.getElementById('lastMessage').textContent = tr(`리스크 해제 실패 (${result.reason || '토큰 불일치'}). 시도 ${clearState.failCount}/${policy.maxFailedAttempts}`, `Risk clear failed (${result.reason || 'token mismatch'}). Attempt ${clearState.failCount}/${policy.maxFailedAttempts}`);
         }
         await refreshAll();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '리스크 해제 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('리스크 해제 실패: ', 'Risk clear failed: ') + e.message;
       }
     }
 
     async function loadConfig() {
       const cfg = await apiGet('/api/config');
       window.__loadedConfig = cfg;
+      applyLanguage((cfg.ui || {}).language || 'ko', true);
       document.getElementById('configJson').value = JSON.stringify(cfg, null, 2);
       renderNotificationSettings(cfg);
       renderSketchConfigSummary(cfg);
-      document.getElementById('lastMessage').textContent = '설정을 불러왔습니다.';
+      applyTheme((cfg.ui || {}).style_preset || 'premium', true);
+      document.getElementById('lastMessage').textContent = tr('설정을 불러왔습니다.', 'Configuration loaded.');
     }
 
     async function saveConfig() {
@@ -2491,7 +3412,7 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       try {
         payload = JSON.parse(document.getElementById('configJson').value);
       } catch (_e) {
-        document.getElementById('lastMessage').textContent = '설정 JSON 형식이 올바르지 않습니다.';
+        document.getElementById('lastMessage').textContent = tr('설정 JSON 형식이 올바르지 않습니다.', 'Config JSON format is invalid.');
         return;
       }
       const uiPayload = buildNotificationPayload();
@@ -2499,7 +3420,8 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
       payload.risk_limits = { ...(payload.risk_limits || {}), ...uiPayload.risk_limits };
       payload.validation_gate = { ...(payload.validation_gate || {}), ...uiPayload.validation_gate };
       await apiPost('/api/config', payload);
-      document.getElementById('lastMessage').textContent = '설정이 저장되었습니다.';
+      await loadConfig();
+      document.getElementById('lastMessage').textContent = tr('설정이 저장되었습니다.', 'Configuration saved.');
       await refreshAll();
     }
 
@@ -2516,12 +3438,13 @@ def create_dashboard_app(config_path: str = "configs/default.json") -> FastAPI:
         await renderExecutions();
         await renderRiskEvents();
       } catch (e) {
-        document.getElementById('lastMessage').textContent = '상태 조회 실패: ' + e.message;
+        document.getElementById('lastMessage').textContent = tr('상태 조회 실패: ', 'Failed to load status: ') + e.message;
       }
     }
 
     window.addEventListener('load', () => {
       loadTheme();
+      loadLanguage();
       ensureValidationAlertControls();
       initSketchTabs();
       refreshAll();

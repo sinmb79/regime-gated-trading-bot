@@ -34,6 +34,7 @@ if not exist "%CONFIG%" (
 
 set "LOG_FILE=%CD%\logs\dashboard-start.log"
 if not exist "%CD%\logs" mkdir "%CD%\logs"
+set "PYTHONPATH=%CD%\src"
 
 echo [1/5] Python 인터프리터 확인: %PY%
 echo [2/5] 프로젝트 경로: %CD%
@@ -56,9 +57,6 @@ if !ERRORLEVEL! neq 0 (
   pause
   exit /b 1
 )
-
-set "PYTHONPATH=%CD%\src"
-
 echo [4/5] 대시보드 실행 시작...
 start "보스 AI 트레이딩 대시보드" /D "%CD%" cmd /c "\"%PY%\" -m trading_system.main --ui --config \"%CONFIG%\" --host %HOST% --port %PORT% >> \"%LOG_FILE%\" 2>&1"
 

@@ -255,7 +255,7 @@ class TradingOrchestrator:
 
     def _build_regime(self, snapshot: MarketSnapshot) -> MarketRegime:
         hist = self.collector.get_history(snapshot.symbol)
-        return classify_market_regime(snapshot.symbol, list(hist)[:12])
+        return classify_market_regime(snapshot.symbol, [snapshot, *list(hist)[:11]])
 
     def _build_account_state(self) -> AccountState:
         balances = self.exchange.get_balance()
@@ -280,6 +280,12 @@ class TradingOrchestrator:
             consecutive_loss_count=consecutive_losses,
             last_trade_at=last_trade_at,
         )
+
+    def _refresh_account_state(self, state: AccountState) -> None:
+        balances = self.exchange.get_balance()
+        state.cash_usdt = balances.get("USDT", state.cash_usdt)
+        state.equity_usdt = balances.get("equity_usdt", balances.get("USDT", state.equity_usdt))
+        state.open_positions = self.exchange.get_open_positions()
 
     def _gather_candidates(self, snapshots: List[MarketSnapshot]) -> Tuple[List[Tuple[StrategySignal, MarketRegime]], dict]:
         candidates: List[Tuple[StrategySignal, MarketRegime]] = []
@@ -446,7 +452,7 @@ class TradingOrchestrator:
                     "regime_confidence": regime.confidence,
                     "regime_reason": regime.reason,
                     "volatility": signal.meta.get("volatility", 0.0),
-                    "spread_bps": signal.meta.get("spread_bps", 0.0),
+                    "spread_bps": signal.meta.get("spread_bps", signal.slippage_estimate_bps),
                     "base_score": base_score,
                 }
             )
@@ -662,6 +668,7 @@ class TradingOrchestrator:
                 continue
 
             event = self.execution.execute(signal, decision, state.equity_usdt, signal_id=signal_id)
+            self._refresh_account_state(state)
             if event.status in {OrderStatus.FILLED, OrderStatus.PARTIALLY_FILLED}:
                 executed += 1
                 state.today_trades += 1

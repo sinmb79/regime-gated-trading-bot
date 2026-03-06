@@ -56,6 +56,8 @@ class DefensiveStrategy(TradingStrategy):
                 comment="defensive_reversion",
                 meta={
                     "volatility": snapshot.volatility,
+                    "spread_bps": snapshot.spread_bps,
+                    "momentum": snapshot.momentum_7d,
                     "regime": regime.regime.value,
                     "kalman_trend_score": k_trend,
                     "kalman_innovation_z": kalman["innovation_z"],
